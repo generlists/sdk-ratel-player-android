@@ -1,0 +1,44 @@
+{
+  "exampleTitle":"Advance 플레이어 예제",
+  "videoList": [
+    {
+  "channelModel": {
+    "title": "할명수",
+    "channelId": "UChgOgRNxrtCcVARDQT_c-Zg"
+  },
+  "videoModel": {
+    "title": "(ENG) 가챠 100개 뽑으라고? 나 지금 가챠가 뭔지도 모르는데 | 할명수 ep.223",
+    "videoId": "RLstFZYbiaw"
+  }},
+    {
+      "channelModel": {
+        "title": "KBS Entertain",
+        "channelId": "UCK1sVuXaDvJeNwl9noN5nOA"
+      },
+      "videoModel": {
+        "title": "[#피크타임] 슈화팀 vs 한나팀 잠자리 복불복 '뒤뚱뒤뚱 릴레이 달리기' ! | #1박2일시즌4 | KBS 250330 방송",
+        "videoId": "Tz1PahQ4LiU"
+      }
+    },
+    {
+      "channelModel": {
+        "title": "스포타임",
+        "channelId": "UCnXNukjRxXGD8aeZGRV-lYg"
+      },
+      "videoModel": {
+        "title": "오라클에 울려 퍼진 \"정후 리\", 시즌 첫 3안타로 응답했다 #SPOTIME",
+        "videoId": "mNhzB90v9N4"
+      }
+    },
+    {
+      "channelModel": {
+        "title": "혜안",
+        "channelId": "UC8CIM3d3zDYMk-3T5aAz0yw"
+      },
+      "videoModel": {
+        "title": "\n\nKR\n\n탐색 건너뛰기\nUC8CIM3d3zDYMk-3T5aAz0yw\n\n\n\n\n\n만들기\n\n9+\n\n아바타 이미지\n\n[2024 추석특집] 할머니댁 가면서 보기좋은 \"파피플레이타임 풀버전\"",
+        "videoId": "gjVlMEKJ-9o"
+      }
+    }
+  ]
+}

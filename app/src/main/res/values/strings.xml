@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">ratel-player</string>
+    <string name="title">Player Demo</string>
+    <string name="youtube_tab">YouTube</string>
+    <string name="basic_player">Basic 플레이어</string>
+    <string name="play">재생</string>
+    <string name="play_list">목록 재생</string>
+    <string name="prev_play">이전 영상</string>
+    <string name="next_play">다음 영상</string>
+    <string name="speed_play">영상 속도</string>
+    <string name="speed_play_0.25">0.25</string>
+    <string name="speed_play_1">1.0</string>
+    <string name="speed_play_2">2.0</string>
+    <string name="sound_on_off">사운드 OnOff</string>
+    <string name="loop_on_off">loop OnOff : </string>
+    <string name="shuffle_on_off">shuffle OnOff : </string>
+    <string name="last_video">마지막 영상입니다.</string>
+    <string name="first_video">처음 영상입니다.</string>
+    <string name="video_move">영상 이동</string>
+    <string name="fullscreen_toggle">FullScreenToggle</string>
+    <string name="play_state">재생 상태</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
