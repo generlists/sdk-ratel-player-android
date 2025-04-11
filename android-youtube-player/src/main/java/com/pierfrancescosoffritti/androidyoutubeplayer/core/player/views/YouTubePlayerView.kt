@@ -58,9 +58,8 @@ class YouTubePlayerView(
   private val legacyTubePlayerView = LegacyYouTubePlayerView(context, webViewFullscreenListener)
 
   // this is a publicly accessible API
-  private var enableAutomaticInitialization: Boolean
-  private var videoId:String? = null
-  private var autoPlay:Boolean
+  var enableAutomaticInitialization: Boolean
+
 
   init {
     addView(legacyTubePlayerView, matchParent)
@@ -68,9 +67,9 @@ class YouTubePlayerView(
     val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.YouTubePlayerView, 0, 0)
 
     enableAutomaticInitialization = typedArray.getBoolean(R.styleable.YouTubePlayerView_enableAutomaticInitialization, false) //todo 수정
-    autoPlay = typedArray.getBoolean(R.styleable.YouTubePlayerView_autoPlay, false)
+    val autoPlay = typedArray.getBoolean(R.styleable.YouTubePlayerView_autoPlay, false)
     val handleNetworkEvents = typedArray.getBoolean(R.styleable.YouTubePlayerView_handleNetworkEvents, true)
-    videoId = typedArray.getString(R.styleable.YouTubePlayerView_videoId)
+    val videoId = typedArray.getString(R.styleable.YouTubePlayerView_videoId)
 
     typedArray.recycle()
 

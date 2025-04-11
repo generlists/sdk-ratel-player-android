@@ -1,12 +1,15 @@
 import java.io.FileInputStream
 import java.util.Properties
-
+apply(from = "publish.gradle.kts")
 plugins {
     id ("com.android.library")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.devtools.ksp)
+    id("maven-publish")
+    id("signing")
 }
+
 
 var versionPropsFile = file("version.properties")
 val versionProps: Properties = Properties()
@@ -15,9 +18,10 @@ if (versionPropsFile.canRead()) {
     versionProps.load(FileInputStream(versionPropsFile))
 }
 
+
 android {
     namespace = "com.sean.ratel.core"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 28
@@ -31,7 +35,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -44,7 +48,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        //실험에 동의했다.
         freeCompilerArgs = listOf(
             "-Xopt-in=kotlin.RequiresOptIn",
             "-Xopt-in=androidx.media3.common.util.UnstableApi")
@@ -59,7 +62,7 @@ android {
 
 dependencies {
 
-    implementation(project(":player-utils"))
+    api(project(":player-utils"))
     api(project(":android-youtube-player"))
 
     implementation(libs.androidx.core.ktx)
@@ -91,3 +94,7 @@ dependencies {
     testImplementation(libs.hilt.google.test)
 
 }
+//signing {
+//    sign(publishing.publications["release"])
+//}
+
