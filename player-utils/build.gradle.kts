@@ -1,13 +1,16 @@
+
 plugins {
     id("com.android.library")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.devtools.ksp)
+    id("maven-publish")
+    id("signing")
 }
 
 android {
     namespace = "com.sean.player.utils"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 28
@@ -54,3 +57,8 @@ dependencies {
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+apply(from = "publish.gradle.kts")
+
+//signing {
+//    sign(publishing.publications["release"])
+//}

@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-
+apply from: "publish.gradle"
 android {
-    compileSdkVersion 34
+    compileSdkVersion 35
 
     defaultConfig {
         minSdkVersion 17
@@ -13,6 +13,12 @@ android {
         main.res.srcDirs = [
                 'src/main/res',
         ]
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
     namespace 'com.pierfrancescosoffritti.androidyoutubeplayer.core'
 

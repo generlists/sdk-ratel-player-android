@@ -27,9 +27,10 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ratel-player-sdk-android"
+rootProject.name = "sdk-ratel-player-android"
 include(":app")
 include(":android-youtube-player")
-include(":player-core")
 include(":player-utils")
+include(":player-core")
+
  

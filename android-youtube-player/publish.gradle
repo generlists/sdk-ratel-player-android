@@ -1,0 +1,35 @@
+apply plugin: 'maven-publish'
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = 'ai.shortform-play.sdk.ratel.player.android'
+                artifactId = 'android-youtube-player'
+                version = '12.1.1'
+
+                from components.release
+
+            }
+        }
+
+        def localProperties = new Properties()
+        def localFile = rootProject.file("local.properties")
+        if (localFile.exists()) {
+            localFile.withInputStream { stream ->
+                localProperties.load(stream)
+            }
+        }
+
+        repositories {
+            maven {
+                name = "AndroidPlayerSDKPackage"
+                url = uri("https://maven.pkg.github.com/generlists/sdk-ratel-player-android")
+                credentials {
+                    username = localProperties.getProperty("gpr.user") ?: System.getenv("GPR_USER")
+                    password = localProperties.getProperty("gpr.key") ?: System.getenv("GPR_TOKEN")
+                }
+            }
+        }
+    }
+}
