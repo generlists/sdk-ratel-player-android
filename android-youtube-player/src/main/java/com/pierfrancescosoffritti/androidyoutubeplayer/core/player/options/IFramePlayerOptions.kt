@@ -47,7 +47,9 @@ class IFramePlayerOptions private constructor(private val playerOptions: JSONObj
       addInt(CONTROLS, 0)
       addInt(ENABLE_JS_API, 1)
       addInt(FS, 0)
-      addString(ORIGIN, "https://www.youtube.com")
+      // https://github.com/PierfrancescoSoffritti/android-youtube-player/issues/1252
+      // shortform-play 홈페이지로 오리진 변경
+      addString(ORIGIN, "https://shortform-play.ai/")
       addInt(REL, 0)
       addInt(IV_LOAD_POLICY, 3)
       addInt(CC_LOAD_POLICY, 0)
