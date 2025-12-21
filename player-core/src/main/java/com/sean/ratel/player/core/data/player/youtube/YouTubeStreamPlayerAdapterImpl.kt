@@ -10,6 +10,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
 
+
 class YouTubeStreamPlayerAdapterImpl(private val youTubePlayerView: YouTubePlayerView) :
     YouTubeStreamPlayerAdapter {
 

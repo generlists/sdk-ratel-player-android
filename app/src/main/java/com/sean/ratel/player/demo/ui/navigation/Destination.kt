@@ -6,31 +6,37 @@ import androidx.navigation.navArgument
 object Destination {
 
     data object Home : Screen("home")
-    data object BasicPlayer : DynamicScreen("basic_player", "contentId")
-    data object AdvancePlayer : DynamicScreen("advance_player", "contentId")
+    data object Download : Screen("download")
+    data object FaceBook : Screen("facebook")
+    data object TikTok : Screen("tiktok")
+    data object EndPlayer : DynamicScreen("endPlayer","contentId","startIndex")
+    data object BasicPlayer : DynamicScreen("basic_player", "contentId","startIndex")
+    data object AdvancePlayer : DynamicScreen("advance_player", "contentId","startIndex")
 
     abstract class Screen(
         baseRoute: String,
     ) {
-        companion object {
-            const val BASE_DEEPLINK_URL = "app://splay"
-        }
-
         open val route = baseRoute
-        open val deeplink = "${BASE_DEEPLINK_URL}/$baseRoute"
+
     }
 
     abstract class DynamicScreen(
         private val baseRoute: String,
         val routeArgName: String,
+        val startIndexArgName:String
     ) : Screen(baseRoute) {
-        val navArguments = listOf(navArgument(routeArgName) { type = NavType.StringType })
+        val navArguments = listOf(
+            navArgument(routeArgName) { type = NavType.StringType },
+            navArgument(startIndexArgName) {
+                type = NavType.IntType
+                defaultValue = 0
+            }
+        )
 
-        override val route = "$baseRoute/{$routeArgName}"
-        override val deeplink = "${BASE_DEEPLINK_URL}/$baseRoute/{$routeArgName}"
+        override val route = "$baseRoute/{$routeArgName}/{$startIndexArgName}"
 
-        fun dynamicRoute(param: String) = "$baseRoute/$param"
+        fun dynamicRoute(contentId: String, startIndex: Int = 0): String =
+            "$baseRoute/$contentId/$startIndex"
 
-        fun dynamicDeeplink(param: String) = "$BASE_DEEPLINK_URL/$baseRoute/$param"
     }
 }

@@ -1,9 +1,9 @@
 package com.sean.ratel.player.demo.di
 
 import android.content.Context
+import com.sean.ratel.player.demo.data.repository.ContentFetchRepositoryImpl
+import com.sean.ratel.player.demo.data.repository.YouTubeRepository
 import com.sean.ratel.player.demo.data.youtube.api.LocalJsonService
-import com.sean.ratel.player.demo.data.youtube.repository.ContentFetchRepositoryImpl
-import com.sean.ratel.player.demo.data.youtube.repository.YouTubeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +25,6 @@ object  RepositoryModule {
     fun provideContentRepository(
         localJsonService: LocalJsonService
     ): YouTubeRepository = ContentFetchRepositoryImpl(localJsonService)
+
+
 }

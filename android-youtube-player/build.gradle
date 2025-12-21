@@ -34,8 +34,8 @@ android {
 
 dependencies {
     testImplementation libs.junit
-    androidTestImplementation libs.test.runner
-    androidTestImplementation libs.androidx.espresso.core
+//    androidTestImplementation libs.test.runner
+//    androidTestImplementation libs.androidx.espresso.core
 
     api libs.androidx.lifecycle.runtime.ktx
 }

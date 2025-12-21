@@ -9,10 +9,10 @@ import androidx.fragment.app.Fragment
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
-import com.sean.ratel.player.core.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.demo.databinding.FragmentBasicPlayerBinding
 import com.sean.ratel.player.demo.di.qualifier.NotControl
 import dagger.hilt.android.AndroidEntryPoint

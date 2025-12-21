@@ -52,13 +52,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
-import com.sean.ratel.player.core.domain.YouTubeStreamPlayer
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlaybackRate
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlaybackState
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlayerError
 import com.sean.ratel.player.core.util.repeatOnStart
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.R
@@ -67,6 +67,7 @@ import com.sean.ratel.player.demo.di.qualifier.WithControl
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class AdvancePlayerFragment : Fragment() {

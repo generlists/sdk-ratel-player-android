@@ -1,6 +1,6 @@
 package com.sean.ratel.player.core.util
 
-import androidx.lifecycle.Lifecycle.State.STARTED
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -13,7 +13,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 fun LifecycleOwner.repeatOnStart(block: suspend CoroutineScope.() -> Unit) {
     lifecycleScope.launch {
-        repeatOnLifecycle(STARTED, block)
+        repeatOnLifecycle(Lifecycle.State.STARTED, block)
     }
 }
 

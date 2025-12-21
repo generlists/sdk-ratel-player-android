@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Surface
 import android.view.SurfaceView
 import androidx.annotation.OptIn
@@ -13,11 +14,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -31,27 +33,37 @@ import androidx.media3.exoplayer.upstream.BandwidthMeter
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
-import com.sean.player.utils.log.RLog
 import com.sean.ratel.player.core.Configurations
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.PlaySpeed
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.RepeatMode
 import com.sean.ratel.player.core.configurations
-import com.sean.ratel.player.core.domain.MediaStreamPlayer
-import com.sean.ratel.player.core.domain.api.UserAgentProvider
-import com.sean.ratel.player.core.domain.model.PlayMuteInfo
-import com.sean.ratel.player.core.domain.model.PlaybackState
-import com.sean.ratel.player.core.domain.model.Resolution
-import com.sean.ratel.player.core.domain.model.SampleBandWidth
-import com.sean.ratel.player.core.domain.model.track.AudioTrack
-import com.sean.ratel.player.core.domain.model.track.VideoTrack
+import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
+import com.sean.ratel.player.core.data.domain.model.PlayMuteInfo
+import com.sean.ratel.player.core.data.domain.model.PlaybackState
+import com.sean.ratel.player.core.data.domain.model.Resolution
+import com.sean.ratel.player.core.data.domain.model.SampleBandWidth
+import com.sean.ratel.player.core.data.domain.model.track.AudioTrack
+import com.sean.ratel.player.core.data.domain.model.track.VideoTrack
+import com.sean.ratel.player.utils.log.RLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.TreeMap
 
 @UnstableApi
 class MediaExoStreamPlayer(
     private val context: Context,
-    userAgentProvider: UserAgentProvider
+    private val datasourceFactory:DataSource.Factory,
+   // userAgentProvider: UserAgentProvider
 ):MediaStreamPlayer,
   Player.Listener{
 
@@ -62,7 +74,7 @@ class MediaExoStreamPlayer(
     private var minBufferMs: Int = MIN_BUFFER_PLAYBACK_TIME
     private var isPreparing = false
     private var playerIndex: Int? = null
-    private var userAgent: String = userAgentProvider.userAgent
+    private var userAgent: String = "exoplayer"//userAgentProvider.userAgent
 
     private val defaultBandwidthMeter =
         DefaultBandwidthMeter.Builder(context)
@@ -90,9 +102,58 @@ class MediaExoStreamPlayer(
     private val _selectedAudioTrack = MutableStateFlow<AudioTrack?>(null)
     override val selectedAudioTrack: StateFlow<AudioTrack?> = _selectedAudioTrack
 
+
     private val _selectedVideoTrack = MutableStateFlow<VideoTrack?>(null)
     override val selectedVideoTrack: StateFlow<VideoTrack?> = _selectedVideoTrack
 
+
+
+
+    private val _seekBackIncrement = MutableStateFlow<Long>(SEEK_BACK_INCREMENTS_MS)
+    override val seekBackIncrement: StateFlow<Long> = _seekBackIncrement
+
+    private val _seekForWardIncrement = MutableStateFlow<Long>(SEEK_FOWARD_INCREMENTS_MS)
+    override val seekForwardIncrement: StateFlow<Long> = _seekForWardIncrement
+
+
+    private val _playSpeed = MutableStateFlow<PlaySpeed>(PlaySpeed.PlaySpeed_1_0)
+    override val playSpeed: StateFlow<PlaySpeed> = _playSpeed
+
+
+    private val _duration = MutableStateFlow<Long?>(null)
+    override val  duration: StateFlow<Long?> = _duration
+
+
+    private val _isShuffleOn = MutableStateFlow<Boolean>(false)
+    override val isShuffleOn: StateFlow<Boolean> = _isShuffleOn
+
+
+    private val _currentPosition= MutableStateFlow<Long?>(null)
+
+    override val  currentPosition:StateFlow<Long?> = _currentPosition
+
+    private val _repeatMode = MutableStateFlow<RepeatMode>(RepeatMode.REPEAT_OFF)
+    override val repeatMode: StateFlow<RepeatMode> = _repeatMode
+
+    private var positionJob: Job? = null
+    private val playerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+
+    fun startPositionUpdates(scope: CoroutineScope) {
+        positionJob?.cancel()
+        positionJob = scope.launch {
+            while (isActive) {
+                val p = player?.currentPosition ?: 0L
+                _currentPosition.value = p
+                delay(250) // 200~500ms 보통
+            }
+        }
+    }
+
+    fun stopPositionUpdates() {
+        positionJob?.cancel()
+        positionJob = null
+    }
 
     private val _resolution = MutableStateFlow(
         Resolution(
@@ -117,29 +178,103 @@ class MediaExoStreamPlayer(
             configurations.videoConfig.maxBufferMs ?: MAX_BUFFER_PLAYBACK_TIME // max buffering
         this.minBufferMs =
             configurations.videoConfig.minBufferMs ?: MIN_BUFFER_PLAYBACK_TIME // min buffering
+
+        this._seekBackIncrement.value =
+            configurations.videoConfig.seekBackIncrementMs ?: SEEK_BACK_INCREMENTS_MS
+
+        this._seekForWardIncrement.value =
+            configurations.videoConfig.seekForwardIncrementMs ?: SEEK_FOWARD_INCREMENTS_MS
+
         this._maximumVideoQuality.update {
             configurations.videoConfig.maximumVideoQuality ?: MAX_VIDEO_QUALITY
         }
     }
 
-    override fun start(uri: Uri, playIndex: Int?) {
-        RLog.d(TAG, "play = ${uri} userAgent : $userAgent ,  player : $player :$playIndex")
-        playerIndex = playIndex ?: 0
+    override fun start(uri: Uri, cacheKey: String?) {
+
         player?.let { release() }
 
         _playbackState.update { PlaybackState.Idle(playerIndex) }
 
-        player = createPlayer().apply {
+
+        player = createPlayer()?.apply {
             initListener(this)
             isPreparing = true
             _playbackState.update {
                 PlaybackState.Preparing(playerIndex)
             }
-            setMediaSource(getMediaSource(uri))
+            setMediaSource(getMediaSource(uri, cacheKey))
             prepare()
+
             mutePlay(_isMute.value)
+            setShuffleOn(_isShuffleOn.value)
+            setRepeat(_repeatMode.value)
+
             playWhenReady = true
         }
+
+        Log.d(
+            "KKKKKKKK",
+            "play = ${uri} userAgent : $userAgent ,  player : $player , cacheKey : ${cacheKey}"
+        )
+
+    }
+
+
+    override fun start(
+        items: List<MediaItem>,
+        startIndex:Int,
+        cacheKey: String?
+    ) {
+
+        player?.release()
+
+        _playbackState.update { PlaybackState.Idle()}
+
+        player = createPlayer()?.apply {
+            initListener(this)
+
+            isPreparing = true
+            _playbackState.update {
+                PlaybackState.Preparing()
+            }
+
+            setMediaItems(items,startIndex,0)
+
+            prepare()
+            mutePlay(_isMute.value)
+
+            playWhenReady = true
+        }
+
+    }
+    override fun start(uri: Uri) {
+
+        start(uri,null)
+    }
+
+    override fun isPrevItem(): Boolean
+        = player?.hasPreviousMediaItem() ?: false
+
+
+    override fun pervPlay() {
+        player?.seekToPreviousMediaItem()
+    }
+
+    override fun isNextItem(): Boolean
+        = player?.hasNextMediaItem() ?: false
+
+
+    override fun nextPlay() {
+        player?.seekToNextMediaItem()
+    }
+
+    override fun seekForward() {
+        player?.seekForward()
+    }
+
+    override fun seekBack() {
+        player?.seekBack()
     }
 
     override fun resume() {
@@ -211,9 +346,26 @@ class MediaExoStreamPlayer(
                 bufferForPlaybackMs = bufferForPlaybackAfterRebufferMs,
                 maxBufferMs = maxBufferMs,
                 minBufferMs = minBufferMs,
-                maximumVideoQuality = quality
+                maximumVideoQuality = quality,
+                seekBackIncrementMs = _seekBackIncrement.value,
+                seekForwardIncrementMs = _seekForWardIncrement.value
             )
         }
+    }
+
+    override fun setShuffleOn(isShuffle: Boolean) {
+        player?.shuffleModeEnabled = isShuffle
+        _isShuffleOn.update { isShuffle }
+    }
+
+    override fun setRepeat(repeatMode: RepeatMode) {
+        player?.repeatMode = repeatMode.ordinal
+        _repeatMode.update { repeatMode }
+    }
+
+    override fun setPlaySpeed(playSpeed: PlaySpeed) {
+        player?.setPlaybackSpeed(playSpeed.speed)
+        _playSpeed.update { playSpeed }
     }
 
     override fun pause() {
@@ -234,22 +386,23 @@ class MediaExoStreamPlayer(
         player?.seekTo(msec)
     }
 
-    override fun isPlaying(): Boolean =
-        player != null &&
+    override fun isPlaying(): Boolean {
+        Log.d("KKKKKKKK","playbackState : ${player?.playbackState} , playWhenReady : ${player?.playWhenReady}")
+        return player != null &&
                 player?.playbackState == ExoPlayer.STATE_READY &&
                 player?.playWhenReady == true
+    }
 
     override fun isPlayComplete(): Boolean = player != null &&
             player?.playbackState == ExoPlayer.STATE_ENDED
 
-    override fun getDuration(): Long = player?.duration ?: 0
 
-    override fun getCurrentPosition(): Long = player?.currentPosition ?: 0
+
 
     override fun getBufferedPosition(): Long = player?.bufferedPosition ?: 0
 
     override fun release() {
-        RLog.d(TAG,"release() player : $player")
+        Log.d("hbungshin","release() player : $player")
         _playbackState.update { PlaybackState.Release(playerIndex) }
         player?.also {
             it.removeListener(this)
@@ -257,6 +410,7 @@ class MediaExoStreamPlayer(
         }.also { player = null }
         player = null
         _playbackState.update { PlaybackState.Idle(playerIndex) }
+        playerScope.cancel()
     }
 
     override fun setVideoSurface(surface: Surface?) {
@@ -268,6 +422,7 @@ class MediaExoStreamPlayer(
     }
     @Deprecated("Deprecated in Java")
     override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+        Log.d("KKKKKKKK","onPlayerStateChanged playbackState : $playbackState playWhenReady : ${playWhenReady}")
         when (playbackState) {
             Player.STATE_IDLE -> _playbackState.update { PlaybackState.Idle(playerIndex) }
             Player.STATE_BUFFERING -> if (playWhenReady) _playbackState.update { PlaybackState.Buffering(playerIndex) }
@@ -278,12 +433,36 @@ class MediaExoStreamPlayer(
                         isPreparing = false
                     }
                     _playbackState.update { PlaybackState.Playing(this,playerIndex) }
+                    player?.duration?.let {
+                        if (it > 0)
+                            _duration.update { player?.duration }
+                    }
+
+                    startPositionUpdates(playerScope)
                 } else {
                     _playbackState.update { PlaybackState.Pause(playerIndex) }
+                    stopPositionUpdates()
                 }
             }
 
-            Player.STATE_ENDED -> if (playWhenReady) _playbackState.update { PlaybackState.Complete(playerIndex) }
+            Player.STATE_ENDED -> {
+                if (playWhenReady) _playbackState.update { PlaybackState.Complete(playerIndex) }
+                stopPositionUpdates()
+            }
+        }
+    }
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+        if (timeline.isEmpty) return
+        val playerIndex = player?.currentMediaItemIndex?:0
+
+        val window = Timeline.Window()
+        timeline.getWindow(playerIndex, window)
+
+        val duration = window.durationMs
+
+        if (duration > 0 && duration != C.TIME_UNSET) {
+            _duration.update{duration}
+            Log.d("hbungshin","1111 duration : $duration")
         }
     }
 
@@ -296,8 +475,9 @@ class MediaExoStreamPlayer(
                 if (uri == null) {
                     dispatchError(error.errorCode, error.cause)
                 } else {
+                    //todo error  처리
                     val prevVolume = _isMute.value
-                    start(uri)
+                    start(uri, null)
                     _isMute.update { prevVolume }
                 }
             }
@@ -369,13 +549,13 @@ class MediaExoStreamPlayer(
             addListener(this@MediaExoStreamPlayer)
         }
 
-    private fun getMediaSource(uri: Uri): MediaSource =
+    private fun getMediaSource(uri: Uri,cacheKey:String?): MediaSource =
         when (Util.inferContentType(uri)) {
             C.CONTENT_TYPE_HLS -> {
                 HlsMediaSource.Factory(getDefaultDatasource()).setAllowChunklessPreparation(true)
                     .setLoadErrorHandlingPolicy(
                         DefaultLoadErrorHandlingPolicy(HLS_REQUEST_RETRY_COUNT)
-                    ).createMediaSource(getMediaItem(uri))
+                    ).createMediaSource(getMediaItem(uri,cacheKey))
             }
 
             else -> ProgressiveMediaSource.Factory(getDefaultDatasource())
@@ -383,14 +563,15 @@ class MediaExoStreamPlayer(
         }
 
 
-    private fun getMediaItem(uri: Uri): MediaItem {
+    private fun getMediaItem(uri: Uri,cacheKey:String?): MediaItem {
         return MediaItem.Builder()
+            .setCustomCacheKey(cacheKey?:"")
             .setUri(uri)
             .setMimeType(MimeTypes.APPLICATION_M3U8)
             .build()
     }
     @OptIn(UnstableApi::class)
-    private fun createPlayer(): ExoPlayer {
+    private fun createPlayer(): ExoPlayer? {
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(
             TARGET_DURATION_MS,
             (TARGET_DURATION_MS * QUALITY_DECREASE_SCALE).toInt(),
@@ -416,9 +597,17 @@ class MediaExoStreamPlayer(
             .setTrackSelector(trackSelector)
             .setBandwidthMeter(getBandwidthMeter())
             .setLoadControl(loadControlBuilder)
+            .setSeekBackIncrementMs(_seekBackIncrement.value?:SEEK_BACK_INCREMENTS_MS)
+            .setSeekForwardIncrementMs(_seekForWardIncrement.value?:SEEK_BACK_INCREMENTS_MS)
+
             .setRenderersFactory(renderersFactory)
             .build()
     }
+
+    override fun getPlayer(): ExoPlayer? {
+        return player
+    }
+
 
     private fun getBandwidthMeter(): DefaultBandwidthMeter =
 
@@ -429,8 +618,11 @@ class MediaExoStreamPlayer(
             )
         }
 
-    private fun getDefaultDatasource(): DefaultHttpDataSource.Factory =
-        DefaultHttpDataSource.Factory().setUserAgent(userAgent)
+    private fun getDefaultDatasource(): DataSource.Factory
+
+        = datasourceFactory
+
+       // DefaultHttpDataSource.Factory().setUserAgent(userAgent)
 
     private val bandwidthMeterEventListener =
         BandwidthMeter.EventListener { elapsedMs: Int, bytes: Long, bitrate: Long ->
@@ -461,6 +653,9 @@ class MediaExoStreamPlayer(
         private const val BUFFER_FOR_PLAYBACK_TIME = 2_000
         private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER = 2_000
         private const val MAX_VIDEO_QUALITY = Int.MAX_VALUE
+        private const val SEEK_BACK_INCREMENTS_MS = 5_000L
+        private const val SEEK_FOWARD_INCREMENTS_MS = 5_000L
+
     }
 
 }
