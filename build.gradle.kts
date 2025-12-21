@@ -2,9 +2,12 @@
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.devtools.ksp)  apply  false
 }
+
 
 tasks.register("publishAll") {
     group = "publishing"
@@ -16,7 +19,9 @@ tasks.register("publishAll") {
         ":player-utils:assembleRelease",
         ":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
         ":player-core:assembleRelease",
-        ":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
+        ":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
+        ":player-ui:assembleRelease",
+        ":player-ui:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
     )
 
     project(":player-core").tasks.named("assembleRelease") {
@@ -28,5 +33,8 @@ tasks.register("publishAll") {
 
     project(":player-core").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
         mustRunAfter(":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
+    }
+    project(":player-ui").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
+        mustRunAfter(":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
     }
 }

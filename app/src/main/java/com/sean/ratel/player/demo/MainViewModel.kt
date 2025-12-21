@@ -4,9 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sean.ratel.player.demo.data.repository.YouTubeRepository
 import com.sean.ratel.player.demo.data.youtube.domain.YouTubeModel
 import com.sean.ratel.player.demo.data.youtube.domain.YouTubeModelList
-import com.sean.ratel.player.demo.data.youtube.repository.YouTubeRepository
 import com.sean.ratel.player.demo.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

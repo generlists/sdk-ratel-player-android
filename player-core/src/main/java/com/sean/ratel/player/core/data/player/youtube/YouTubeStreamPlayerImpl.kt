@@ -13,11 +13,11 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.You
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.loadOrCueVideo
+import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
-import com.sean.ratel.player.core.domain.YouTubeStreamPlayer
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlaybackRate
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlaybackState
-import com.sean.ratel.player.core.domain.model.youtube.YouTubeStreamPlayerError
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

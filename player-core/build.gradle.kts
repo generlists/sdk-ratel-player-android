@@ -2,12 +2,14 @@ import java.io.FileInputStream
 import java.util.Properties
 apply(from = "publish.gradle.kts")
 plugins {
-    id ("com.android.library")
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.devtools.ksp)
-    id("maven-publish")
-    id("signing")
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.signing)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.compose)
 }
 
 
@@ -20,13 +22,13 @@ if (versionPropsFile.canRead()) {
 
 
 android {
-    namespace = "com.sean.ratel.core"
+    namespace = "com.sean.ratel.player.core"
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 26
 
-        testInstrumentationRunner = "com.sean.ratel.core.HiltTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
         buildConfigField("String", "VERSION_NAME", "\""+versionProps["VERSION_NAME"]+ "\"")
@@ -43,58 +45,42 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.media3.common.util.UnstableApi")
+        jvmTarget = "11"
     }
     buildFeatures {
         buildConfig = true
+        compose =true
     }
-    hilt{
-        enableAggregatingTask = false //https://ovso.tistory.com/475
-    }
+
 }
 
 dependencies {
-
-    api(project(":player-utils"))
     api(project(":android-youtube-player"))
+    implementation(project(":player-utils"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.appcompat.appcompat)
+    implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.google.media3.common)
-    implementation(libs.google.media3.exoplayer)
-    implementation(libs.google.media3.ui)
-    implementation(libs.google.media3.exoplayer.dash)
-    implementation(libs.google.media3.exoplayer.hls)
-    implementation(libs.google.media3.datasource.okhttp)
-
-    implementation(libs.retrofit2)
-    implementation (libs.retrofit2.converter.gson)
-
-
-    implementation(platform(libs.okhttp.bom))
-    implementation(libs.okhttp)
-    debugImplementation(libs.okhttp.logging)
-
+    androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+
+    implementation(libs.google.media3.exoplayer)
+
+    implementation(libs.google.media3.exoplayer.dash)
+    implementation(libs.google.media3.exoplayer.hls)
+    implementation(libs.google.media3.datasource.okhttp)
+    implementation(libs.google.media3.database)
+    implementation(libs.google.media3.ui)
 
     testImplementation(libs.junit)
-    androidTestImplementation(libs.junit.ext)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.hilt.android.test)
-    testImplementation(libs.hilt.google.test)
+    androidTestImplementation(libs.androidx.junit)
 
 }
-//signing {
-//    sign(publishing.publications["release"])
-//}
-

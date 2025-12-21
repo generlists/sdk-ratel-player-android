@@ -1,21 +1,20 @@
 
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt.android)
-    alias(libs.plugins.devtools.ksp)
-    id("maven-publish")
-    id("signing")
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.signing)
 }
 
 android {
-    namespace = "com.sean.player.utils"
+    namespace = "com.sean.ratel.player.utils"
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -28,37 +27,24 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.media3.common.util.UnstableApi")
+        jvmTarget = "11"
     }
     buildFeatures {
         buildConfig = true
-    }
-    hilt{
-        enableAggregatingTask = false //https://ovso.tistory.com/475
     }
 }
 
 dependencies {
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.appcompat.appcompat)
-    implementation(libs.google.media3.common)
-    implementation(libs.google.media3.exoplayer)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.junit.ext)
+    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
 apply(from = "publish.gradle.kts")
-
-//signing {
-//    sign(publishing.publications["release"])
-//}

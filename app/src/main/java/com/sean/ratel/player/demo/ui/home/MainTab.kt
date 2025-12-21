@@ -16,4 +16,9 @@ enum class MainTab(
         Destination.Home.route,
         Destination.Home.route,
     ),
+    DOWNLOAD(
+        R.string.download_tab,
+        Destination.Download.route,
+        Destination.Download.route,
+    ),
 }

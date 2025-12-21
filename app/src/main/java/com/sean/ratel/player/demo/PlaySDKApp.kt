@@ -1,5 +1,7 @@
 package com.sean.ratel.player.demo
 
+
+//import com.sean.ratel.player.demo.ui.navigation.NavGraph
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,21 +50,35 @@ fun DemoPlayApp(
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route ?: Destination.Home.route
+        val selectedTab = remember { mutableStateOf<MainTab>(MainTab.YOUTUBE) }
+
         Scaffold(
             modifier = Modifier.imePadding(),
             topBar = {
-                HomeTopBar()
+                if(currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route
+                    && currentRoute != Destination.AdvancePlayer.route){
+                    HomeTopBar()
+                }
             },
 
             floatingActionButtonPosition = FabPosition.End,
         ) { innerPaddingModifier ->
-            Column(modifier = Modifier.fillMaxSize().background(Background_op_20).padding(innerPaddingModifier)) {
-                if(currentRoute == Destination.Home.route){
-                    TopTabBar()
+
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .background(Background_op_20)
+                .padding(innerPaddingModifier)) {
+
+                if (currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route
+                    && currentRoute != Destination.AdvancePlayer.route
+                ) {
+                    TopTabBar(changeSelectedIndex = {
+                        selectedTab.value = it
+                    })
+                }
                     LaunchedEffect(Unit) {
                         mainViewModel.loadBasicJsonData()
                     }
-                }
 
                 NavGraph(
                     navController = navController,
@@ -70,6 +86,13 @@ fun DemoPlayApp(
                     navigator = mainViewModel.navigator,
                     finish = finish,
                 )
+                LaunchedEffect(selectedTab.value) {
+                    when(selectedTab.value) {
+                        MainTab.YOUTUBE -> navController.navigate(Destination.Home.route)
+                        MainTab.DOWNLOAD -> navController.navigate(Destination.Download.route)
+                    }
+                }
+
             }
 
         }
@@ -77,7 +100,7 @@ fun DemoPlayApp(
 }
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun TopTabBar() {
+fun TopTabBar(changeSelectedIndex:(MainTab)->Unit) {
     val tabs = remember { MainTab.entries.toTypedArray().asList() }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -91,7 +114,11 @@ fun TopTabBar() {
         tabs.forEachIndexed { index, item ->
             Tab(
                 selected = selectedTabIndex == index,
-                onClick = { selectedTabIndex = index },
+                onClick = {
+                    selectedTabIndex = index
+                    changeSelectedIndex(if(selectedTabIndex ==0) MainTab.YOUTUBE else MainTab.DOWNLOAD)
+                  }
+
             ) {
                 // 아이콘과 텍스트를 가로로 배치
                 Row(
@@ -107,9 +134,9 @@ fun TopTabBar() {
                         modifier = Modifier.padding(vertical = 4.dp),
                         fontFamily = FontFamily.Default,
                         fontStyle = FontStyle.Normal,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color.Black,
+                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = if (selectedTabIndex == index) Color.Black else Color.Gray,
                         textAlign = TextAlign.Center,
                     )
                 }
