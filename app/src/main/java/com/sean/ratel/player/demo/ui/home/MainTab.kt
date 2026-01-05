@@ -21,4 +21,9 @@ enum class MainTab(
         Destination.Download.route,
         Destination.Download.route,
     ),
+    BROWSER(
+        R.string.browser,
+        Destination.Browser.route,
+        Destination.Browser.route,
+    ),
 }

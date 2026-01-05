@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("com.google.accompanist:accompanist-webview:0.36.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
