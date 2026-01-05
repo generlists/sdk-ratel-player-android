@@ -22,6 +22,8 @@ foundation = "1.10.0"
 google-media3 = "1.8.0"
 icons-core="1.6.0"
 hilt-compose="1.2.0"
+google-gson="2.10.1"
+accompanist-webview="0.36.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,7 +55,8 @@ google-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash
 google-media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "google-media3"}
 google-media3-datasource-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "google-media3"}
 google-media3-database = { module = "androidx.media3:media3-database", version.ref = "google-media3"}
-
+google-code-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson"}
+com-google-accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist-webview"}
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"}
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt"}
