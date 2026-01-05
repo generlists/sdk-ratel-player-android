@@ -24,5 +24,6 @@
     <string name="download_tab">Download</string>
     <string name="download_tab_facebook">FaceBook</string>
     <string name="download_tab_tiktok">TikTok</string>
+    <string name="browser">Browser</string>
 
 </resources>

@@ -60,12 +60,13 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.constraintlayout)
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("org.danilopianini:gson-extras:0.2.1")
+    implementation(libs.google.code.gson)
+
 
     implementation(libs.coil)
     implementation(libs.coil.compose)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.com.google.accompanist.webview)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

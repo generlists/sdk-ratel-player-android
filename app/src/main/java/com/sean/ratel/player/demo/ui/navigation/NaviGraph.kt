@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.sean.ratel.player.demo.MainActivity
 import com.sean.ratel.player.demo.MainViewModel
+import com.sean.ratel.player.demo.ui.download.AccompanistBrowserScreen
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.screen.AdvancePlayer
 import com.sean.ratel.player.demo.ui.screen.BasicPlayer
@@ -43,6 +44,9 @@ fun NavGraph(
         }
         composable(Destination.Download.route) {
             DownLoadSample(videoDownloadViewModel)
+        }
+        composable(Destination.Browser.route) {
+            AccompanistBrowserScreen("https://m.facebook.com")
         }
 
         composable(

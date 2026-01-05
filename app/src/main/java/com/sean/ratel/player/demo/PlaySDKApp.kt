@@ -90,6 +90,7 @@ fun DemoPlayApp(
                     when(selectedTab.value) {
                         MainTab.YOUTUBE -> navController.navigate(Destination.Home.route)
                         MainTab.DOWNLOAD -> navController.navigate(Destination.Download.route)
+                        MainTab.BROWSER -> navController.navigate(Destination.Browser.route)
                     }
                 }
 
@@ -116,7 +117,7 @@ fun TopTabBar(changeSelectedIndex:(MainTab)->Unit) {
                 selected = selectedTabIndex == index,
                 onClick = {
                     selectedTabIndex = index
-                    changeSelectedIndex(if(selectedTabIndex ==0) MainTab.YOUTUBE else MainTab.DOWNLOAD)
+                    changeSelectedIndex(if(selectedTabIndex ==0) MainTab.YOUTUBE else if(selectedTabIndex==1) MainTab.DOWNLOAD else MainTab.BROWSER)
                   }
 
             ) {
