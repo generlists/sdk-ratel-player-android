@@ -5,6 +5,7 @@ import androidx.navigation.navArgument
 
 object Destination {
 
+    data object Splash : Screen("splash")
     data object Home : Screen("home")
     data object Download : Screen("download")
     data object Browser : Screen("browser")

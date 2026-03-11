@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.ui.control
+package com.sean.ratel.player.ui.control.component
 
 
 import androidx.compose.foundation.clickable
@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 import com.sean.ratel.player.ui.R
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 
 @Composable
 fun MoreButton(viewModel: PlayerViewModel) {

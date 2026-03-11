@@ -1,15 +1,17 @@
 package com.sean.ratel.player.core.data.domain
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.view.Surface
 import android.view.SurfaceView
+import android.view.View
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import com.sean.ratel.player.core.Configurations
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.PlaySpeed
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.RepeatMode
 import com.sean.ratel.player.core.data.domain.model.PlayMuteInfo
+import com.sean.ratel.player.core.data.domain.model.PlaySpeed
 import com.sean.ratel.player.core.data.domain.model.PlaybackState
+import com.sean.ratel.player.core.data.domain.model.RepeatMode
 import com.sean.ratel.player.core.data.domain.model.Resolution
 import com.sean.ratel.player.core.data.domain.model.SampleBandWidth
 import com.sean.ratel.player.core.data.domain.model.track.AudioTrack
@@ -20,12 +22,15 @@ import kotlinx.coroutines.flow.StateFlow
 interface MediaStreamPlayer {
 
     val playbackState: Flow<PlaybackState>
+    val playbackErrorState: Flow<PlaybackState>
 
     val resolution: Flow<Resolution>
 
     val sampleBandWidth: Flow<SampleBandWidth>
 
     val isMute: StateFlow<PlayMuteInfo>
+
+    val volume: StateFlow<Float>
 
     val maximumVideoQuality: StateFlow<Int>
 
@@ -52,6 +57,10 @@ interface MediaStreamPlayer {
 
     val playSpeed:StateFlow<PlaySpeed>
 
+    val mediaType: StateFlow<Set<Int>>
+
+    val currentIndex: StateFlow<Int>
+
 
     fun getPlayer():ExoPlayer?
 
@@ -71,18 +80,21 @@ interface MediaStreamPlayer {
         cacheKey: String? = null
     )
 
+    fun replaceMediaItem(index:Int, newMediaItem: MediaItem)
+
     fun isPrevItem():Boolean
 
-    fun pervPlay()
+    fun pervPlay(isReset:Boolean)
 
     fun isNextItem():Boolean
 
-    fun nextPlay()
+    fun nextPlay(isReset:Boolean)
 
     fun seekForward()
 
     fun seekBack()
 
+    fun rePlay(mediaIndex:Int)
 
     fun resume()
 
@@ -91,6 +103,8 @@ interface MediaStreamPlayer {
     fun stop()
 
     fun seekTo(msec: Long)
+
+    fun seekTo(mediaIndex:Int,msec: Long)
 
     fun isPlaying(): Boolean
 
@@ -118,4 +132,14 @@ interface MediaStreamPlayer {
     fun setRepeat(repeatMode: RepeatMode)
 
     fun setPlaySpeed(playSpeed: PlaySpeed)
+
+    fun setVolume(volume: Float)
+
+    fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int)
+
+    fun getVideoCapture(view: View, infoCallback: (Bitmap?) -> Unit)
+
+
+
+
 }

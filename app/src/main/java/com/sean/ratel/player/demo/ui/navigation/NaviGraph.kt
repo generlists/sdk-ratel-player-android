@@ -15,19 +15,24 @@ import com.sean.ratel.player.demo.ui.screen.AdvancePlayer
 import com.sean.ratel.player.demo.ui.screen.BasicPlayer
 import com.sean.ratel.player.demo.ui.screen.DownLoadSample
 import com.sean.ratel.player.demo.ui.screen.EndPlayerScreen
+import com.sean.ratel.player.demo.ui.screen.SplashScreen
 import com.sean.ratel.player.demo.ui.screen.YouTubeScreen
+import com.sean.ratel.player.ui.ThemeMode
 
 
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    themeMode: ThemeMode,
+    requestInLineBannerView:suspend () -> Unit,
+    requestNativeAd:suspend () -> Unit,
     startDestination: String = Destination.Home.route,
     navigator: Navigator,
     finish: () -> Unit = {},
 ) {
 
-    val activity = LocalContext.current as MainActivity
+    val activity = LocalContext.current   as MainActivity
     val mainViewModel: MainViewModel = ViewModelProvider(activity)[MainViewModel::class.java]
     val videoDownloadViewModel: VideoDownloadViewModel = ViewModelProvider(activity)[VideoDownloadViewModel::class.java]
 
@@ -39,11 +44,15 @@ fun NavGraph(
         navController = navController,
         startDestination = startDestination,
     ) {
+
+        composable(Destination.Splash.route) {
+            SplashScreen(activity,mainViewModel)
+        }
         composable(Destination.Home.route) {
             YouTubeScreen(mainViewModel)
         }
         composable(Destination.Download.route) {
-            DownLoadSample(videoDownloadViewModel)
+            DownLoadSample(mainViewModel,videoDownloadViewModel,requestInLineBannerView)
         }
         composable(Destination.Browser.route) {
             AccompanistBrowserScreen("https://m.facebook.com")
@@ -54,7 +63,7 @@ fun NavGraph(
             arguments = Destination.BasicPlayer.navArguments,
         ) { backStackEntry ->
             val videoId = backStackEntry.arguments?.getString("contentId")
-            BasicPlayer(videoId)
+            BasicPlayer(videoId,mainViewModel,requestNativeAd)
         }
 
         composable(
@@ -70,11 +79,16 @@ fun NavGraph(
             route = Destination.EndPlayer.route,
             arguments = Destination.BasicPlayer.navArguments,
         ) { backStackEntry ->
-          val requestId =   backStackEntry.arguments?.getString("contentId")
+          val content =   backStackEntry.arguments?.getString("contentId")
            val startIndex =   backStackEntry.arguments?.getInt("startIndex")?:-1
-            requestId?.let{
+            content?.let {
 
-                EndPlayerScreen(it,startIndex)
+                EndPlayerScreen(
+                    modifier = modifier,
+                    urls = it,
+                    startIndex = startIndex,
+                    themeMode = themeMode
+                )
             }
 
         }

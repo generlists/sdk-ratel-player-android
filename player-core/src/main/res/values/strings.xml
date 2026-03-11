@@ -2,4 +2,26 @@
 <resources>
     <string name="download_channel_name">동영상 다운로드</string>
     <string name="download_channel_desc">다운로드 진행 상태 알림</string>
+
+    <string name="info_screen_shot_detail_title">스크린샷 상세 정보</string>
+    <string name="info_screen_shot_share">공유할 캡쳐 미리보기</string>
+    <string name="info_file_name">파일명</string>
+    <string name="info_save_path">저장 경로</string>
+    <string name="info_screen_size">해상도</string>
+    <string name="info_create_date">생성 일시</string>
+    <string name="info_original_file_name">원본 영상 이름</string>
+    <string name="info_capture_time">캡처 시점</string>
+    <string name="info_file_size">용량</string>
+    <string name="info_device_model">기기 모델</string>
+    <string name="info_speed_info">배속 정보</string>
+    <string name="info_memo">메모</string>
+    <string name="scale_fit">원본 비율</string>
+    <string name="scale_fill_width">가로 맞춤</string>
+    <string name="scale_fill_height">세로 맞춤</string>
+    <string name="scale_inside">잘림 없음</string>
+    <string name="scale_crop">화면 채움</string>
+    <string name="download_notification">다운로드 알림</string>
+    <string name="face_book">FACEBOOK</string>
+    <string name="insta_gram">INSTAGRAM</string>
+
 </resources>

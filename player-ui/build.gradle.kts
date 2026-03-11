@@ -56,6 +56,7 @@ android {
 dependencies {
 
     implementation(project(":player-core"))
+    implementation(project(":player-utils"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -71,7 +73,9 @@ dependencies {
     implementation(libs.google.media3.ui )
     implementation(libs.google.media3.exoplayer)
     implementation(libs.androidx.foundation)
-
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

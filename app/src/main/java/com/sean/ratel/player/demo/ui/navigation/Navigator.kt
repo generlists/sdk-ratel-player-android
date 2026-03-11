@@ -1,4 +1,4 @@
-package com.sean.ratel.player.demo.ui.navigation
+ package com.sean.ratel.player.demo.ui.navigation
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,10 +15,12 @@ constructor() {
 
     private val _back =
         MutableSharedFlow<NavBack>(extraBufferCapacity = 1)
-
+    private val _end =
+        MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
     val navigate = _navigate.asSharedFlow()
     val back = _back.asSharedFlow()
+    val end = _end.asSharedFlow()
 
 
     fun navigateTo(
@@ -31,6 +33,9 @@ constructor() {
 
     fun navigateBack(recreate: Boolean = false) {
         _back.tryEmit(NavBack(recreate))
+    }
+    fun finish() {
+        _end.tryEmit(true)
     }
 
     data class NavTarget(

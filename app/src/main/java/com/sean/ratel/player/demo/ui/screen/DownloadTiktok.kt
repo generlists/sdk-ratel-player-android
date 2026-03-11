@@ -1,6 +1,5 @@
 package com.sean.ratel.player.demo.ui.screen
 
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +31,7 @@ import com.sean.ratel.player.demo.data.download.TikTokVideoResponse
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.navigation.Destination
+import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.UnstableApi
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -169,7 +169,7 @@ fun DownloadListTiktok(viewModel: VideoDownloadViewModel) {
                         .fillMaxSize()
                         .background(Color.White)
                         .padding(end = 7.dp) .clickable {
-                            Log.d(
+                            RLog.d(
                                 "hbungshin",
                                 "downloadPath : ${  (items[text].downloadResponse as TikTokVideoResponse).info.video.sd?.url}"
                             )

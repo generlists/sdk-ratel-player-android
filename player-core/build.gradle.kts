@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+
 apply(from = "publish.gradle.kts")
 plugins {
     alias(libs.plugins.android.library)
@@ -31,8 +32,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "VERSION_NAME", "\""+versionProps["VERSION_NAME"]+ "\"")
-        buildConfigField("String", "LIB_NAME",  "\""+versionProps["LIB_NAME"]+ "\"")
+        buildConfigField("String", "VERSION_NAME", "\"" + versionProps["VERSION_NAME"] + "\"")
+        buildConfigField("String", "LIB_NAME", "\"" + versionProps["LIB_NAME"] + "\"")
     }
 
     buildTypes {
@@ -53,7 +54,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
-        compose =true
+        compose = true
     }
 
 }

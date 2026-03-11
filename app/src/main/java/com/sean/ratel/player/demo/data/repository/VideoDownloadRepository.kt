@@ -1,12 +1,12 @@
 package com.sean.ratel.player.demo.data.repository
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.sean.ratel.player.core.data.domain.model.DownloadInfo
 import com.sean.ratel.player.core.data.domain.model.HttpHeaders
+import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.core.data.player.download.VideoDownloadManager
 import com.sean.ratel.player.demo.data.download.FacebookDownloadResponse
 import com.sean.ratel.player.demo.data.download.InstagramVideoResponse
@@ -17,6 +17,7 @@ import com.sean.ratel.player.demo.data.download.domain.DownloadModel
 import com.sean.ratel.player.demo.data.download.domain.DownloadResponse
 import com.sean.ratel.player.demo.data.download.domain.DownloadResponseDeserializer
 import com.sean.ratel.player.demo.data.download.domain.VideoDownloadedInfo
+import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,7 +29,6 @@ class VideoDownloadRepository @Inject constructor(
     private val videoDownloadApi: ShortFormDownloadApi,
     private val videoDownloadManager: VideoDownloadManager
 ) {
-
 
     suspend fun fetchSampleUrl(rawId: Int): Flow<DownloadModel> =
         flow {
@@ -42,9 +42,9 @@ class VideoDownloadRepository @Inject constructor(
             emit(response)
         }
 
-
     fun addDownload(
         id: String,
+        title:String,
         url: String,
         headers: HttpHeaders? = null,
         cookies: String? = null,
@@ -53,9 +53,14 @@ class VideoDownloadRepository @Inject constructor(
 
         videoDownloadManager.startDownload(
             downloadId = id,
+            downloadQuality = Quality.SD,
             downLoadUrl = url,
+            brandName = "FACEBOOK",
             headers = headers,
             cookies = cookies,
+            convertMp4 = true,
+            fileName = "FaceBook_SD_$id.mp4",
+            notificationMessage = title,
             requestExtra = downloadedInfo?.toByteArray()
         )
     }
@@ -64,9 +69,10 @@ class VideoDownloadRepository @Inject constructor(
         videoDownloadManager.addDownloadEventListener(listener)
     }
 
-    fun requestFaceBookReelsDownload(url: String): Flow<FacebookDownloadResponse?> =
+    fun requestFaceBookReelsDownload(url: String, cookies:String,userAgent:String,accept:String): Flow<FacebookDownloadResponse?> =
         flow {
-            val response = videoDownloadApi.requestFaceBookReelsDownloadUrl(url)
+            val response = videoDownloadApi.requestFaceBookReelsDownloadUrl(url,cookies,userAgent,
+               accept)
             emit(response)
         }
 
@@ -111,7 +117,7 @@ class VideoDownloadRepository @Inject constructor(
 
             gson.fromJson(json, VideoDownloadedInfo::class.java)
         } catch (e: Exception) {
-            Log.e("VideoDownloadRepository", "$e")
+            RLog.e("VideoDownloadRepository", "$e")
             null
         }
     }

@@ -44,8 +44,8 @@ import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 
 @Composable
 fun YouTubeScreen(viewModel: MainViewModel) {
-    var basicDataModel = viewModel.youtubeModel.collectAsState()
-    var advanceDataModel = viewModel.youtubeModelList.collectAsState()
+    val basicDataModel = viewModel.youtubeModel.collectAsState()
+    val advanceDataModel = viewModel.youtubeModelList.collectAsState()
 
 
 
@@ -53,7 +53,7 @@ fun YouTubeScreen(viewModel: MainViewModel) {
         TitleArea(basicDataModel.value?.exampleTitle?:"")
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth().height(60.dp).background(Color.White), verticalAlignment = Alignment.CenterVertically){
-            BasicPlayer(viewModel)
+            BasicPlayerScreen(viewModel)
         }
         Spacer(Modifier.height(10.dp))
         TitleArea(advanceDataModel.value?.exampleTitle?:"")
@@ -123,7 +123,7 @@ private fun TitleArea(
 }
 
 @Composable
-private fun BasicPlayer(viewModel: MainViewModel) {
+private fun BasicPlayerScreen(viewModel: MainViewModel) {
     val youTubeModel  = viewModel.youtubeModel.collectAsState()
 
     Column(Modifier

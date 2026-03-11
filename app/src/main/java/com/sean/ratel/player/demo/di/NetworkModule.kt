@@ -57,6 +57,6 @@ object NetworkModule {
     @Provides
     @Singleton
     @DownloadApiBaseUrl
-    fun provideShortFormDownloadBaseUrl(): String = "http://10.0.2.2:8000"
+    fun provideShortFormDownloadBaseUrl(): String = "http://10.64.120.74:8000"
 
 }

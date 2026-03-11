@@ -27,12 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.home.DownloadTab
 
 @Composable
-fun DownLoadSample( viewModel: VideoDownloadViewModel){
+fun DownLoadSample(mainViewModel: MainViewModel, viewModel: VideoDownloadViewModel, requestInLineBannerView:suspend () -> Unit){
 
     val selectedTab = remember { mutableStateOf<DownloadTab>(DownloadTab.FACEBOOK) }
 
@@ -45,7 +46,7 @@ fun DownLoadSample( viewModel: VideoDownloadViewModel){
         Spacer(Modifier.height(10.dp))
 
         when (selectedTab.value) {
-            DownloadTab.FACEBOOK -> DownloadFacebook(viewModel)
+            DownloadTab.FACEBOOK -> DownloadFacebook(mainViewModel,viewModel,requestInLineBannerView)
             DownloadTab.TIKTOK ->DownloadTikTok(viewModel)
         }
 

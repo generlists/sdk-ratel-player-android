@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.ui.control
+package com.sean.ratel.player.ui.control.component
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
@@ -38,11 +38,10 @@ fun CustomSeekBar(
     progressColor: Color = Color.White
 ) {
 
-
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .height(30.dp)
+            .height(20.dp)
        )
     {
 
@@ -67,13 +66,20 @@ fun CustomSeekBar(
                     }
                 }
                 .pointerInput(widthPx) {
+                    var lastX = 0f
+
                     detectDragGestures(
+
+
                         onDrag = { change, _ ->
                             change.consume()
-                            onSeekPreview(progressFromX(change.position.x))
+
+                            lastX = change.position.x
+                            onSeekPreview(progressFromX(lastX))
                         },
+
                         onDragEnd = {
-                            onSeekCommit(progress)
+                            onSeekCommit(progressFromX(lastX))
                         }
                     )
                 }
