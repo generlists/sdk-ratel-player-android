@@ -20,16 +20,6 @@ class VideoDownloadNotifierImpl(
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     override fun showProgress(data: DownloadNotificationData) {
-//        val notification = notificationHelper.buildProgressNotification(
-//            context,
-//            data.smallIcon,
-//            data.contentIntent,
-//            data.message,                 // description
-//            data.progress ?: 0,           // progress
-//            100,                          // max
-//            false                         // indeterminate
-//        )
-//        notificationManager.notify(NOTIFY_ID, notification)
     }
 
     override fun showCompleted(data: DownloadNotificationData) {
@@ -39,13 +29,13 @@ class VideoDownloadNotifierImpl(
             data.contentIntent,
             data.message
         )
-        val channel =  NotificationChannel(
-                    DOWNLOAD_CHANNEL_ID,
-                    "Downloads",
-                    NotificationManager.IMPORTANCE_HIGH
-                )
-            notificationManager.createNotificationChannel(channel)
-            notificationManager.notify(NOTIFY_ID, notification)
+        val channel = NotificationChannel(
+            DOWNLOAD_CHANNEL_ID,
+            "Downloads",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        notificationManager.createNotificationChannel(channel)
+        notificationManager.notify(NOTIFY_ID, notification)
     }
 
     override fun showFailed(data: DownloadNotificationData) {

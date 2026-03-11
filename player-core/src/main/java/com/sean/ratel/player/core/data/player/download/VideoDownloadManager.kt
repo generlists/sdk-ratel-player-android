@@ -8,9 +8,11 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
+import com.sean.ratel.player.core.data.domain.model.DownloadAppParam
 import com.sean.ratel.player.core.data.domain.model.DownloadInfo
 import com.sean.ratel.player.core.data.domain.model.DownloadedInfo
 import com.sean.ratel.player.core.data.domain.model.HttpHeaders
+import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.utils.log.RLog
 import com.sean.ratel.player.utils.log.Utils
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,20 +28,22 @@ class VideoDownloadManager @Inject constructor(
     private val headerStore: HeaderStore
 ) {
 
-
     fun startDownload(
         downloadId: String,
+        downloadQuality: Quality,
         downLoadUrl: String,
+        brandName:String ="FACEBOOK",
         headers: HttpHeaders? = null,
         cookies: String? = null,
         convertMp4: Boolean = true,
+        fileName:String? = null,
+        notificationMessage:String? = null,
         requestExtra: ByteArray? = null
-
     ) {
 
         val request = DownloadRequest.Builder(downloadId, downLoadUrl.toUri())
             .setMimeType("video/mp4")
-            .setCustomCacheKey(downloadId)
+            .setCustomCacheKey(downloadId + "_" + downloadQuality.name)
             .setData(requestExtra)
             .build()
         setMetaData(downloadId, headers, cookies)
@@ -52,19 +56,25 @@ class VideoDownloadManager @Inject constructor(
             request,
             true
         )
-        RLog.d("hbungshin","custom key : ${downloadId}")
-        downloadTracker.isConvertMp4(mapOf(downloadId to convertMp4))
+
+        RLog.d("Downloader", "custom key : ${downloadId}")
+
+        downloadTracker.mp4ConvertMp4(
+            mapOf(
+                downloadId to (DownloadAppParam(
+                    brandName = brandName,
+                    quality = downloadQuality,
+                    isConvertMp4 = convertMp4,
+                    fileName = fileName,
+                    notificationMessage = notificationMessage ?: "Download"
+                ))
+            )
+        )
     }
 
     fun addDownloadEventListener(listener: (DownloadInfo) -> Unit) {
-
         downloadTracker.addListener(listener)
     }
-
-
-    // -------------------------------------------------------------------------
-    // DOWNLOAD MANAGER 직접 제어 기능 (일반적으로 사용하는 방식)
-    // -------------------------------------------------------------------------
 
     /** 다운로드 추가 */
     fun addDownload(request: DownloadRequest) {

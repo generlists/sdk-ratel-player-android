@@ -1,7 +1,10 @@
 package com.sean.ratel.player.core.data.player.download
 
+import android.content.ContentValues
 import android.content.Context
-import android.util.Log
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -11,11 +14,17 @@ import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
+import com.sean.ratel.player.core.data.domain.model.DownloadAppParam
 import com.sean.ratel.player.core.data.domain.model.DownloadInfo
+import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.core.data.domain.model.toInfo
+import com.sean.ratel.player.utils.log.RLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileOutputStream
 
 /**
  * 다운로드 상태관리
@@ -24,11 +33,13 @@ import java.io.FileOutputStream
 class DownloadTracker(
     private val context: Context,
     private val downloadManager: DownloadManager,
-    private val simpleCache: Cache // Cache 인터페이스로 주입받습니다
+    private val simpleCache: Cache
 ) : DownloadManager.Listener {
 
     private val listeners = mutableListOf<(DownloadInfo) -> Unit>()
-    private val _isConverting = MutableStateFlow<Map<String, Boolean>>(mapOf())
+    private val _downloadOptions =
+        MutableStateFlow<Map<String, DownloadAppParam>>(mapOf())
+    val downloadOptions = _downloadOptions.asStateFlow()
 
     fun addListener(listener: (DownloadInfo) -> Unit) {
         listeners.add(listener)
@@ -43,25 +54,24 @@ class DownloadTracker(
 
         listeners.forEach { downloadInfo ->
 
-            val info = requestDownload.toInfo()
-
-
-            downloadInfo(info)
             //Mp4 파일로 저장
+            val downloadOptions = _downloadOptions.value[requestDownload.request.id]
 
-            val isConvertFile = _isConverting.value.get(requestDownload.request.id)
+            val info = requestDownload.toInfo(downloadOptions?.brandName?:"FACEBOOK", downloadOptions?.quality?: Quality.SD, downloadOptions?.notificationMessage?:"다운로드")
+            downloadInfo(info)
 
-            if (isConvertFile == true) {
+            if (downloadOptions?.isConvertMp4 == true) {
                 when (requestDownload.state) {
                     Download.STATE_COMPLETED -> {
-                        Log.d(
+                        RLog.d(
                             "hbungshin",
-                            "isConvertFile : $isConvertFile , request.id : ${requestDownload.request.id}"
+                            "isConvertFile : $downloadOptions , request.id : ${requestDownload.request.id}"
                         )
                         convertCachedToMp4(
+                            context,
                             requestDownload,
                             simpleCache,
-                            createMp4File(context, requestDownload.request.id)
+                            downloadOptions.fileName ?: "UNKNOWN_${requestDownload.request.id}.mp4"
                         )
                     }
 
@@ -72,40 +82,88 @@ class DownloadTracker(
     }
 
     // 예시 (실제 구현에는 예외 처리 및 스레딩 필요)
-    private fun convertCachedToMp4(download: Download, cache: Cache, outputFile: File) {
-        val upstreamFactory = DefaultHttpDataSource.Factory()
-        val cacheDataSourceFactory = CacheDataSource.Factory()
-            .setCache(cache)
-            .setUpstreamDataSourceFactory(upstreamFactory)
-            .setCacheWriteDataSinkFactory(null) // 쓰기 캐시 비활성화
+    private fun convertCachedToMp4(
+        context: Context,
+        download: Download,
+        cache: Cache,
+        saveFileName: String
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
 
-        val dataSpec = DataSpec(download.request.uri)
+            val upstreamFactory = DefaultHttpDataSource.Factory()
+            val cacheDataSourceFactory = CacheDataSource.Factory()
+                .setCache(cache)
+                .setUpstreamDataSourceFactory(upstreamFactory)
+                .setCacheWriteDataSinkFactory(null)
 
-        // 실제 데이터 소스 생성
-        val dataSource = cacheDataSourceFactory.createDataSource()
 
-        try {
-            dataSource.open(dataSpec)
-            val outputStream = FileOutputStream(outputFile)
-            val buffer = ByteArray(1024 * 4)
-            var bytesRead: Int
-            var totalBytesRead = 0L
+            val dataSource = cacheDataSourceFactory.createDataSource()
+            val dataSpec = DataSpec.Builder()
+                .setUri(download.request.uri)
+                .build()
 
-            while (totalBytesRead < download.contentLength) {
-                bytesRead = dataSource.read(buffer, 0, buffer.size)
-                if (bytesRead == C.RESULT_END_OF_INPUT) break
 
-                outputStream.write(buffer, 0, bytesRead)
-                totalBytesRead += bytesRead
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, saveFileName)
+                put(MediaStore.Downloads.MIME_TYPE, "video/mp4")
+                put(
+                    MediaStore.Downloads.RELATIVE_PATH,
+                    Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
+                )
+                put(MediaStore.Downloads.IS_PENDING, 1)
             }
-            outputStream.close()
-            dataSource.close()
 
-            // 성공적으로 변환되면 캐시를 삭제
-            // DownloadService.removeDownload() 등을 사용
-        } catch (e: Exception) {
-            // 오류 처리
-            e.printStackTrace()
+            val resolver = context.contentResolver
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //Android 10+
+                values.put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
+                )
+                values.put(MediaStore.MediaColumns.IS_PENDING, 1)
+
+                resolver.insert(
+                    MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                    values
+                )
+            } else {
+                // Android 9 이하 (legacy)
+                val dir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
+                )
+                if (!dir.exists()) dir.mkdirs()
+
+                val file = File(dir, saveFileName)
+                values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
+
+                resolver.insert(
+                    MediaStore.Files.getContentUri("external"),
+                    values
+                )
+            } ?: return@launch
+
+            try {
+                dataSource.open(dataSpec)
+
+                resolver.openOutputStream(uri)?.use { output ->
+                    val buffer = ByteArray(8 * 1024)
+                    while (true) {
+                        val read = dataSource.read(buffer, 0, buffer.size)
+                        if (read == C.RESULT_END_OF_INPUT) break
+                        output.write(buffer, 0, read)
+                    }
+                }
+
+                values.clear()
+                values.put(MediaStore.Video.Media.IS_PENDING, 0)
+                resolver.update(uri, values, null, null)
+
+            } catch (e: Exception) {
+                resolver.delete(uri, null, null)
+                e.printStackTrace()
+            } finally {
+                dataSource.close()
+            }
         }
     }
 
@@ -113,23 +171,10 @@ class DownloadTracker(
         return downloadManager.downloadIndex.getDownload(id)?.state == Download.STATE_COMPLETED
     }
 
-    fun isConvertMp4(isConvert: Map<String, Boolean>) {
-        _isConverting.value += isConvert
+    fun mp4ConvertMp4(convertMap: Map<String, DownloadAppParam>) {
+        _downloadOptions.value += convertMap
 
     }
 
-
-    fun createMp4File(context: Context, downloadId: String): File {
-        val outputDir = context.getExternalFilesDir("media_output")
-
-        if (outputDir == null || !outputDir.exists()) {
-            outputDir?.mkdirs()
-        }
-
-        val safeFileName = downloadId.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
-        val mp4FileName = "${safeFileName}.mp4"
-
-        // 3. 최종 File 객체 반환
-        return File(outputDir, mp4FileName)
-    }
 }
+

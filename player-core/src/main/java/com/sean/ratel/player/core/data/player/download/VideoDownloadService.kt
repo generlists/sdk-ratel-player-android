@@ -1,5 +1,7 @@
 package com.sean.ratel.player.core.data.player.download
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
@@ -31,32 +33,63 @@ class VideoDownloadService() : DownloadService(
     @Inject
     lateinit var notificationHelper: DownloadNotificationHelper
 
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannels()
+    }
     override fun getDownloadManager(): DownloadManager {
         return videoDownloadManager
     }
 
-    override fun getScheduler(): Scheduler? {
+    override fun getScheduler(): Scheduler {
         return PlatformScheduler(this, JOB_ID)
     }
 
     override fun getForegroundNotification(
         downloads: List<Download>,
         notMetRequirements: Int
-    ): Notification  {
-    return notificationHelper.buildProgressNotification(
-        applicationContext,
-        R.drawable.ic_download,
-        null,
-        null,
-        downloads,
-        notMetRequirements
-    )
-    }
+    ): Notification {
 
+        val currentDownload = downloads.firstOrNull {
+            it.state == Download.STATE_DOWNLOADING
+        }
+
+        val id = currentDownload
+            ?.request
+            ?.id
+
+        val downloadOptions = downloadTracker.downloadOptions.value[id]
+
+        return notificationHelper.buildProgressNotification(
+            applicationContext,
+            scrapBrandIcon(downloadOptions?.brandName?:"FACEBOOK"),
+            null,
+            downloadOptions?.notificationMessage,
+            downloads,
+            notMetRequirements
+        )
+    }
+    private fun scrapBrandIcon(scrapBrand: String) =
+        when (scrapBrand) {
+            getString(R.string.face_book) -> R.drawable.ic_facebook_logo
+            getString(R.string.insta_gram) -> R.drawable.ic_instagram_logo
+            else -> R.drawable.ic_facebook_logo
+        }
 
     companion object {
         private const val FOREGROUND_NOTIFICATION_ID = 1001
         private const val JOB_ID = 123456
         const val DOWNLOAD_CHANNEL_ID ="download_channel"
+    }
+
+    private fun createNotificationChannels() {
+            val channel = NotificationChannel(
+                DOWNLOAD_CHANNEL_ID,
+                getString(R.string.download_channel_desc),
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+
     }
 }

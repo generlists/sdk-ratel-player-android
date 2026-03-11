@@ -25,6 +25,12 @@ hilt-compose="1.2.0"
 google-gson="2.10.1"
 accompanist-webview="0.36.0"
 
+google-ad ="23.5.0"
+foundationVersion = "1.10.2"
+lifecycle-process = "2.8.3"
+multidex = "2.0.1"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -34,6 +40,10 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle-process" }
+androidx-multidex-multidex = { group = "androidx.multidex", name = "multidex", version.ref = "multidex" }
+
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -73,6 +83,11 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil"}
 androidx-navigation = { module = "androidx.navigation:navigation-compose",  version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+
+#ad
+
+google-play-service-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "google-ad"}
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

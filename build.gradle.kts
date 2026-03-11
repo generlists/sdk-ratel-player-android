@@ -14,27 +14,34 @@ tasks.register("publishAll") {
     description = "Publishes player-utils first, then player-core to GitHub Packages"
 
     dependsOn(
-         ":android-youtube-player:assembleRelease",
         ":android-youtube-player:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
-        ":player-utils:assembleRelease",
         ":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
-        ":player-core:assembleRelease",
         ":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
-        ":player-ui:assembleRelease",
-        ":player-ui:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
+        ":player-ui:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
+        ":player-ad:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
     )
 
-    project(":player-core").tasks.named("assembleRelease") {
+    project(":player-utils").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
         mustRunAfter(":android-youtube-player:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
-    }
-    project(":player-core").tasks.named("assembleRelease") {
-        mustRunAfter(":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
     }
 
     project(":player-core").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
-        mustRunAfter(":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
+        mustRunAfter(
+            ":android-youtube-player:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
+            ":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
+        )
     }
+
     project(":player-ui").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
-        mustRunAfter(":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
+        mustRunAfter(
+            ":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository",
+            ":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
+        )
+    }
+
+    project(":player-ad").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
+        mustRunAfter(
+            ":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository"
+        )
     }
 }

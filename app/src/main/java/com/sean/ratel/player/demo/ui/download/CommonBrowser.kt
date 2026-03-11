@@ -1,7 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.sean.ratel.player.demo.ui.download
 
 import android.content.Context
-import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
@@ -27,6 +28,7 @@ import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewNavigator
 import com.google.accompanist.web.rememberWebViewState
+import com.sean.ratel.player.utils.log.RLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,13 +106,13 @@ private fun setupWebViewSettings(webView: WebView, context: Context) {
         @JavascriptInterface
         fun onVideoDetected(videoId: String, postUrl: String, sdUrl: String, hdUrl: String, audioUrl: String) {
             // 네이티브 영역: 다운로드 로직 호출
-            Log.d("FB_DEBUG", "--------------------------")
-            Log.d("FB_DEBUG", "감지된 영상 ID: $videoId")
-            Log.d("FB_DEBUG", "분석 페이지 URL: $postUrl")
-            Log.d("FB_DEBUG", "✅ SD 재생 주소: $sdUrl")
-            Log.d("FB_DEBUG", "✅ HD 재생 주소: $hdUrl")
-            Log.d("FB_DEBUG", "✅ 오디오 주소: $audioUrl")
-            Log.d("FB_DEBUG", "--------------------------")
+            RLog.d("FB_DEBUG", "--------------------------")
+            RLog.d("FB_DEBUG", "감지된 영상 ID: $videoId")
+            RLog.d("FB_DEBUG", "분석 페이지 URL: $postUrl")
+            RLog.d("FB_DEBUG", "✅ SD 재생 주소: $sdUrl")
+            RLog.d("FB_DEBUG", "✅ HD 재생 주소: $hdUrl")
+            RLog.d("FB_DEBUG", "✅ 오디오 주소: $audioUrl")
+            RLog.d("FB_DEBUG", "--------------------------")
         }
     }, "AndroidBridge")
 }

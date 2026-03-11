@@ -1,5 +1,6 @@
 package com.sean.ratel.player.core.data.domain.model
 
+import androidx.media3.common.MediaItem
 import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
 
 
@@ -14,6 +15,7 @@ sealed class PlaybackState {
     data class Stop(val index: Int? = null) : PlaybackState()
     data class Complete(val index: Int? = null) : PlaybackState()
     data class Release(val index: Int? = null) : PlaybackState()
+    data class MediaTransition(val item: MediaItem?,val reason:MediaStreamTransitionReason): PlaybackState()
 
     data class Error(val errorCode: Int, val throwable: Throwable?, val index: Int? = null) :
         PlaybackState()

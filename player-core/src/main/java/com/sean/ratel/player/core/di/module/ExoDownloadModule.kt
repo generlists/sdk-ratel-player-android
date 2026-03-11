@@ -7,6 +7,7 @@ import androidx.media3.database.DatabaseProvider
 
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
@@ -16,6 +17,7 @@ import androidx.media3.exoplayer.offline.DefaultDownloadIndex
 import androidx.media3.exoplayer.offline.DownloadIndex
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.media.UnifiedDataSourceFactory
 import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.VideoDownloadNotifier
 import com.sean.ratel.player.core.data.player.download.DownloadTracker
@@ -35,6 +37,7 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import javax.inject.Named
 
 import javax.inject.Singleton
 
@@ -69,27 +72,45 @@ object ExoDownloadModule {
 
     @OptIn(UnstableApi::class)
     @Provides
+    @Named("http")
     @Singleton
-    fun provideCustomDataSourceFactory(
+    fun provideDefaultHttpDataSourceFactory(): DefaultHttpDataSource.Factory =
+        DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
+
+
+    @Provides
+    @Singleton
+    @Named("local")
+    @UnstableApi
+    fun provideLocalDataSourceFactory(
+        @ApplicationContext context: Context
+    ): DataSource.Factory {
+        return DefaultDataSource.Factory(context)
+    }
+
+    @Provides
+    @Singleton
+    @UnstableApi
+    fun provideUnifiedDataSourceFactory(
+        @Named("http") httpFactory: DefaultHttpDataSource.Factory,
+        @Named("local") localFactory: DataSource.Factory,
         cache: Cache,
-        defaultHttpDataSourceFactory: DefaultHttpDataSource.Factory,
         headerStore: HeaderStore
     ): DataSource.Factory {
 
         val dynamicHeaderFactory =
-            DynamicHeaderDataSourceFactory(defaultHttpDataSourceFactory, headerStore)
+            DynamicHeaderDataSourceFactory(httpFactory, headerStore)
 
-        return CacheDataSource.Factory()
+        val cachedHttpFactory= CacheDataSource.Factory()
             .setCache(cache)
             .setUpstreamDataSourceFactory(dynamicHeaderFactory)
             .setCacheWriteDataSinkFactory(null)
 
+        return UnifiedDataSourceFactory(
+            httpFactory = cachedHttpFactory,
+            localFactory = localFactory
+        )
     }
-    @OptIn(UnstableApi::class)
-    @Provides
-    @Singleton
-    fun provideDefaultHttpDataSourceFactory(): DefaultHttpDataSource.Factory =
-        DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
 
     @OptIn(UnstableApi::class)
     @Provides
@@ -171,5 +192,6 @@ object ExoDownloadModule {
     ): MediaStreamPlayer {
         return MediaExoStreamPlayer(context,datasourceFactory)
     }
+
 
 }

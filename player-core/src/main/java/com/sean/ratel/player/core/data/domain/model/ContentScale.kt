@@ -1,15 +1,15 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model
+package com.sean.ratel.player.core.data.domain.model
 
-import android.annotation.SuppressLint
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
+import com.sean.ratel.player.core.R
 
-@SuppressLint("UnsafeOptInUsageError")
-val CONTENT_SCALES =
-    listOf(
-        "Fit" to AspectRatioFrameLayout.RESIZE_MODE_FIT,
-        "FillWidth" to AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH,
-        "FillHeight" to AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT,
-        "Inside" to AspectRatioFrameLayout.RESIZE_MODE_FILL,
-        "Zoom" to AspectRatioFrameLayout.RESIZE_MODE_ZOOM,
 
-    )
+@UnstableApi
+enum class ContentScale(val scaleIndex:Int,val label:Int) {
+    Fit(AspectRatioFrameLayout.RESIZE_MODE_FIT, R.string.scale_fit),
+    FillWidth(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH,R.string.scale_fill_width),
+    FillHeight(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT,R.string.scale_fill_height),
+    Inside(AspectRatioFrameLayout.RESIZE_MODE_FILL,R.string.scale_inside),
+    Zoom(AspectRatioFrameLayout.RESIZE_MODE_ZOOM,R.string.scale_crop),
+}

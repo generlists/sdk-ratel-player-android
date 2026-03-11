@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.ui.control
+package com.sean.ratel.player.ui.control
 
 import androidx.annotation.OptIn
 import androidx.compose.foundation.clickable
@@ -15,8 +15,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
+import com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 import com.sean.ratel.player.ui.R
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -29,8 +29,8 @@ fun SeekForwardButton(viewModel: PlayerViewModel) {
     painter = painterResource(seekForwardIconId(incrementMs)),
     seekForwardContentDescription(incrementMs),
     modifier = Modifier
-      .width(40.dp)
-      .height(40.dp)
+      .width(35.dp)
+      .height(35.dp)
       .clickable {
         viewModel.seekForward()
       },
@@ -40,11 +40,11 @@ fun SeekForwardButton(viewModel: PlayerViewModel) {
 
 private fun seekForwardIconId(seekForwardAmountMs: Long): Int {
   return when (seekForwardAmountMs) {
-    in 2500..7500 -> R.drawable.media3_icon_skip_forward_5
-    in 7500..12500 -> R.drawable.media3_icon_skip_forward_10
-    in 12500..20000 -> R.drawable.media3_icon_skip_forward_15
-    in 20000..40000 -> R.drawable.media3_icon_skip_forward_30
-    else -> R.drawable.media3_icon_skip_forward
+    in 2500..7500 -> R.drawable.icon_skip_forward_5
+    in 7500..12500 -> R.drawable.icon_skip_forward_10
+    in 12500..20000 -> R.drawable.icon_skip_forward_15
+    in 20000..40000 -> R.drawable.icon_skip_forward_30
+    else -> R.drawable.icon_skip_forward
   }
 }
 

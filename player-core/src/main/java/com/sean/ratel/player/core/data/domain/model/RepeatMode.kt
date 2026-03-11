@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model
+package com.sean.ratel.player.core.data.domain.model
 
 enum class RepeatMode {
     REPEAT_OFF,

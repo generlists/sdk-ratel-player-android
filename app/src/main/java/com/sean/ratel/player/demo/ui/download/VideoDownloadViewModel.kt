@@ -1,7 +1,6 @@
 package com.sean.ratel.player.demo.ui.download
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import com.sean.ratel.player.demo.data.download.domain.SampleDownloadModel
 import com.sean.ratel.player.demo.data.download.domain.VideoDownloadedInfo
 import com.sean.ratel.player.demo.data.repository.VideoDownloadRepository
 import com.sean.ratel.player.demo.ui.navigation.Navigator
+import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.UnstableApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -89,20 +89,21 @@ class VideoDownloadViewModel @Inject constructor(
 
     fun download(
         id: String,
+        title:String,
         url: String,
         headers: HttpHeaders? = null,
         cookies: String? = null,
         downloadedInfo: VideoDownloadedInfo? = null
-    ) = repository.addDownload(id, url, headers, cookies, downloadedInfo)
+    ) = repository.addDownload(id,title, url, headers, cookies, downloadedInfo)
 
 
     fun requestFacebookDownloadUrl(requestId:String, url:String, headers: HttpHeaders?=null, cookies:String?= null){
 
         viewModelScope.launch {
-            repository.requestFaceBookReelsDownload(url).collect { response ->
+            repository.requestFaceBookReelsDownload(url, "datr=ew9iabdHBVtT-blidsrSaMaE; sb=ew9iacoLTnCvyQHF7E_lvahP","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Mozilla/5.0 (Linux; Android 13; sdk_gphone64_arm64 Build/TE1A.240213.009; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.1").collect { response ->
 
                 response?.let {
-                    Log.d("hbungshin","response : ${response}")
+                    RLog.d("LOG_TAG","response : ${response}")
                     _downloadedList.value += listOf<VideoDownloadedInfo>(
                         VideoDownloadedInfo(
                             DownloadBland.FACEBOOK,
@@ -113,6 +114,7 @@ class VideoDownloadViewModel @Inject constructor(
                     addListener()
                     download(
                         requestId,
+                        it.info.title,
                         it.info.videoSD?.url ?: "",
                         headers,
                         cookies,
@@ -125,7 +127,7 @@ class VideoDownloadViewModel @Inject constructor(
 
     fun requestTikTokDownloadUrl(requestId: String, url: String) {
 
-        Log.d("hbungshin","requestId : $requestId , url : $url")
+        RLog.d("LOG_TAG","requestId : $requestId , url : $url")
         viewModelScope.launch {
 
             repository.requestTikTokVideoDownload(url).collect { response ->
@@ -148,6 +150,7 @@ class VideoDownloadViewModel @Inject constructor(
                     url?.let { downloadUrl ->
                         download(
                             requestId,
+                            "",
                             downloadUrl,
                             headers,
                             cookies,
@@ -169,7 +172,7 @@ class VideoDownloadViewModel @Inject constructor(
                 response?.video?.let{
                     val url =  it.sd?.url?:""
                    addListener()
-                    download(requestId,url,headers,cookies)
+                    download(requestId,url,"",headers,cookies)
 
                 }
             }
@@ -181,7 +184,7 @@ class VideoDownloadViewModel @Inject constructor(
 
         _downloadedList.update { list ->
             list.map { item ->
-                Log.d("hbungshin","item requestId : ${item.requestId} , requestId : $requestId")
+                RLog.d("LOG_TAG","item requestId : ${item.requestId} , requestId : $requestId")
                 if (item.requestId == requestId && state == DownloadState.COMPLETED.name) {
                     item.copy(
                         downloadPath =requestId,

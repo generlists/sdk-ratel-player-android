@@ -2,6 +2,7 @@
 <resources>
     <string name="playpause_button_play">Play</string>
     <string name="playpause_button_pause">Pause</string>
+    <string name="playpause_button_replay">Replay</string>
     <string name="next_button">Next</string>
     <string name="previous_button">Previous</string>
     <string name="seek_back_button">Rewind</string>
@@ -28,5 +29,68 @@
     <string name="repeat_button_repeat_one">Current mode: Repeat one. Toggle repeat mode.</string>
     <!-- Accessibility description for a button that controls the repeat mode of a media playback. In this mode the entire playlist is repeated. If the user clicks the button, the repeat mode changes to the next available mode. [CHAR LIMIT=NONE] -->
     <string name="repeat_button_repeat_all">Current mode: Repeat all. Toggle repeat mode.</string>
+
+
+    <string name="player_control_capture_fail">영상 캡쳐를 실패 했어요!</string>
+    <string name="player_control_file_Save_fail">파일 저장을 실패을 실패했어요!</string>
+    <string name="player_control_capture_audio_fail">오디오는 캡쳐 기능이 되지 않아요!</string>
+
+
+
+    <string name="player_control_quality">화질 설정(%1$s)</string>
+    <string name="player_control_repeat">구간 반복</string>
+    <string name="player_control_speed">배속 설정(%1$sx)</string>
+    <string name="player_control_suffle">무작위 재생</string>
+    <string name="player_control_hw_accelate">H/W 가속</string>
+    <string name="player_control_brightness_low">밝기(낮음)</string>
+    <string name="player_control_brightness_middle">밝기(중간)</string>
+    <string name="player_control_brightness_high">밝기(높음)</string>
+
+    <string name="player_control_volume_off">소리(무음)</string>
+    <string name="player_control_volume_low">소리(낮음)</string>
+    <string name="player_control_volume_middle">소리(중간)</string>
+    <string name="player_control_volume_high">소리(높음)</string>
+    <string name="player_control_system_volume_zero">🔇기기 음소거 중이에요</string>
+
+    <string name="player_control_screen_shot">스크린샷</string>
+    <string name="player_control_screen_size">화면 크기\n(%1$s)</string>
+
+    <string name="player_control_options">플레이 옵션</string>
+    <string name="player_control_screen_options">화면 설정</string>
+
+    <string name="player_control_info_off">▲ 정보 접기</string>
+
+    <string name="player_control_info_more">▼ 상세 정보 더보기</string>
+
+    <string name="player_control_delay_time">4000</string>
+
+    <string name="player_control_discription">설명</string>
+
+    <string name="player_control_share">공유하기</string>
+    <string name="video_scrapping_video_share">지금 보고 있는 영상사진 공유해요!\n</string>
+    <string name="player_capture_share">캡쳐 공유하기</string>
+
+    <string name="face_book">페이스북</string>
+    <string name="face_book_package_name">com.facebook.katana</string>
+
+    <string name="instagram">인스타그램</string>
+    <string name="instagram_package_name">com.instagram.android</string>
+    <string name="line">라인</string>
+    <string name="line_package_name">jp.naver.line.android</string>
+
+
+    <string name="kakaotallk">카카오톡</string>
+    <string name="kakaotallk_package_name">com.kakao.talk</string>
+
+    <string name="x">X</string>
+    <string name="x_package_name">com.twitter.android</string>
+    <string name="alert_confirm">확인</string>
+    <string name="player_error">⛔ 재생 에러(%s)</string>
+    <string name="player_unkwnown_error">알수 없는 에러</string>
+    <string name="player_error_protocal">적절한 재생 프로토콜이 아니에요.</string>
+    <string name="player_error_file_not_founded">재생 파일이 존재하지 않아요.</string>
+    <string name="player_error_connect_error">재생 접속 오류에요.</string>
+    <string name="player_error_unknown_error">알수 없는 에러에요.</string>
+
 
 </resources>

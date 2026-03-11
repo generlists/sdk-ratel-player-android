@@ -4,15 +4,20 @@ import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 
-
-data class DownloadInfo(
+@OptIn(UnstableApi::class)
+data class DownloadInfo
+    (
     val id: String,
+    val message:String,
+    val brandName: String,
     val mimeType: String?,
+    val quality: Quality,
     val state: DownloadState,
     val progress: Int,
     val bytesDownloaded: Long,
+    val percentDownloaded:Float,
     val contentLength: Long,
-)
+    )
 
 data class DownloadedInfo(
     val id: String,
@@ -56,15 +61,15 @@ enum class DownloadState(val state: Int) {
     FAILED(4),
     REMOVING(5),
     RESTARTED(6),
-    PAUSED(7); // 커스텀 상태 (앱 전용)
+    PAUSED(7);
     companion object {
         fun from(state: Int?): DownloadState =
-            values().firstOrNull { it.state == state } ?: IDLE
+            DownloadState.entries.firstOrNull { it.state == state } ?: IDLE
     }
 }
 
 @OptIn(UnstableApi::class)
-fun Download.toInfo(): DownloadInfo {
+fun Download.toInfo(brandName: String, downloadQuality: Quality, message: String): DownloadInfo {
     val progress =
         if (contentLength > 0) ((bytesDownloaded * 100) / contentLength).toInt()
         else 0
@@ -72,6 +77,7 @@ fun Download.toInfo(): DownloadInfo {
     return DownloadInfo(
         id = request.id,
         mimeType = request.mimeType,
+        quality = downloadQuality,
         state = when (state) {
             Download.STATE_QUEUED -> DownloadState.QUEUED
             Download.STATE_DOWNLOADING -> DownloadState.DOWNLOADING
@@ -84,6 +90,18 @@ fun Download.toInfo(): DownloadInfo {
         },
         progress = progress,
         bytesDownloaded = bytesDownloaded,
-        contentLength = contentLength
+        percentDownloaded = percentDownloaded,
+        contentLength = contentLength,
+        brandName = brandName,
+        message = message,
+
     )
 }
+
+data class DownloadAppParam(
+    val brandName:String,
+    val quality: Quality,
+    val isConvertMp4: Boolean,
+    val fileName: String?,
+    val notificationMessage: String
+)

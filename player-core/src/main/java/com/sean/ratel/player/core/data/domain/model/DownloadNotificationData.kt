@@ -5,7 +5,7 @@ import android.app.PendingIntent
 data class DownloadNotificationData(
     val title: String,
     val message: String,
-    val progress: Int? = null,   // null → 완료/실패
+    val progress: Int? = null,
     val smallIcon: Int,
     val contentIntent: PendingIntent? = null
 )

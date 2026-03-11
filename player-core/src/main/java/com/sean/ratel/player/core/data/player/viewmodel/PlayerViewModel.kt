@@ -1,29 +1,69 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.viewmodel
+package com.sean.ratel.player.core.data.player.viewmodel
 
+import android.content.ContentResolver
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.view.View
 import androidx.annotation.OptIn
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.CONTENT_SCALES
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.PlaySpeed
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.RepeatMode
+import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil
+import com.sean.ratel.player.core.data.domain.InfoManager
 import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
+import com.sean.ratel.player.core.data.domain.model.InfoType
+import com.sean.ratel.player.core.data.domain.model.PlaySpeed
+import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
+import com.sean.ratel.player.core.data.domain.model.Quality
+import com.sean.ratel.player.core.data.domain.model.RepeatMode
+import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    val mediaStreamPlayer: MediaStreamPlayer
+    @ApplicationContext val context: Context,
+    val mediaStreamPlayer: MediaStreamPlayer,
+    val infoManager: InfoManager,
 ) : ViewModel(){
 
     private val _isPlaying = MutableStateFlow<Boolean>(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying
+
+    private val _isPlayEnd = MutableStateFlow<Boolean>(false)
+    val isPlayEnd: StateFlow<Boolean> = _isPlayEnd
+
+    private val _isStop = MutableStateFlow<Boolean>(false)
+    val isStop: StateFlow<Boolean> = _isStop
+
+    private val _isNextButtonEnabled= MutableStateFlow<Boolean>(true)
+    val isNextButtonEnabled: StateFlow<Boolean> = _isNextButtonEnabled
+
+    private val _isBeforeButtonEnabled= MutableStateFlow<Boolean>(false)
+    val isBeforeButtonEnabled: StateFlow<Boolean> = _isBeforeButtonEnabled
+
+
+    private val _isReset= MutableStateFlow<Boolean>(false)
+    val isReset: StateFlow<Boolean> = _isReset
+
+
+    private val _isSeek = MutableStateFlow<Boolean>(false)
+    var isSeek = _isSeek
 
     private val _backWardMs = mediaStreamPlayer.seekBackIncrement
     val backWardMs: StateFlow<Long> = _backWardMs
@@ -37,36 +77,214 @@ class PlayerViewModel @Inject constructor(
     private val _currentTimeMs = MutableStateFlow<Long>(0L)
     val currentTimeMs: StateFlow<Long> = _currentTimeMs
 
+    private val _saveTimeMs = MutableStateFlow<Long>(0L)
+    val saveTimeMs: StateFlow<Long> = _saveTimeMs
 
-    private val _isShuffle = MutableStateFlow<Boolean>(false)
-    val isShuffle: StateFlow<Boolean> = _isShuffle
+    private val _saveCurrentId = MutableStateFlow<String>("")
+    val saveCurrentId: StateFlow<String> = _saveCurrentId
 
+    private var _audioOnly = MutableStateFlow<Boolean>(false)
+     val audioOnly = _audioOnly
 
-    private val _repeatMode = MutableStateFlow<RepeatMode>(RepeatMode.REPEAT_OFF)
-    val repeatMode: StateFlow<RepeatMode> = _repeatMode
-
-
-    private val _playSpeed = MutableStateFlow<PlaySpeed>(PlaySpeed.PlaySpeed_1_0)
-    val playSpeed: StateFlow<PlaySpeed> = _playSpeed
+    private val _videoQualityChanged = MutableStateFlow<Pair<Quality,String>>(Pair(Quality.SD,""))
+    val videoQualityChanged: StateFlow<Pair<Quality,String>> = _videoQualityChanged
 
     private val toggleModeSequence: List<RepeatMode> =
         listOf(RepeatMode.REPEAT_OFF, RepeatMode.REPEAT_ONE, RepeatMode.REPEAT_ALL)
 
     val speedSelection: List<PlaySpeed> = PlaySpeed.entries.map { it }
 
-    private val _showControls = mutableStateOf<Boolean>(true)
-    var showControls = _showControls
 
-    private var _currentContentScaleIndex  = mutableIntStateOf(0)
-    var currentContentScaleIndex = _currentContentScaleIndex
+    private val _optionQualityChanged = mutableStateOf<Boolean>(false)
+    var optionQualityChanged = _optionQualityChanged
 
-    fun getCurrentContentScaleIndex(index:Int):Int{
-        _currentContentScaleIndex.intValue = index
-        return CONTENT_SCALES[_currentContentScaleIndex.intValue].second
+    private val _isSystemVolumeMute = MutableStateFlow<Boolean>(false)
+    var isSystemVolumeMute = _isSystemVolumeMute
+
+
+
+
+
+    private val _qualityList = MutableStateFlow<List<Pair<Quality,String>>>(listOf())
+    val qualityList: StateFlow<List<Pair<Quality,String>>> = _qualityList
+
+    private val _mediaList = MutableStateFlow<List<Pair<String, List<Pair<Quality, String>>>>>(listOf())
+    val mediaList: StateFlow<List<Pair<String, List<Pair<Quality, String>>>>> = _mediaList
+
+
+
+    private val _isHWYAccelerated = MutableStateFlow<Boolean>(true)
+    val isHWYAccelerated: StateFlow<Boolean> = _isHWYAccelerated
+
+
+    private val _surfaceView = mutableStateOf<View?>(null)
+
+
+    private val _currentItemIndex = MutableStateFlow<Int>(0)
+    val currentItemIndex: StateFlow<Int> = _currentItemIndex
+
+
+    fun setCurrentIndex(currentIndex:Int){
+        _currentItemIndex.value = currentIndex
     }
 
-    fun showControls(showControl:Boolean){
-        _showControls.value = showControl
+    fun setSaveTimeMs(saveTimeMs:Long){
+        _saveTimeMs.value = saveTimeMs
+    }
+    fun setSaveCurrentId(currentId:String){
+        _saveCurrentId.value = currentId
+    }
+
+    fun audioOnly(audioOnly:Boolean){
+        _audioOnly.value = audioOnly
+    }
+
+    fun setSurfaceView(view: View?){
+        _surfaceView.value = view
+    }
+    fun setReset(reset:Boolean){
+        _isReset.value = reset
+    }
+
+    fun getScreenCapture(onInfo:(PreviewInfoData?)->Unit,speed: PlaySpeed){
+        _surfaceView.value?.let {
+            mediaStreamPlayer.getVideoCapture(it, infoCallback = { bitmap ->
+
+                bitmap?.let {
+                    onInfo(
+                        infoManager.buildPreviewData(
+                            bitmap = bitmap,
+                            currentPos = mediaStreamPlayer.currentPosition.value ?: 0L,
+                            playbackSpeed = speed.speed,
+                            videoFileName = "fileName",
+                        )
+                    )
+                } ?: run {
+                    onInfo(
+                        PreviewInfoData(
+                            infoType = InfoType.ScreenShot,
+                            mainInfoList = listOf(),
+                        )
+                    )
+                }
+
+            })
+        }
+    }
+    fun getShareScreenCapture(
+        onInfo: (PreviewInfoData?) -> Unit,speed: PlaySpeed
+    ) {
+        _surfaceView.value?.let {
+            mediaStreamPlayer.getVideoCapture(it, infoCallback = { bitmap ->
+
+                bitmap?.let {
+                    onInfo(
+                        infoManager.buildShareData(
+                            bitmap = bitmap,
+                            currentPos = mediaStreamPlayer.currentPosition.value ?: 0L,
+                            playbackSpeed = speed.speed
+                        )
+                    )
+                } ?: run {
+                    onInfo(
+                        PreviewInfoData(
+                            infoType = InfoType.ScreenShot,
+                            mainInfoList = listOf(),
+                        )
+                    )
+                }
+
+            })
+        }
+    }
+    fun saveCaptureFile(context:Context,infoType: InfoType,bitmap: Bitmap,saveComplete:((File?,Uri?)->Unit)?= null){
+                // 2. 버전별 저장 분기 (이게 핵심!)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // 안드로이드 10 이상: MediaStore 방식 (권한 필요 없음)
+            saveWithMediaStore(context,bitmap,infoType,saveComplete)
+        } else {
+            // 안드로이드 8, 9: 직접 파일 경로 방식 (WRITE_EXTERNAL_STORAGE 권한 필수)
+            saveFileBitmap(context,infoType, bitmap,saveComplete)
+        }
+    }
+    private fun saveFileBitmap(context: Context,infoType: InfoType, bitmap: Bitmap,saveComplete:((File?,Uri?)->Unit)?= null) {
+
+        val filename = "video_scrap_pro_${System.currentTimeMillis()}.jpg"
+
+        // Pictures/scap_pro/screen_shot 경로
+        val path = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+            "scap_pro/screen_shot"
+        )
+
+        if (!path.exists()) path.mkdirs()
+
+        val file = File(path, filename)
+        try {
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
+            // 갤러리 새로고침
+            MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
+           if(infoType == InfoType.Share){
+               saveComplete?.let{
+                   saveComplete(file,null)
+               }
+           }
+
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun saveWithMediaStore(context: Context, bitmap: Bitmap ,infoType: InfoType, saveComplete:((File?,Uri?)->Unit)?= null) {
+        val filename = "screenshot_${System.currentTimeMillis()}.jpg"
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/scap_pro/screen_shot")
+        }
+
+        val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        uri?.let { targetUri ->
+            context.contentResolver.openOutputStream(targetUri)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                RLog.d("Player", "최신 방식으로 MediaStore 저장 성공!")
+            }
+            if(infoType == InfoType.Share){
+                saveComplete?.let{
+                    saveComplete(null,uri)
+                }
+            }
+        }
+
+    }
+
+    fun setVideoQualityChanged(qualityChanged: Boolean, videoQuality: Pair<Quality, String>) {
+        _videoQualityChanged.value = videoQuality
+        _optionQualityChanged.value = qualityChanged
+    }
+    fun setVideoQuality(videoQuality: Pair<Quality, String>) {
+        _videoQualityChanged.value = videoQuality
+    }
+
+    fun setOptionQualityChanged(qualityChanged:Boolean){
+        _optionQualityChanged.value = qualityChanged
+    }
+
+    fun setVolume(volume:Float){
+        mediaStreamPlayer.setVolume(volume)
+    }
+
+    fun setQuality(quality:List<Pair<Quality,String>>){
+        _qualityList.value = quality
+
+    }
+
+    fun setHWAccelerated(isHWYAccelerated:Boolean){
+        _isHWYAccelerated.value = isHWYAccelerated
     }
 
     fun play(){
@@ -79,11 +297,61 @@ class PlayerViewModel @Inject constructor(
             mediaStreamPlayer.pause()
         }
     }
-    fun nextPlay(){
-        if(mediaStreamPlayer.isNextItem())mediaStreamPlayer.nextPlay()
+
+
+    fun setIsStop(isStop:Boolean){
+        _isStop.value = isStop
     }
-    fun pervPlay(){
-        if(mediaStreamPlayer.isPrevItem()) mediaStreamPlayer.pervPlay()
+
+    fun setPlayAllEnd(isPlayEnd:Boolean){
+        _isPlayEnd.value = isPlayEnd
+    }
+    fun nextButtonEnabled(isEnabled:Boolean){
+        _isNextButtonEnabled.value = isEnabled
+    }
+    fun beforeButtonEnabled(isEnabled:Boolean){
+        _isBeforeButtonEnabled.value = isEnabled
+    }
+
+    fun rePlay(mediaIndex: Int = 0) {
+        mediaStreamPlayer.rePlay(mediaIndex)
+    }
+    fun isSeek(isSeek:Boolean){
+        _isSeek.value = isSeek
+    }
+    fun nextPlay(){
+        if(mediaStreamPlayer.isNextItem()){
+            RLog.d("MediaScreen","_isReset.value : ${_isReset.value}")
+            //퀄러티 인덱스 초기화
+            mediaStreamPlayer.nextPlay(isReset = _isReset.value)
+
+            if(!_isPlaying.value){
+                 mediaStreamPlayer.resume()
+               // mediaStreamPlayer.pause()
+            }
+            val nextIndex =
+                if (currentItemIndex.value < _mediaList.value.size) currentItemIndex.value + 1 else currentItemIndex.value
+            setVideoQualityChanged(
+                qualityChanged = false,
+                videoQuality = _mediaList.value[nextIndex].second[0]
+            )
+        }
+    }
+    fun pervPlay() {
+        if (mediaStreamPlayer.isPrevItem()) {
+            mediaStreamPlayer.pervPlay(_isReset.value)
+            if (!_isPlaying.value) {
+                mediaStreamPlayer.resume()
+                // mediaStreamPlayer.pause()
+            }
+            val pervIndex =
+                if (currentItemIndex.value >= 0) currentItemIndex.value - 1 else currentItemIndex.value
+            //퀄러티 인덱스 초기화
+            setVideoQualityChanged(
+                qualityChanged = false,
+                videoQuality = _mediaList.value[pervIndex].second[0]
+            )
+        }
     }
 
     fun seekForward(){
@@ -95,17 +363,15 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun setPlaySpeedMode(speed: PlaySpeed) {
-        _playSpeed.value = speed
         mediaStreamPlayer.setPlaySpeed(speed)
     }
 
     fun setRepeatMode(repeat: RepeatMode) {
-        _repeatMode.value = repeat
         mediaStreamPlayer.setRepeat(repeat)
     }
 
     fun setShuffle(isShuffle: Boolean) {
-        _isShuffle.value = isShuffle
+        //_isShuffle.value = isShuffle
         mediaStreamPlayer.setShuffleOn(isShuffle)
     }
 
@@ -127,9 +393,11 @@ class PlayerViewModel @Inject constructor(
     fun setCurrentTime(){
 
         viewModelScope.launch {
+
             mediaStreamPlayer.currentPosition.collect {
                 it?.let{
                     _currentTimeMs.value = it
+                    setSystemVolumeMute()
                 }
             }
         }
@@ -138,17 +406,79 @@ class PlayerViewModel @Inject constructor(
     fun seekTo(seekMs:Long){
         mediaStreamPlayer.seekTo(seekMs)
     }
+    fun seekTo(mediaIndex:Int,seekMs:Long){
+        mediaStreamPlayer.seekTo(mediaIndex,seekMs)
+    }
 
     @OptIn(UnstableApi::class)
-    fun mediaItem(url: String, cacheKey: String): MediaItem =
+    private fun mediaItem(url: String, cacheKey: String): MediaItem =
         MediaItem.Builder()
             .setUri(url)
             .setCustomCacheKey(cacheKey)
             .build()
 
+    fun buildMediaItem(
+        video: String,
+        cacheKey: String
+    ): MediaItem {
+        RLog.d("AdView","video : $video ,  cacheKey : $cacheKey")
+
+        when {
+            video.toUri().scheme == ContentResolver.SCHEME_CONTENT ->
+            return MediaItem.fromUri( video.toUri())
+
+            video.toUri().scheme == ContentResolver.SCHEME_FILE ->
+
+            return MediaItem.fromUri( video.toUri())
+
+            else ->
+                return mediaItem(video,cacheKey)
+
+        }
+
+
+    }
+
+    fun changeItemUrl(index:Int,newUrl: String) {
+        // 1. 새 URL로 미디어 아이템 생성
+        val newMediaItem = MediaItem.fromUri(newUrl)
+
+        // 2. 0번 인덱스(첫 번째)의 아이템을 새로운 놈으로 교체!
+        // false는 "기존 재생 상태를 유지하겠다"는 뜻이야.
+        mediaStreamPlayer.replaceMediaItem(index, newMediaItem)
+    }
+
+
     fun getRepeatToggleSequence(): RepeatMode{
+
         val currRepeatModeIndex = toggleModeSequence.indexOf(mediaStreamPlayer.repeatMode.value)
         return toggleModeSequence[(currRepeatModeIndex + 1) % toggleModeSequence.size]
 
+    }
+
+
+    fun setMediaList(media:List<Pair<String, List<Pair<Quality, String>>>>){
+        _mediaList.value = media
+    }
+
+    fun reorderMediaList(
+        list: List<Pair<String, List<Pair<Quality, String>>>>,
+        saveId: String
+    ): List<Pair<String, List<Pair<Quality, String>>>> {
+
+            val savedIndex  = list.indexOfFirst { it.first ==saveId }
+
+            // 1. startIndex부터 끝까지 (예: [1, 2])
+            val head = list.subList(savedIndex, list.size)
+
+            // 2. 처음부터 startIndex 전까지 (예: [0])
+            val tail = list.subList(0, savedIndex)
+
+            // 3. 둘이 합치기! ([1, 2] + [0])
+            return head + tail
+        }
+
+    fun setSystemVolumeMute(){
+        _isSystemVolumeMute.value = PlayerUtil.isSystemVolumeMute(context)
     }
 }

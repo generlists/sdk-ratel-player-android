@@ -34,5 +34,9 @@ internal fun NavHandler(
                     navController.navigateUp()
                 }
             }.launchIn(this)
+        navigator.end
+            .onEach {
+                finish()
+            }.launchIn(this)
     }
 }
