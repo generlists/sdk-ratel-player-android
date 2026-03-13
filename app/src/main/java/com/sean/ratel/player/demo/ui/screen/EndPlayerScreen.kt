@@ -30,6 +30,7 @@ import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.UnstableApi
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
+import kotlin.collections.emptyList
 
 
 @OptIn(UnstableApi::class)
@@ -88,17 +89,9 @@ fun EndPlayerScreen(
 //        }
         // list: List<Pair<String, List<Pair<Quality, String>>>>
         val localList = listOf(
-            Pair(
-                "1052137116925296",
-                listOf(
-                    Pair(
-                        Quality.SD,
-                        "file:///storage/emulated/0/Download/kakaotallk/14902146_1080_1920_25fps.mp4"
-                    ), Pair(Quality.HD, ""), Pair(Quality.AUDIO, "")
-                )
-            )
+            "123445566" to emptyList<Pair<Quality,String>>()
         )
-        val reorder = reorderMediaList(urlDecodeList, startIndex)
+        val reorder = reorderMediaList(urlDecodeList+localList, startIndex)
 
         reorder.forEach {
             RLog.d("LOG_TAG", "222 it : $it startIndex : $startIndex")
