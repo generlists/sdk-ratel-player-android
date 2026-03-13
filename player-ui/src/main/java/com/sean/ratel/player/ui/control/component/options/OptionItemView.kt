@@ -103,7 +103,7 @@ internal fun OptionItemView(
             },
             modifier = Modifier.wrapContentSize(),
             color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
             textAlign = TextAlign.Center
 
         )

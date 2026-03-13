@@ -2,6 +2,7 @@ package com.sean.ratel.player.core.data.player.download
 
 import android.content.ContentValues
 import android.content.Context
+import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 
 /**
  * 다운로드 상태관리
@@ -103,19 +105,15 @@ class DownloadTracker(
                 .build()
 
 
-            val values = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, saveFileName)
-                put(MediaStore.Downloads.MIME_TYPE, "video/mp4")
-                put(
-                    MediaStore.Downloads.RELATIVE_PATH,
-                    Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
-                )
-                put(MediaStore.Downloads.IS_PENDING, 1)
-            }
-
             val resolver = context.contentResolver
             val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                //Android 10+
+
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, saveFileName)
+                    put(MediaStore.Downloads.MIME_TYPE, "video/mp4")
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+
                 values.put(
                     MediaStore.MediaColumns.RELATIVE_PATH,
                     Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
@@ -128,21 +126,42 @@ class DownloadTracker(
                 )
             } else {
                 // Android 9 이하 (legacy)
-                val dir = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS + "/scrap_pro"
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "scrap_pro"
                 )
+
                 if (!dir.exists()) dir.mkdirs()
 
                 val file = File(dir, saveFileName)
-                values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
 
-                resolver.insert(
-                    MediaStore.Files.getContentUri("external"),
-                    values
+                dataSource.open(dataSpec)
+
+                FileOutputStream(file).use { output ->
+                    val buffer = ByteArray(8 * 1024)
+                    while (true) {
+                        val read = dataSource.read(buffer, 0, buffer.size)
+                        if (read == C.RESULT_END_OF_INPUT) break
+                        output.write(buffer, 0, read)
+                    }
+                }
+
+                dataSource.close()
+
+                MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(file.absolutePath),
+                    arrayOf("video/mp4"),
+                    null
                 )
-            } ?: return@launch
+
+                return@launch
+            }
 
             try {
+
+                if(uri == null ) return@launch
+
                 dataSource.open(dataSpec)
 
                 resolver.openOutputStream(uri)?.use { output ->
@@ -154,12 +173,13 @@ class DownloadTracker(
                     }
                 }
 
-                values.clear()
-                values.put(MediaStore.Video.Media.IS_PENDING, 0)
-                resolver.update(uri, values, null, null)
+                val updateValues = ContentValues().apply {
+                    put(MediaStore.Video.Media.IS_PENDING, 0)
+                }
+                resolver.update(uri, updateValues, null, null)
+
 
             } catch (e: Exception) {
-                resolver.delete(uri, null, null)
                 e.printStackTrace()
             } finally {
                 dataSource.close()

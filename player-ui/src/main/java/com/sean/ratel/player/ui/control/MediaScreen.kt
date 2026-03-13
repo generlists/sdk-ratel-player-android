@@ -200,16 +200,16 @@ fun MediaScreen(
     }
 
     //View
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
         // PlayerView를 Compose에 삽입
         //BG->FG
         key(forceUpdate) {
 
             AndroidView(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().background(Color.Black),
                 factory = { _ ->
                     val view = playerView.value
-
+                    view.setBackgroundColor(android.graphics.Color.BLACK)
                     (view.parent as? ViewGroup)?.removeView(view)
 
                     view.player = viewModel.mediaStreamPlayer.getPlayer()
@@ -576,12 +576,15 @@ private fun start(
     playList: List<Pair<String, List<Pair<Quality, String>>>>
 ) {
     viewModel.mediaStreamPlayer.start(
-        items = playList.map { pair ->
+        items = playList.filter {
+            it.second.isNotEmpty()
+        }.map { pair ->
 
             val mediaItem = viewModel.buildMediaItem(
-                pair.second[qualityStartIndex].second,
-                pair.second[qualityStartIndex].second,
+                video = pair.second[qualityStartIndex].second,
+                cacheKey = pair.second[qualityStartIndex].second
             )
+
             mediaItem
         },
         startIndex = startIndex
