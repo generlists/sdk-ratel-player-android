@@ -576,17 +576,21 @@ private fun start(
     playList: List<Pair<String, List<Pair<Quality, String>>>>
 ) {
     viewModel.mediaStreamPlayer.start(
-        items = playList.filter {
-            it.second.isNotEmpty()
-        }.map { pair ->
-
-            val mediaItem = viewModel.buildMediaItem(
-                video = pair.second[qualityStartIndex].second,
-                cacheKey = pair.second[qualityStartIndex].second
-            )
-
-            mediaItem
-        },
+        items = playList.map { viewModel.buildMediaItem(
+                video = it.second[qualityStartIndex].second,
+                cacheKey = it.second[qualityStartIndex].second
+            ) },
+//            playList.filter {
+//            it.second.isNotEmpty()
+//        }.map { pair ->
+//
+//            val mediaItem = viewModel.buildMediaItem(
+//                video = pair.second[qualityStartIndex].second,
+//                cacheKey = pair.second[qualityStartIndex].second
+//            )
+//
+//            mediaItem
+//        },
         startIndex = startIndex
     )
 }
