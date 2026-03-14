@@ -457,8 +457,8 @@ class PlayerViewModel @Inject constructor(
     }
 
 
-    fun setMediaList(media:List<Pair<String, List<Pair<Quality, String>>>>){
-        _mediaList.value = media
+    fun setMediaList(media: List<Pair<String, List<Pair<Quality, String>>>>) {
+        _mediaList.value = media.filter { it.second.isNotEmpty() }
     }
 
     fun reorderMediaList(
