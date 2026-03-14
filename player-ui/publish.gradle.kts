@@ -3,7 +3,7 @@ extensions.configure<PublishingExtension>("publishing") {
         create<MavenPublication>("release") {
             groupId = "ai.shortform-play.sdk.ratel.player.android"
             artifactId = "player-ui"
-            version = "0.0.0.1.2"
+            version = project.version.toString()
 
             afterEvaluate {
                 from(components["release"])
