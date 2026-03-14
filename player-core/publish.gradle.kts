@@ -4,7 +4,7 @@ extensions.configure<PublishingExtension>("publishing") {
         create<MavenPublication>("release") {
             groupId = "ai.shortform-play.sdk.ratel.player.android"
             artifactId = "player-core"
-            version = "0.0.0.3.5"
+            version = project.version.toString()//"0.0.0.3.5"
 
             afterEvaluate {
                 from(components["release"])
@@ -12,6 +12,8 @@ extensions.configure<PublishingExtension>("publishing") {
 
         }
     }
+
+
     val localProperties = java.util.Properties()
     val localFile = rootProject.file("local.properties")
 

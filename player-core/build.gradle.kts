@@ -14,17 +14,9 @@ plugins {
 }
 
 
-var versionPropsFile = file("version.properties")
-val versionProps: Properties = Properties()
-
-if (versionPropsFile.canRead()) {
-    versionProps.load(FileInputStream(versionPropsFile))
-}
-
-
 android {
     namespace = "com.sean.ratel.player.core"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
@@ -32,8 +24,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "VERSION_NAME", "\"" + versionProps["VERSION_NAME"] + "\"")
-        buildConfigField("String", "LIB_NAME", "\"" + versionProps["LIB_NAME"] + "\"")
     }
 
     buildTypes {
