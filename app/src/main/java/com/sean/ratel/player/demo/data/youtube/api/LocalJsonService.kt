@@ -8,14 +8,16 @@ import com.sean.ratel.player.demo.data.youtube.domain.YouTubeModelList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class LocalJsonService(private val context: Context) {
-
+class LocalJsonService(
+    private val context: Context,
+) {
     suspend fun fetchContentFromJson(rawId: Int): Flow<YouTubeModel> =
         flow {
-            val jsonString = context.resources.openRawResource(rawId)
-                .bufferedReader()
-                .use { it.readText() }
-
+            val jsonString =
+                context.resources
+                    .openRawResource(rawId)
+                    .bufferedReader()
+                    .use { it.readText() }
 
             val type = object : TypeToken<YouTubeModel>() {}.type
 
@@ -25,10 +27,11 @@ class LocalJsonService(private val context: Context) {
 
     suspend fun fetchContentListFromJson(rawId: Int): Flow<YouTubeModelList> =
         flow {
-            val jsonString = context.resources.openRawResource(rawId)
-                .bufferedReader()
-                .use { it.readText() }
-
+            val jsonString =
+                context.resources
+                    .openRawResource(rawId)
+                    .bufferedReader()
+                    .use { it.readText() }
 
             val type = object : TypeToken<YouTubeModelList>() {}.type
 

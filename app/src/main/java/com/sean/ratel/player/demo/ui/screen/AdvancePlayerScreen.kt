@@ -19,35 +19,43 @@ import com.sean.ratel.player.demo.R
 import com.sean.ratel.player.demo.ui.navigation.Destination
 import com.sean.ratel.player.demo.ui.view.AdvancePlayerFragment
 
-
 @Composable
-fun AdvancePlayer(mainViewModel: MainViewModel, videoIdList: List<String>?) {
+@Suppress("ktlint:standard:function-naming")
+fun AdvancePlayer(
+    mainViewModel: MainViewModel,
+    videoIdList: List<String>?,
+) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black)
-    )
-    {
+            .background(Color.Black),
+    ) {
         AdvancePlayerHost(mainViewModel, videoIdList)
     }
 }
 
 @Composable
-fun AdvancePlayerHost(mainViewModel: MainViewModel, videoIdList: List<String>?) {
+@Suppress("ktlint:standard:function-naming")
+fun AdvancePlayerHost(
+    mainViewModel: MainViewModel,
+    videoIdList: List<String>?,
+) {
     val context = LocalContext.current
     val activity = context as FragmentActivity
     val fragmentManager = activity.supportFragmentManager
     val tag = "advance_player_fragment"
 
-    val containerView = remember {
-        FragmentContainerView(context).apply {
-            id = R.id.fragmen_advance_container
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+    val containerView =
+        remember {
+            FragmentContainerView(context).apply {
+                id = R.id.fragmen_advance_container
+                layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+            }
         }
-    }
 
     AndroidView(factory = { containerView })
 
@@ -55,7 +63,8 @@ fun AdvancePlayerHost(mainViewModel: MainViewModel, videoIdList: List<String>?) 
         val existingFragment = fragmentManager.findFragmentByTag(tag)
         if (existingFragment == null) {
             val fragment = AdvancePlayerFragment.newInstance(videoIdList)
-            fragmentManager.beginTransaction()
+            fragmentManager
+                .beginTransaction()
                 .add(containerView.id, fragment, tag)
                 .commitNowAllowingStateLoss()
         }
@@ -65,7 +74,8 @@ fun AdvancePlayerHost(mainViewModel: MainViewModel, videoIdList: List<String>?) 
         val fm = activity.supportFragmentManager
         val fragment = fm.findFragmentByTag("advance_player_fragment")
         if (fragment != null) {
-            fm.beginTransaction()
+            fm
+                .beginTransaction()
                 .remove(fragment)
                 .commitNowAllowingStateLoss()
         }

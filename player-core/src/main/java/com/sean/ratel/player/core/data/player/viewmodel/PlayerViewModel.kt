@@ -16,21 +16,23 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil
 import com.sean.ratel.player.core.data.domain.InfoManager
 import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.InfoType
+import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaySpeed
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
 import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.core.data.domain.model.RepeatMode
-import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import so.smartlab.common.utils.log.RLog
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -86,8 +88,9 @@ class PlayerViewModel @Inject constructor(
     private var _audioOnly = MutableStateFlow<Boolean>(false)
      val audioOnly = _audioOnly
 
-    private val _videoQualityChanged = MutableStateFlow<Pair<Quality,String>>(Pair(Quality.SD,""))
-    val videoQualityChanged: StateFlow<Pair<Quality,String>> = _videoQualityChanged
+    private val _videoQualityChanged = MutableStateFlow<Pair<Quality,PlayMediaItem>>(Pair(Quality.SD,
+        PlayMediaItem("","","")))
+    val videoQualityChanged: StateFlow<Pair<Quality,PlayMediaItem>> = _videoQualityChanged
 
     private val toggleModeSequence: List<RepeatMode> =
         listOf(RepeatMode.REPEAT_OFF, RepeatMode.REPEAT_ONE, RepeatMode.REPEAT_ALL)
@@ -105,11 +108,11 @@ class PlayerViewModel @Inject constructor(
 
 
 
-    private val _qualityList = MutableStateFlow<List<Pair<Quality,String>>>(listOf())
-    val qualityList: StateFlow<List<Pair<Quality,String>>> = _qualityList
+    private val _qualityList = MutableStateFlow<List<Pair<Quality, PlayMediaItem>>>(listOf())
+    val qualityList: StateFlow<List<Pair<Quality,PlayMediaItem>>> = _qualityList
 
-    private val _mediaList = MutableStateFlow<List<Pair<String, List<Pair<Quality, String>>>>>(listOf())
-    val mediaList: StateFlow<List<Pair<String, List<Pair<Quality, String>>>>> = _mediaList
+    private val _mediaList = MutableStateFlow<List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>>(listOf())
+    val mediaList: StateFlow<List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>> = _mediaList
 
 
 
@@ -262,11 +265,11 @@ class PlayerViewModel @Inject constructor(
 
     }
 
-    fun setVideoQualityChanged(qualityChanged: Boolean, videoQuality: Pair<Quality, String>) {
+    fun setVideoQualityChanged(qualityChanged: Boolean, videoQuality: Pair<Quality, PlayMediaItem>) {
         _videoQualityChanged.value = videoQuality
         _optionQualityChanged.value = qualityChanged
     }
-    fun setVideoQuality(videoQuality: Pair<Quality, String>) {
+    fun setVideoQuality(videoQuality: Pair<Quality, PlayMediaItem>) {
         _videoQualityChanged.value = videoQuality
     }
 
@@ -278,7 +281,7 @@ class PlayerViewModel @Inject constructor(
         mediaStreamPlayer.setVolume(volume)
     }
 
-    fun setQuality(quality:List<Pair<Quality,String>>){
+    fun setQuality(quality:List<Pair<Quality, PlayMediaItem>>){
         _qualityList.value = quality
 
     }
@@ -417,26 +420,45 @@ class PlayerViewModel @Inject constructor(
             .setCustomCacheKey(cacheKey)
             .build()
 
+    @OptIn(UnstableApi::class)
     fun buildMediaItem(
-        video: String,
-        cacheKey: String
+        playMediaItem: Pair<Quality, PlayMediaItem>,
+        isConnectError:Boolean = false
     ): MediaItem {
-        RLog.d("AdView","video : $video ,  cacheKey : $cacheKey")
+        RLog.d(
+            "PlayerView",
+            "videoUrl : ${playMediaItem.second.mediaKey} ,  cacheKey : ${playMediaItem.second.mediaUrl}"
+        )
+        val playItem = playMediaItem.second
 
-        when {
-            video.toUri().scheme == ContentResolver.SCHEME_CONTENT ->
-            return MediaItem.fromUri( video.toUri())
+            val uri = if(!isConnectError)playItem.mediaUrl.toUri() else playItem.filePath.toUri()
 
-            video.toUri().scheme == ContentResolver.SCHEME_FILE ->
+            when (uri.scheme) {
+                ContentResolver.SCHEME_CONTENT ->
+                    return MediaItem.fromUri(uri)
 
-            return MediaItem.fromUri( video.toUri())
+                ContentResolver.SCHEME_FILE ->
+                    return MediaItem.fromUri(uri)
 
-            else ->
-                return mediaItem(video,cacheKey)
+                else -> {
+                    when {
+                        playItem.mediaUrl.contains(".m3u8", ignoreCase = true) -> {
+                            return MediaItem.Builder()
+                                .setUri(uri)
+                                .setCustomCacheKey(playItem.mediaKey)
+                                .setMimeType(MimeTypes.APPLICATION_M3U8)
+                                .build()
+                        }
 
-        }
-
-
+                        else -> {
+                            return MediaItem.Builder()
+                                .setUri(uri)
+                                .setCustomCacheKey(playItem.mediaKey)
+                                .build()
+                        }
+                    }
+                }
+            }
     }
 
     fun changeItemUrl(index:Int,newUrl: String) {
@@ -457,14 +479,14 @@ class PlayerViewModel @Inject constructor(
     }
 
 
-    fun setMediaList(media: List<Pair<String, List<Pair<Quality, String>>>>) {
+    fun setMediaList(media: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>) {
         _mediaList.value = media.filter { it.second.isNotEmpty() }
     }
 
     fun reorderMediaList(
-        list: List<Pair<String, List<Pair<Quality, String>>>>,
+        list: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>,
         saveId: String
-    ): List<Pair<String, List<Pair<Quality, String>>>> {
+    ): List<Pair<String, List<Pair<Quality, PlayMediaItem>>>> {
 
             val savedIndex  = list.indexOfFirst { it.first ==saveId }
 

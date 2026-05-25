@@ -1,6 +1,7 @@
 package com.sean.ratel.player.demo.ui.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +22,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class BasicPlayerFragment : Fragment() {
-
-    private  val ARG_PARAM1 = "param1"
+    private val argsParm1 = "param1"
     private var param1: String? = null
     private var _binding: FragmentBasicPlayerBinding? = null
     private val binding get() = _binding!!
@@ -42,17 +42,18 @@ class BasicPlayerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-
+            param1 = it.getString(argsParm1)
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View? {
-       val  videoId = arguments?.getString(ARG_PARAM1) ?: ""
+        val videoId = arguments?.getString(argsParm1) ?: ""
         _binding = FragmentBasicPlayerBinding.inflate(inflater, container, false)
+        Log.d("hbungshin","videoId : $videoId")
 
         youTubePlayerView =
             YouTubePlayerView(requireActivity()).apply {
@@ -79,21 +80,19 @@ class BasicPlayerFragment : Fragment() {
 
         lifecycle.addObserver(youTubePlayerView)
 
-        youTubeStreamPlayer.initPlayer(networkHandle = false,videoId =videoId)
-
+        youTubeStreamPlayer.initPlayer(networkHandle = false, videoId = videoId)
 
         return binding.root
-
     }
 
     companion object {
-
         @JvmStatic
         fun newInstance(videoId: String) =
             BasicPlayerFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, videoId)
-                }
+                arguments =
+                    Bundle().apply {
+                        putString(argsParm1, videoId)
+                    }
             }
     }
 }

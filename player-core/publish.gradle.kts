@@ -4,15 +4,13 @@ extensions.configure<PublishingExtension>("publishing") {
         create<MavenPublication>("release") {
             groupId = "ai.shortform-play.sdk.ratel.player.android"
             artifactId = "player-core"
-            version = project.version.toString()//"0.0.0.3.5"
+            version = project.version.toString() // "0.0.0.3.5"
 
             afterEvaluate {
                 from(components["release"])
             }
-
         }
     }
-
 
     val localProperties = java.util.Properties()
     val localFile = rootProject.file("local.properties")
@@ -21,7 +19,6 @@ extensions.configure<PublishingExtension>("publishing") {
         localFile.inputStream().use { localProperties.load(it) }
     }
 
-
     repositories {
         maven {
             name = "AndroidPlayerSDKPackage"
@@ -29,7 +26,7 @@ extensions.configure<PublishingExtension>("publishing") {
 
             credentials {
                 username = localProperties.getProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = localProperties.getProperty("gpr.key")  ?: System.getenv("GPR_TOKEN")
+                password = localProperties.getProperty("gpr.key") ?: System.getenv("GPR_TOKEN")
             }
         }
     }

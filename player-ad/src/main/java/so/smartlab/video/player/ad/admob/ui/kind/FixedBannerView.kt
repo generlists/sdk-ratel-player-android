@@ -26,7 +26,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-import com.sean.ratel.player.utils.log.RLog
 import so.smartlab.video.player.ad.C.PROGRESS_LOADING_HEIGHT
 import so.smartlab.video.player.ad.admob.data.AppOpenAdManager.Companion.AD_LOG_TAG
 import so.smartlab.video.player.ad.admob.data.model.AdMobBannerState

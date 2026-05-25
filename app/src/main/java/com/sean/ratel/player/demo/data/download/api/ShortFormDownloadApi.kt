@@ -8,26 +8,21 @@ import retrofit2.http.Header
 import retrofit2.http.Query
 
 interface ShortFormDownloadApi {
-
     @GET("/video_scrap_pro/facebook_reels_download")
     suspend fun requestFaceBookReelsDownloadUrl(
         @Query("url") url: String,
         @Header("Cookie") cookies: String,
         @Header("User-Agent") userAgent: String,
-        @Header("Accept") accept: String
+        @Header("Accept") accept: String,
     ): FacebookDownloadResponse
-
 
     @GET("/instagram_reels_download")
     suspend fun requestInstagramReelsDownloadUrl(
         @Query("url") url: String,
     ): InstagramVideoResponse?
 
-
     @GET("/tiktok_video_download")
     suspend fun requestTikTokVideoDownloadUrl(
         @Query("url") url: String,
     ): TikTokVideoResponse?
-
-
 }

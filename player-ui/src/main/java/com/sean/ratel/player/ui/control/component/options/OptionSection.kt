@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.sean.ratel.player.core.data.domain.model.ContentScale
+import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaySpeed
 import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.ui.R
@@ -41,11 +42,11 @@ internal fun OptionSection(
     isSystemVolumeMute: StateFlow<Boolean>,
     items: List<OptionItem>,
     speeds: List<PlaySpeed> = listOf(),
-    qualityList: List<Pair<Quality, String>> = listOf(),
+    qualityList: List<Pair<Quality, PlayMediaItem>> = listOf(),
     scaleOptions: Array<ContentScale>? = null,
     openLayer: Map<MediaOptionKey, Boolean> = mapOf(),
     onChangeLayer: (Boolean) -> Unit = {},
-    onSelect: (Pair<Quality, String>?, PlaySpeed?, ContentScale?) -> Unit = { q, p, c -> },
+    onSelect: (Pair<Quality, PlayMediaItem>?, PlaySpeed?, ContentScale?) -> Unit = { q, p, c -> },
     brightSoundDelta: (Float?, Float?) -> Unit = { s, v -> }
 ) {
 

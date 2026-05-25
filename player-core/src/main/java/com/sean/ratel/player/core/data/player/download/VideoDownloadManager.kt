@@ -13,9 +13,9 @@ import com.sean.ratel.player.core.data.domain.model.DownloadInfo
 import com.sean.ratel.player.core.data.domain.model.DownloadedInfo
 import com.sean.ratel.player.core.data.domain.model.HttpHeaders
 import com.sean.ratel.player.core.data.domain.model.Quality
-import com.sean.ratel.player.utils.log.RLog
-import com.sean.ratel.player.utils.log.Utils
+import com.sean.ratel.player.utils.PlayerUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
+import so.smartlab.common.utils.log.RLog
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,6 +46,7 @@ class VideoDownloadManager @Inject constructor(
             .setCustomCacheKey(downloadId + "_" + downloadQuality.name)
             .setData(requestExtra)
             .build()
+
         setMetaData(downloadId, headers, cookies)
 
         addDownload(request)
@@ -59,9 +60,11 @@ class VideoDownloadManager @Inject constructor(
 
         RLog.d("Downloader", "custom key : ${downloadId}")
 
-        downloadTracker.mp4ConvertMp4(
+        //파일로 떨구기
+        downloadTracker.fileTransfer(
             mapOf(
                 downloadId to (DownloadAppParam(
+                    downloadUrl = downLoadUrl,
                     brandName = brandName,
                     quality = downloadQuality,
                     isConvertMp4 = convertMp4,
@@ -167,7 +170,7 @@ class VideoDownloadManager @Inject constructor(
 
     private fun setMetaData(url: String, headers: HttpHeaders? = null, cookies: String? = null) {
         if (cookies != null) {
-            val chainToken = Utils.extractTtChainToken(cookies)
+            val chainToken = PlayerUtils.extractTtChainToken(cookies)
 
             headers?.apply {
                 val header = mapOf<String, String?>(

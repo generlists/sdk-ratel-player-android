@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.offline.Download
 data class DownloadInfo
     (
     val id: String,
+    val downloadUrl:String,
     val message:String,
     val brandName: String,
     val mimeType: String?,
@@ -69,13 +70,14 @@ enum class DownloadState(val state: Int) {
 }
 
 @OptIn(UnstableApi::class)
-fun Download.toInfo(brandName: String, downloadQuality: Quality, message: String): DownloadInfo {
+fun Download.toInfo(downloadUrl:String,brandName: String, downloadQuality: Quality, message: String): DownloadInfo {
     val progress =
         if (contentLength > 0) ((bytesDownloaded * 100) / contentLength).toInt()
         else 0
 
     return DownloadInfo(
         id = request.id,
+        downloadUrl = downloadUrl,
         mimeType = request.mimeType,
         quality = downloadQuality,
         state = when (state) {
@@ -99,6 +101,7 @@ fun Download.toInfo(brandName: String, downloadQuality: Quality, message: String
 }
 
 data class DownloadAppParam(
+    val downloadUrl:String,
     val brandName:String,
     val quality: Quality,
     val isConvertMp4: Boolean,

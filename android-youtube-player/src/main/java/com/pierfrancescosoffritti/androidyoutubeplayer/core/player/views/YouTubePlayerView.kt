@@ -2,6 +2,7 @@ package com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -103,6 +104,7 @@ class YouTubePlayerView(
 
   // TODO: Use @JvmOverloads instead of duplicating the method. Unfortunately that will cause a breaking change.
   fun initialize(youTubePlayerListener: YouTubePlayerListener, handleNetworkEvents: Boolean, playerOptions: IFramePlayerOptions, videoId: String?) {
+    Log.d("hbungshin","enableAutomaticInitialization : $enableAutomaticInitialization")
     if (enableAutomaticInitialization) {
       throw IllegalStateException(AUTO_INIT_ERROR)
     }

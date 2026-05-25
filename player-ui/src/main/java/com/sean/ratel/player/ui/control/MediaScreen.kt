@@ -48,6 +48,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.sean.ratel.player.core.data.domain.model.InfoType
 import com.sean.ratel.player.core.data.domain.model.MediaStreamTransitionReason
+import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaybackState
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
 import com.sean.ratel.player.core.data.domain.model.Quality
@@ -59,11 +60,11 @@ import com.sean.ratel.player.ui.control.component.PlayerErrorDialog
 import com.sean.ratel.player.ui.control.component.options.MediaOptionKey
 import com.sean.ratel.player.ui.control.component.options.MediaOptionValue
 import com.sean.ratel.player.ui.control.component.options.PrevViewInfoDialog
-import com.sean.ratel.player.utils.log.RLog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import so.smartlab.common.utils.log.RLog
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -71,7 +72,7 @@ fun MediaScreen(
     modifier: Modifier = Modifier,
     themeMode: ThemeMode,
     mediaOptions: StateFlow<MediaOptions>,
-    mediaList: List<Pair<String, List<Pair<Quality, String>>>>,
+    mediaList: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>,
     startIndex: Int,
     listStartIndex: Int = 0,
     qualityStartIndex: Int,
@@ -124,6 +125,7 @@ fun MediaScreen(
             viewModel = viewModel,
             qualityStartIndex = qualityStartIndex,
             startIndex = startIndex,
+            connectFailError = false,
             playList = playList.value
         )
 
@@ -142,18 +144,18 @@ fun MediaScreen(
     LaunchedEffect(viewModel.currentItemIndex) {
 
         val currentIndex = viewModel.mediaStreamPlayer.currentIndex
-        val videoQuality = viewModel.videoQualityChanged
+        val mediaItem = viewModel.videoQualityChanged
         val optionQualityChanged = viewModel.optionQualityChanged
         val qualityList = viewModel.qualityList
 
-        combine(currentIndex, videoQuality) { currentIndex, videoQuality ->
+        combine(currentIndex, mediaItem) { currentIndex, mediaItem ->
 
             viewModel.setCurrentIndex(currentIndex)
 
-            if (!videoQuality.second.isEmpty() && optionQualityChanged.value) {
+            if (optionQualityChanged.value) {
                 (viewModel.mediaStreamPlayer.replaceMediaItem(
                     currentIndex,
-                    viewModel.buildMediaItem(videoQuality.second, videoQuality.second)
+                    viewModel.buildMediaItem(mediaItem, isConnectError = false)
                 ))
                 viewModel.audioOnly(false)
             }
@@ -166,13 +168,13 @@ fun MediaScreen(
                 )
             }
 
-            Triple(currentIndex, videoQuality, qualityList)
+            Triple(currentIndex, mediaItem, qualityList)
         }.collect {
 
             RLog.d("MediaScreen", "현재 퀄리티   : ${it.second}")
             RLog.d(
                 "MediaScreen",
-                "현재 퀄리티  : ${it.second.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}"
+                "현재 퀄리티  : ${it.second?.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}"
             )
             RLog.d(
                 "MediaScreen",
@@ -200,13 +202,17 @@ fun MediaScreen(
     }
 
     //View
-    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
+    Box(modifier = modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
         // PlayerView를 Compose에 삽입
         //BG->FG
         key(forceUpdate) {
 
             AndroidView(
-                modifier = Modifier.fillMaxSize().background(Color.Black),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
                 factory = { _ ->
                     val view = playerView.value
                     view.setBackgroundColor(android.graphics.Color.BLACK)
@@ -455,7 +461,9 @@ fun MediaScreen(
             Log.e("MediaScreen", "state : ${state}")
             when (state) {
                 is PlaybackState.Error -> {
+                    //재생 url 만료
                     errorState = Pair(true, getErrorMessage(context, state.errorCode))
+
                 }
 
                 else -> Unit
@@ -473,7 +481,19 @@ fun MediaScreen(
             message = errorState.second.second ?: stringResource(R.string.player_unkwnown_error),
             onConfirm = {
                 errorState = Pair(false, Pair(200, null))
-                viewModel.setReset(reset = true)
+                if(errorState.second.first == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS){
+                    start(
+                        viewModel = viewModel,
+                        qualityStartIndex = qualityStartIndex,
+                        startIndex = 0,
+                        connectFailError = true,
+                        playList = mediaList
+                    )
+
+                }else{
+                    viewModel.setReset(reset = true)
+                }
+
             },
             onDismiss = {
                 errorState = Pair(false, Pair(200, null))
@@ -555,6 +575,7 @@ private fun play(
         viewModel = viewModel,
         qualityStartIndex = qualityStartIndex,
         startIndex = 0,
+        connectFailError = false,
         playList = mediaList
     )
     viewModel.seekTo(0, viewModel.saveTimeMs.value)
@@ -573,24 +594,16 @@ private fun start(
     viewModel: PlayerViewModel,
     qualityStartIndex: Int,
     startIndex: Int,
-    playList: List<Pair<String, List<Pair<Quality, String>>>>
+    connectFailError:Boolean,
+    playList: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>
 ) {
     viewModel.mediaStreamPlayer.start(
-        items = playList.map { viewModel.buildMediaItem(
-                video = it.second[qualityStartIndex].second,
-                cacheKey = it.second[qualityStartIndex].second
-            ) },
-//            playList.filter {
-//            it.second.isNotEmpty()
-//        }.map { pair ->
-//
-//            val mediaItem = viewModel.buildMediaItem(
-//                video = pair.second[qualityStartIndex].second,
-//                cacheKey = pair.second[qualityStartIndex].second
-//            )
-//
-//            mediaItem
-//        },
+        items = playList.map {
+            viewModel.buildMediaItem(
+                playMediaItem = it.second[qualityStartIndex],
+                isConnectError = connectFailError
+            )
+        },
         startIndex = startIndex
     )
 }

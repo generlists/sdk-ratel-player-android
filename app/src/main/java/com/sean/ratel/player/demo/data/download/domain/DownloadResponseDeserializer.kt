@@ -7,18 +7,27 @@ import com.sean.ratel.player.demo.data.download.FacebookDownloadInfo
 import com.sean.ratel.player.demo.data.download.TikTokDownloadInfo
 import java.lang.reflect.Type
 
-class DownloadResponseDeserializer(val bland: DownloadBland) : JsonDeserializer<DownloadResponse> {
+class DownloadResponseDeserializer(
+    val bland: DownloadBland,
+) : JsonDeserializer<DownloadResponse> {
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type,
-        context: JsonDeserializationContext
+        context: JsonDeserializationContext,
     ): DownloadResponse {
-
         val jsonObject = json.asJsonObject
 
         return when (bland) {
-            DownloadBland.FACEBOOK -> context.deserialize(jsonObject, FacebookDownloadInfo::class.java)
-            DownloadBland.TIKTOK -> context.deserialize(jsonObject, TikTokDownloadInfo::class.java)
+            DownloadBland.FACEBOOK -> {
+                context.deserialize(
+                    jsonObject,
+                    FacebookDownloadInfo::class.java,
+                )
+            }
+
+            DownloadBland.TIKTOK -> {
+                context.deserialize(jsonObject, TikTokDownloadInfo::class.java)
+            }
         }
     }
 }

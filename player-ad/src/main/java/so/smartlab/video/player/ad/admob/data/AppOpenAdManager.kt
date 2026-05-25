@@ -9,7 +9,6 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
-import com.sean.ratel.player.utils.log.RLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import so.smartlab.video.player.ad.BuildConfig
 import so.smartlab.video.player.ad.admob.data.model.AdMobAppOpenAdState

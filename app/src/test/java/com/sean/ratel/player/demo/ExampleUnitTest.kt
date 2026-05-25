@@ -1,4 +1,4 @@
-package so.smartlab.shortform.test_hilt
+package com.sean.ratel.player.demo
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

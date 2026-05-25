@@ -1,4 +1,4 @@
-package com.sean.ratel.player.utils.log
+package com.sean.ratel.player.utils
 
 import android.app.Activity
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.ContextWrapper
 import java.util.Locale
 import kotlin.math.ceil
 
-object Utils {
+object PlayerUtils {
 
     fun extractTtChainToken(cookie: String): String? {
         val regex = Regex("""tt_chain_token="?([^";]+)"?""")
@@ -15,15 +15,6 @@ object Utils {
     }
 
 
-}
-
-fun Context.findActivity(): Activity? {
-    var ctx = this
-    while (ctx is ContextWrapper) {
-        if (ctx is Activity) return ctx
-        ctx = ctx.baseContext
-    }
-    return null
 }
 
 fun formatTimeFromFloat(floatTime: Float): String {

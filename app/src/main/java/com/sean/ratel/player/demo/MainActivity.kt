@@ -11,41 +11,23 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
-
     val mainViewModel by viewModels<MainViewModel>()
-    val openAd = false //앱시작 광고할때 true
+    val openAd = false // 앱시작 광고할때 true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            mainViewModel.initAdMobSDK(this)
 
             DemoPlayApp(
-
                 mainViewModel = mainViewModel,
-
-                requestBannerAdView = {
-                    mainViewModel.requestBannerAdView(this@MainActivity)
-                },
-                requestInLineBannerView = {
-                    mainViewModel.requestInLineBannerAdView(this@MainActivity)
-                },
-                requestNativeAd = {
-                    mainViewModel.requestNativeAd(this@MainActivity)
-                },
-                showAppOpenAd = {
-                    if(openAd)
-                        mainViewModel.showAppOpenAd(this@MainActivity)
-                },
-
-                finish = { finish() }
+                finish = { finish() },
             )
         }
-
     }
 }
 
 @Preview(showBackground = true)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun GreetingPreview() {
     DemoplayerTheme {

@@ -33,37 +33,56 @@ import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.home.DownloadTab
 
 @Composable
-fun DownLoadSample(mainViewModel: MainViewModel, viewModel: VideoDownloadViewModel, requestInLineBannerView:suspend () -> Unit){
-
+@Suppress("ktlint:standard:function-naming")
+fun DownLoadSample(
+    mainViewModel: MainViewModel,
+    viewModel: VideoDownloadViewModel,
+) {
     val selectedTab = remember { mutableStateOf<DownloadTab>(DownloadTab.FACEBOOK) }
 
     Column(Modifier.fillMaxWidth()) {
         Spacer(Modifier.height(10.dp))
-        DownloadTabBar(changeSelectedIndex ={
+        DownloadTabBar(changeSelectedIndex = {
             selectedTab.value = it
-
         })
         Spacer(Modifier.height(10.dp))
 
         when (selectedTab.value) {
-            DownloadTab.FACEBOOK -> DownloadFacebook(mainViewModel,viewModel,requestInLineBannerView)
-            DownloadTab.TIKTOK ->DownloadTikTok(viewModel)
+            DownloadTab.FACEBOOK -> {
+                DownloadFacebook(
+                    mainViewModel,
+                    viewModel
+                )
+            }
+
+            DownloadTab.TIKTOK -> {
+                DownloadTikTok(viewModel)
+            }
         }
 
         LaunchedEffect(selectedTab.value) {
             viewModel.loadSampleData()
             val downloadBland: DownloadBland =
-                if (selectedTab.value == DownloadTab.FACEBOOK) DownloadBland.FACEBOOK else if (selectedTab.value == DownloadTab.TIKTOK) DownloadBland.TIKTOK else DownloadBland.FACEBOOK
+                if (selectedTab.value ==
+                    DownloadTab.FACEBOOK
+                ) {
+                    DownloadBland.FACEBOOK
+                } else if (selectedTab.value ==
+                    DownloadTab.TIKTOK
+                ) {
+                    DownloadBland.TIKTOK
+                } else {
+                    DownloadBland.FACEBOOK
+                }
             viewModel.localDownloadList(downloadBland)
         }
-
     }
-
 }
-//북마크만 해놓고 나중에 다운로드
+
+// 북마크만 해놓고 나중에 다운로드
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun DownloadTabBar(changeSelectedIndex:(DownloadTab)->Unit) {
+fun DownloadTabBar(changeSelectedIndex: (DownloadTab) -> Unit) {
     val tabs = remember { DownloadTab.entries.toTypedArray().asList() }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -79,9 +98,8 @@ fun DownloadTabBar(changeSelectedIndex:(DownloadTab)->Unit) {
                 selected = selectedTabIndex == index,
                 onClick = {
                     selectedTabIndex = index
-                     changeSelectedIndex(if(selectedTabIndex ==0) DownloadTab.FACEBOOK else DownloadTab.TIKTOK)
-                          },
-
+                    changeSelectedIndex(if (selectedTabIndex == 0) DownloadTab.FACEBOOK else DownloadTab.TIKTOK)
+                },
             ) {
                 // 아이콘과 텍스트를 가로로 배치
                 Row(
@@ -91,7 +109,6 @@ fun DownloadTabBar(changeSelectedIndex:(DownloadTab)->Unit) {
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-
                     Text(
                         text = stringResource(item.title),
                         modifier = Modifier.padding(vertical = 4.dp),

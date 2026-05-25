@@ -6,17 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-
-
 import com.sean.ratel.player.demo.MainActivity
 import com.sean.ratel.player.demo.MainViewModel
 
-
 @Composable
-fun SplashScreen(activity: MainActivity, mainViewModel: MainViewModel){
-
-    Box(Modifier.fillMaxSize().background(Color.Green)){
-
+@Suppress("ktlint:standard:function-naming")
+fun SplashScreen(
+    activity: MainActivity,
+    mainViewModel: MainViewModel,
+) {
+    Box(Modifier.fillMaxSize().background(Color.Green)) {
     }
-
 }

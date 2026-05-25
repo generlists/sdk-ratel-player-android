@@ -1,6 +1,7 @@
 package com.sean.ratel.player.core.data.player.youtube
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.lifecycle.Lifecycle
@@ -69,6 +70,8 @@ class YouTubeStreamPlayerImpl(
 
 
     override fun initPlayer(networkHandle: Boolean?,videoId: String?) {
+        Log.d("hbungshin","videoId : $videoId")
+
         if (initialPlayer) return
 
         youtubeStreamPlayerAdapter.initialize(
@@ -79,6 +82,7 @@ class YouTubeStreamPlayerImpl(
         )
         this.initialPlayer = true
         this.videoId = videoId
+        Log.d("hbungshin","initialPlayer : $initialPlayer")
     }
 
     @SuppressLint("RestrictedApi")
@@ -160,6 +164,7 @@ class YouTubeStreamPlayerImpl(
         }
 
     override fun onReady(youTubePlayer: YouTubePlayer) {
+        Log.d("hbungshin","$videoId , youTubePlayer : $youTubePlayer $autoPlay")
         youTubeStreamPlayer = youTubePlayer
         youTubeStreamPlayer?.addListener(this)
 
@@ -172,6 +177,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         state: PlayerState,
     ) {
+        Log.d("hbungshin","state : $state")
         _playbackState.update { (getConvertPlayerStateToYouTubeStreamPlaybackState(state)) }
     }
 

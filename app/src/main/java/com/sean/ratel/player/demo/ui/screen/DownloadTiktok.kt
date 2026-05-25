@@ -1,5 +1,6 @@
 package com.sean.ratel.player.demo.ui.screen
 
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,26 +32,25 @@ import com.sean.ratel.player.demo.data.download.TikTokVideoResponse
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.navigation.Destination
-import com.sean.ratel.player.utils.log.RLog
 import dagger.hilt.android.UnstableApi
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @OptIn(UnstableApi::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun DownloadTikTok(viewModel: VideoDownloadViewModel) {
-
-    var buttonClick = remember {mutableStateOf<String>("테스트 영상")}
+    var buttonClick = remember { mutableStateOf<String>("테스트 영상") }
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .wrapContentSize()
+                .wrapContentSize(),
         ) {
             Box(
                 Modifier
                     .wrapContentSize()
-                    .weight(1.0f)
+                    .weight(1.0f),
             ) {
                 Button(onClick = {
                     buttonClick.value = "테스트 영상"
@@ -61,7 +61,7 @@ fun DownloadTikTok(viewModel: VideoDownloadViewModel) {
             Box(
                 Modifier
                     .wrapContentSize()
-                    .weight(1.0f)
+                    .weight(1.0f),
             ) {
                 Button(onClick = {
                     buttonClick.value = "다운로드한 목록"
@@ -71,20 +71,17 @@ fun DownloadTikTok(viewModel: VideoDownloadViewModel) {
             }
         }
 
-
-
         if (buttonClick.value == "테스트 영상") {
             TikTokDownload(viewModel)
         } else if (buttonClick.value == "다운로드한 목록") {
             DownloadListTiktok(viewModel)
         }
-
     }
-
 }
 
 @Composable
-fun TikTokDownload(viewModel: VideoDownloadViewModel){
+@Suppress("ktlint:standard:function-naming")
+fun TikTokDownload(viewModel: VideoDownloadViewModel) {
     val items = viewModel.downloadTiktokList.collectAsState()
     val statusText = viewModel.downloads.collectAsState()
 
@@ -93,16 +90,14 @@ fun TikTokDownload(viewModel: VideoDownloadViewModel){
         contentPadding = PaddingValues(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-
         items(
-            count = items.value.size
-
+            count = items.value.size,
         ) { text ->
             Column(
                 Modifier
                     .fillMaxSize()
                     .background(Color.White)
-                    .padding(start = 7.dp, end = 7.dp)
+                    .padding(start = 7.dp, end = 7.dp),
             ) {
                 val requestId = items.value[text].requestId
                 val url = items.value[text].url
@@ -111,29 +106,26 @@ fun TikTokDownload(viewModel: VideoDownloadViewModel){
                     Modifier
                         .fillMaxWidth()
                         .height(60.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         items.value[text].url,
                         Modifier.weight(0.7f),
                         fontSize = 12.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
 
                     Box(
                         Modifier
                             .fillMaxWidth()
                             .weight(0.3f)
-                            .height(60.dp), contentAlignment = Alignment.CenterEnd
+                            .height(60.dp),
+                        contentAlignment = Alignment.CenterEnd,
                     ) {
-
-
                         val status = items.value[text].downloadState ?: "Ready"
                         Button(onClick = {
                             viewModel.requestTikTokDownloadUrl(requestId, url)
-
-
                         }) {
                             Text(status, fontSize = 12.sp)
                         }
@@ -142,63 +134,70 @@ fun TikTokDownload(viewModel: VideoDownloadViewModel){
 
                 StateCheck(requestId, statusText.value, viewModel)
             }
-
         }
     }
 }
+
 @OptIn(UnstableApi::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun DownloadListTiktok(viewModel: VideoDownloadViewModel) {
+    val items =
+        viewModel.downloadedList
+            .collectAsState()
+            .value
+            .filter { it.downloadBrand == DownloadBland.TIKTOK }
 
-    val items = viewModel.downloadedList.collectAsState().value.filter { it.downloadBrand == DownloadBland.TIKTOK }
-
-    Box(Modifier
-        .fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize(),
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-
             items(
-                count = items.size
-
+                count = items.size,
             ) { text ->
                 Column(
                     Modifier
                         .fillMaxSize()
                         .background(Color.White)
-                        .padding(end = 7.dp) .clickable {
-                            RLog.d(
+                        .padding(end = 7.dp)
+                        .clickable {
+                            Log.d(
                                 "hbungshin",
-                                "downloadPath : ${  (items[text].downloadResponse as TikTokVideoResponse).info.video.sd?.url}"
+                                "downloadPath : ${(items[text].downloadResponse as TikTokVideoResponse).info.video.sd?.url}",
                             )
 
                             val requestIds =
-                                URLEncoder.encode( items.joinToString(",") {
-                                    it.requestId.takeIf { it.isNotBlank() } ?: ""
-                                },StandardCharsets.UTF_8.toString())
+                                URLEncoder.encode(
+                                    items.joinToString(",") {
+                                        it.requestId.takeIf { it.isNotBlank() } ?: ""
+                                    },
+                                    StandardCharsets.UTF_8.toString(),
+                                )
 
                             val startIndex = text
 
                             viewModel.navigator.navigateTo(
                                 Destination.EndPlayer.dynamicRoute(
                                     contentId = requestIds,
-                                    startIndex = startIndex
-                                )
+                                    startIndex = startIndex,
+                                ),
                             )
-
-                        }
+                        },
                 ) {
-                    val videoThumbnail=   items.get(text).downloadResponse.thumbnail
+                    val videoThumbnail = items.get(text).downloadResponse.thumbnail
 
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .height(60.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        videoThumbnail.let { url->
+                        videoThumbnail.let { url ->
                             AsyncImage(
                                 model = url,
                                 contentDescription = null,
@@ -210,13 +209,11 @@ fun DownloadListTiktok(viewModel: VideoDownloadViewModel) {
                             Modifier.weight(0.7f).padding(start = 5.dp),
                             fontSize = 12.sp,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
             }
-
         }
     }
-
 }

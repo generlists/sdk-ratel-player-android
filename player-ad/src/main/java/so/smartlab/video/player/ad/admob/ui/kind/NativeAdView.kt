@@ -33,7 +33,6 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.VideoController
 import com.google.android.gms.ads.nativead.NativeAd
-import com.sean.ratel.player.utils.log.RLog
 import so.smartlab.video.player.ad.R
 import so.smartlab.video.player.ad.admob.data.AppOpenAdManager.Companion.AD_LOG_TAG
 import so.smartlab.video.player.ad.admob.data.model.AdMobNativeAdState

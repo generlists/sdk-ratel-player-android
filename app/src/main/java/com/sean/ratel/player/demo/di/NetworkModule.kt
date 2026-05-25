@@ -1,7 +1,6 @@
 package com.sean.ratel.player.demo.di
 
 import com.google.gson.GsonBuilder
-
 import com.sean.ratel.player.demo.data.download.api.ShortFormDownloadApi
 import com.sean.ratel.player.demo.di.qualifier.DownloadApiBaseUrl
 import dagger.Module
@@ -17,28 +16,26 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     @Provides
     @Singleton
     fun provideShortFormDownloadApi(
         @DownloadApiBaseUrl baseUrl: String,
         okHttpClient: OkHttpClient,
-    ): ShortFormDownloadApi {
-        return createService(
+    ): ShortFormDownloadApi =
+        createService(
             baseUrl,
             okHttpClient,
             ShortFormDownloadApi::class.java,
         )
-    }
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =  OkHttpClient
-        .Builder()
-        .readTimeout(60L, TimeUnit.SECONDS)
-        .writeTimeout(60L, TimeUnit.SECONDS)
-        .build()
-
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .readTimeout(60L, TimeUnit.SECONDS)
+            .writeTimeout(60L, TimeUnit.SECONDS)
+            .build()
 
     fun <T> createService(
         @DownloadApiBaseUrl baseUrl: String,
@@ -53,10 +50,8 @@ object NetworkModule {
             .build()
             .create(service)
 
-
     @Provides
     @Singleton
     @DownloadApiBaseUrl
-    fun provideShortFormDownloadBaseUrl(): String = "http://10.64.120.59:8000"
-
+    fun provideShortFormDownloadBaseUrl(): String = "http://10.64.120.81:8000"
 }

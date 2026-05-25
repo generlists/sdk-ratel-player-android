@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BookMarkButton(onClick:()->Unit){
-
+@Suppress("ktlint:standard:function-naming")
+fun BookMarkButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {

@@ -34,7 +34,7 @@ fun EndTopBar(
     infoClick: () -> Unit,
     shareButtonClick: () -> Unit,
     optionClick: () -> Unit = {},
-    bookMarkClick: () -> Unit = {}
+    bookMarkClick: () -> Unit = {},
 ) {
     Box(
         modifier =
@@ -47,7 +47,6 @@ fun EndTopBar(
     ) {
         val density = LocalDensity.current
 
-
         Row(
             modifier =
                 Modifier
@@ -55,26 +54,25 @@ fun EndTopBar(
                     .padding(start = 10.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-
             BackButton(onClick = {
                 historyBack()
             })
 
             Text(
-
                 "가나다라마바사아자차카타파하아아아아아아아아아아아아아",
                 modifier =
                     Modifier
-                        .wrapContentSize().weight(0.8f)
+                        .wrapContentSize()
+                        .weight(0.8f)
                         .padding(start = 5.dp),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
 
-            Row(Modifier.wrapContentSize()){
+            Row(Modifier.wrapContentSize()) {
                 InfoButton(onClick = {
                     infoClick()
                 })
@@ -87,11 +85,7 @@ fun EndTopBar(
                 OptionButton(onClick = {
                     optionClick()
                 })
-
             }
-
         }
-
     }
-
 }

@@ -10,7 +10,8 @@ import kotlinx.parcelize.Parcelize
 data class FacebookDownloadResponse(
     var success: String,
     var code: Int,
-    var info : FacebookDownloadInfo):Parcelable
+    var info: FacebookDownloadInfo,
+) : Parcelable
 
 @Parcelize
 @Keep
@@ -25,24 +26,23 @@ data class FacebookDownloadInfo(
     override val uploaderId: String,
     override val uploadDate: String,
     override val viewCount: Long,
-
     val hasDrm: String?,
     val videoSD: VideoFormat?,
     val videoHD: VideoFormat?,
-    val audio: AudioFormat?
-
-): DownloadResponse,Parcelable
-
+    val audio: AudioFormat?,
+) : DownloadResponse,
+    Parcelable
 
 @Parcelize
 @Keep
 data class VideoFormat(
     val url: String,
-    val ext: String?
-): Parcelable
+    val ext: String?,
+) : Parcelable
+
 @Parcelize
 @Keep
 data class AudioFormat(
     val url: String,
-    val ext: String?
-): Parcelable
+    val ext: String?,
+) : Parcelable

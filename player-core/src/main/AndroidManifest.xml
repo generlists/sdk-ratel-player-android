@@ -9,12 +9,25 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application>
+        <meta-data
+            android:name="log_enable"
+            android:value="${IS_DEBUG}" />
+        <meta-data
+            android:name="log_enable_udp"
+            android:value="${IS_DEBUG_UDP}" />
+        <meta-data
+            android:name="log_enable_udp"
+            android:value="${IS_DEBUG_LINK_SOURCE}" />
         <service
             android:name="com.sean.ratel.player.core.data.player.download.VideoDownloadService"
             android:exported="false"
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:foregroundServiceType="dataSync"
             />
+        <provider
+            android:name="so.smartlab.common.utils.log.RLogInitializer"
+            android:authorities="${applicationId}.rlog-init"
+            android:exported="false" />
 
     </application>
 </manifest>

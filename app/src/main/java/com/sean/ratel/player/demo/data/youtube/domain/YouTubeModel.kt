@@ -4,12 +4,13 @@ import androidx.annotation.Keep
 
 @Keep
 data class YouTubeModel(
-    val exampleTitle:String,
+    val exampleTitle: String,
     val channelModel: ChannelModel,
-    val videoModel: VideoModel)
+    val videoModel: VideoModel,
+)
 
 @Keep
 data class YouTubeModelList(
-    val exampleTitle:String,
-    val videoList:List<YouTubeModel>
+    val exampleTitle: String,
+    val videoList: List<YouTubeModel>,
 )

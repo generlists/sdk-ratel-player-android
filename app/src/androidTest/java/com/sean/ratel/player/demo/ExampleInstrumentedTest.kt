@@ -1,4 +1,4 @@
-package so.smartlab.shortform.test_hilt
+package com.sean.ratel.player.demo
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("so.smartlab.shortform.test_hilt", appContext.packageName)
+        assertEquals("com.sean.ratel.player.demo", appContext.packageName)
     }
 }

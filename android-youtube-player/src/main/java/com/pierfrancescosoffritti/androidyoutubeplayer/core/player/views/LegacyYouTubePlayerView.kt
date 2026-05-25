@@ -2,6 +2,7 @@ package com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -96,6 +97,7 @@ internal class LegacyYouTubePlayerView(
     playerOptions: IFramePlayerOptions,
     videoId: String?
   ) {
+    Log.d("hbungshin","isYouTubePlayerReady : $isYouTubePlayerReady")
     if (isYouTubePlayerReady) {
       throw IllegalStateException("This YouTubePlayerView has already been initialized.")
     }
@@ -107,6 +109,7 @@ internal class LegacyYouTubePlayerView(
     initialize = {
       webViewYouTubePlayer.initialize({ it.addListener(youTubePlayerListener) }, playerOptions, videoId)
     }
+    Log.d("hbungshin","initialize : $initialize")
 
     if (!handleNetworkEvents) {
       initialize()

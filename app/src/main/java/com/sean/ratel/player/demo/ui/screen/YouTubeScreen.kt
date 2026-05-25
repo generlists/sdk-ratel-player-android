@@ -1,6 +1,5 @@
 package com.sean.ratel.player.demo.ui.screen
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,34 +40,36 @@ import com.sean.ratel.player.demo.R
 import com.sean.ratel.player.demo.ui.navigation.Destination
 import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 
-
 @Composable
+@Suppress("ktlint:standard:function-naming")
 fun YouTubeScreen(viewModel: MainViewModel) {
     val basicDataModel = viewModel.youtubeModel.collectAsState()
     val advanceDataModel = viewModel.youtubeModelList.collectAsState()
 
-
-
     Column(Modifier.fillMaxWidth()) {
-        TitleArea(basicDataModel.value?.exampleTitle?:"")
+        TitleArea(basicDataModel.value?.exampleTitle ?: "")
         Spacer(Modifier.height(10.dp))
-        Row(Modifier.fillMaxWidth().height(60.dp).background(Color.White), verticalAlignment = Alignment.CenterVertically){
+        Row(
+            Modifier.fillMaxWidth().height(60.dp).background(Color.White),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             BasicPlayerScreen(viewModel)
         }
         Spacer(Modifier.height(10.dp))
-        TitleArea(advanceDataModel.value?.exampleTitle?:"")
+        TitleArea(advanceDataModel.value?.exampleTitle ?: "")
         Spacer(Modifier.height(10.dp))
-        Row(Modifier.fillMaxWidth().height(60.dp).background(Color.White), verticalAlignment = Alignment.CenterVertically){
+        Row(
+            Modifier.fillMaxWidth().height(60.dp).background(Color.White),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AdvancePlayer(viewModel)
         }
     }
-
 }
 
 @Composable
-private fun TitleArea(
-    title: String,
-) {
+@Suppress("ktlint:standard:function-naming")
+private fun TitleArea(title: String) {
     var textWidth by remember { mutableStateOf(0f) }
     val context = LocalContext.current
 
@@ -76,11 +77,9 @@ private fun TitleArea(
         Modifier
             .fillMaxWidth()
             .background(Color.Black)
-            .height(30.dp)
-          ,
+            .height(30.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-
         Row(
             Modifier
                 .fillMaxWidth()
@@ -94,7 +93,7 @@ private fun TitleArea(
                 Column(Modifier.wrapContentSize()) {
                     Text(
                         text =
-                            title,
+                        title,
                         Modifier
                             .padding(start = 7.dp)
                             .wrapContentSize(),
@@ -123,23 +122,28 @@ private fun TitleArea(
 }
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 private fun BasicPlayerScreen(viewModel: MainViewModel) {
-    val youTubeModel  = viewModel.youtubeModel.collectAsState()
+    val youTubeModel = viewModel.youtubeModel.collectAsState()
 
-    Column(Modifier
-        .fillMaxSize()
-        .padding(start = 7.dp, end = 7.dp)) {
-        Row(Modifier
-            .fillMaxWidth()
-            .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 7.dp, end = 7.dp),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             youTubeModel.value?.let {
                 Text(
                     it.videoModel.title,
                     Modifier.weight(0.7f),
                     fontSize = 12.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -147,38 +151,47 @@ private fun BasicPlayerScreen(viewModel: MainViewModel) {
                 Modifier
                     .fillMaxWidth()
                     .weight(0.3f)
-                    .height(60.dp), contentAlignment = Alignment.CenterEnd
+                    .height(60.dp),
+                contentAlignment = Alignment.CenterEnd,
             ) {
-                val safeVideoId = youTubeModel.value?.videoModel?.videoId?.takeIf { it.isNotBlank() } ?: ""
+                val safeVideoId =
+                    youTubeModel.value
+                        ?.videoModel
+                        ?.videoId
+                        ?.takeIf { it.isNotBlank() } ?: ""
                 Button(onClick = {
                     viewModel.navigator.navigateTo(Destination.BasicPlayer.dynamicRoute(safeVideoId))
-
                 }) {
                     Text(stringResource(R.string.play))
                 }
             }
         }
-
     }
 }
-@Composable
-private fun AdvancePlayer(viewModel: MainViewModel) {
-    val youTubeAdvanceModel  = viewModel.youtubeModelList.collectAsState()
 
-    Column(Modifier
-        .fillMaxSize()
-        .padding(start = 7.dp, end = 7.dp)) {
-        Row(Modifier
-            .fillMaxWidth()
-            .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically) {
+@Composable
+@Suppress("ktlint:standard:function-naming")
+private fun AdvancePlayer(viewModel: MainViewModel) {
+    val youTubeAdvanceModel = viewModel.youtubeModelList.collectAsState()
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 7.dp, end = 7.dp),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             youTubeAdvanceModel.value?.videoList?.get(0)?.let {
                 Text(
                     it.videoModel.title,
                     Modifier.weight(0.7f),
                     fontSize = 12.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -186,23 +199,30 @@ private fun AdvancePlayer(viewModel: MainViewModel) {
                 Modifier
                     .fillMaxWidth()
                     .weight(0.3f)
-                    .height(60.dp), contentAlignment = Alignment.CenterEnd
+                    .height(60.dp),
+                contentAlignment = Alignment.CenterEnd,
             ) {
-
                 val safeVideoId =
-                    youTubeAdvanceModel.value?.videoList?.joinToString(",") { it.videoModel.videoId }?.takeIf{ it.isNotBlank() } ?: ""
+                    youTubeAdvanceModel.value
+                        ?.videoList
+                        ?.joinToString(",") { it.videoModel.videoId }
+                        ?.takeIf { it.isNotBlank() } ?: ""
                 Button(onClick = {
-                    viewModel.navigator.navigateTo(Destination.AdvancePlayer.dynamicRoute(safeVideoId))
-
+                    viewModel.navigator.navigateTo(
+                        Destination.AdvancePlayer.dynamicRoute(
+                            safeVideoId,
+                        ),
+                    )
                 }) {
                     Text(stringResource(R.string.play))
                 }
             }
         }
-
     }
 }
+
 @Preview(showBackground = true)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun PlayerViewPreview() {
     DemoplayerTheme {

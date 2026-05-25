@@ -2,7 +2,7 @@ package com.sean.ratel.player.core
 
 
 import android.content.Context
-import com.sean.ratel.player.utils.log.RLog
+import so.smartlab.common.utils.log.RLog
 
 
 /**

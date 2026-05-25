@@ -6,23 +6,14 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.hilt.android) apply false
-    alias(libs.plugins.devtools.ksp)  apply  false
+    alias(libs.plugins.devtools.ksp) apply false
+    alias(libs.plugins.ktlint)
 }
 
-
-val versionProps = Properties().apply {
-    load(rootProject.file("version.properties").inputStream())
-}
-
-//val baseVersion = versionProps["VERSION_NAME"].toString()
-//val snapshot = versionProps["SNAPSHOT"].toString().toBoolean()
-//
-//val finalVersion = if (snapshot) "$baseVersion-SNAPSHOT" else baseVersion
-//
-//allprojects {
-//    group = versionProps["GROUP"].toString()
-//    version = finalVersion
-//}
+val versionProps =
+    Properties().apply {
+        load(rootProject.file("version.properties").inputStream())
+    }
 
 val snapshot = versionProps["SNAPSHOT"].toString().toBoolean()
 val suffix = if (snapshot) "-SNAPSHOT" else ""
@@ -31,14 +22,15 @@ subprojects {
     group = versionProps["GROUP"].toString()
 
     // 모듈별로 다른 버전 할당
-    version = when (name) {
-        "player-core" -> "${versionProps["CORE_VERSION"]}$suffix"
-        "player-utils" -> "${versionProps["UTIL_VERSION"]}$suffix"
-        "player-ui" -> "${versionProps["UI_VERSION"]}$suffix"
-        "player-ad" -> "${versionProps["AD_VERSION"]}$suffix"
-        "android-youtube-player" -> "${versionProps["YOUTUBE_PLAYER_VERSION"] ?: "1.0.0"}$suffix"
-        else -> versionProps["VERSION_NAME"].toString() // 기본값
-    }
+    version =
+        when (name) {
+            "player-core" -> "${versionProps["CORE_VERSION"]}$suffix"
+            "player-utils" -> "${versionProps["UTIL_VERSION"]}$suffix"
+            "player-ui" -> "${versionProps["UI_VERSION"]}$suffix"
+            "player-ad" -> "${versionProps["AD_VERSION"]}$suffix"
+            "android-youtube-player" -> "${versionProps["YOUTUBE_PLAYER_VERSION"] ?: "1.0.0"}$suffix"
+            else -> versionProps["VERSION_NAME"].toString() // 기본값
+        }
 }
 
 tasks.register("publishAll") {
@@ -56,13 +48,14 @@ tasks.register("publishAll") {
         println(">>> [ERROR] version.properties 파일을 찾을 수 없습니다! 경로: ${vPropsFile.absolutePath}")
     }
     // 1. 배포할 모듈 폴더명과 properties의 접두어 매핑
-    val modules = mapOf(
-        ":android-youtube-player" to "YOUTUBE_PLAYER",
-        ":player-utils" to "UTIL",
-        ":player-core" to "CORE",
-        ":player-ui" to "UI",
-        ":player-ad" to "AD"
-    )
+    val modules =
+        mapOf(
+            ":android-youtube-player" to "YOUTUBE_PLAYER",
+            ":player-utils" to "UTIL",
+            ":player-core" to "CORE",
+            ":player-ui" to "UI",
+            ":player-ad" to "AD",
+        )
 
     // 2. UPDATED가 true인 모듈만 찾아서 배포 태스크를 dependsOn에 추가
     modules.forEach { (path, prefix) ->
@@ -70,18 +63,17 @@ tasks.register("publishAll") {
         println(">>> [DEBUG] 모듈: $path, 찾는 키: $prefix")
 
         val propName = "${prefix}_UPDATED"
+        val version = vProps.getProperty(prefix)
         val rawValue = vProps.getProperty(propName) // 여기서 직접 꺼냄
         val isUpdated = rawValue?.trim()?.toBoolean() ?: false
 
-        println(">>> [CHECK] Key: $propName | Value: $rawValue | Result: $isUpdated")
-
+        println(">>> [CHECK] Key: $propName | Value: $rawValue | Result: $isUpdated , version :$version")
 
         if (isUpdated) {
             // 이 구문이 태스크 등록 시점에 실행되도록 확실히 보장합니다.
             this.dependsOn("$path:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
         }
     }
-
 
     // 3. 순서 제어 로직 (그대로 유지)
     // 이 로직은 태스크가 '실행 목록'에 있을 때만 작동하므로,

@@ -1,6 +1,6 @@
 package com.sean.ratel.player.demo.data.download.domain
 
-interface   DownloadResponse{
+interface DownloadResponse {
     var id: String
     val title: String
     val duration: Double?
