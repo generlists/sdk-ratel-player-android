@@ -89,7 +89,7 @@
     <string name="player_unkwnown_error">알수 없는 에러</string>
     <string name="player_error_protocal">적절한 재생 프로토콜이 아니에요.</string>
     <string name="player_error_file_not_founded">재생 파일이 존재하지 않아요.</string>
-    <string name="player_error_connect_error">재생 접속 오류에요.</string>
+    <string name="player_error_connect_error">재생 중 접속 오류가 발생했어요.\n 휴대폰에 저장된 파일 경로로 다시 재생합니다.</string>
     <string name="player_error_unknown_error">알수 없는 에러에요.</string>
 
 

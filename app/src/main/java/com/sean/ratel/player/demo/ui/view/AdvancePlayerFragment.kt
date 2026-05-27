@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
@@ -59,29 +60,29 @@ import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerE
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
+import com.sean.ratel.player.core.util.launch
 import com.sean.ratel.player.core.util.repeatOnStart
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.R
 import com.sean.ratel.player.demo.databinding.FragmentAdvancePlayerBinding
 import com.sean.ratel.player.demo.di.qualifier.WithControl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import java.util.Locale
 import javax.inject.Inject
 
-
 @AndroidEntryPoint
 class AdvancePlayerFragment : Fragment() {
-
-    private val ARG_PARAM2 = "param2"
+    private val argParam2 = "param2"
     private var _binding: FragmentAdvancePlayerBinding? = null
     private val binding get() = _binding!!
-
 
     lateinit var youTubePlayerView: YouTubePlayerView
     private lateinit var youTubeStreamPlayer: YouTubeStreamPlayer
     private lateinit var youtubeStreamPlayerAdapter: YouTubeStreamPlayerAdapter
     private var currentIndex = 0
     private var isFullscreen = false
+    private var videoId: String? = null
 
     lateinit var mainViewModel: MainViewModel
 
@@ -93,6 +94,36 @@ class AdvancePlayerFragment : Fragment() {
     lateinit var youtubeStreamPlayerTracker: YouTubePlayerTracker
 
     init {
+        repeatOnStart {
+            youTubeStreamPlayer.playbackState.collect { state ->
+                when (state) {
+                    is YouTubeStreamPlaybackState.Prepared -> {
+
+                        videoId?.let {
+                            youTubeStreamPlayer.loadVideo(it, 0f)
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.UnStarted -> {
+                        // delay 로 시작 시간 확보
+                        launch {
+                            delay(500)
+                            youTubeStreamPlayer.start()
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.Buffering -> {}
+
+                    YouTubeStreamPlaybackState.Paused -> {}
+
+                    YouTubeStreamPlaybackState.Playing -> {}
+
+                    YouTubeStreamPlaybackState.Ended -> {}
+
+                    else -> {}
+                }
+            }
+        }
         repeatOnStart {
             youTubeStreamPlayer.videoSpeedChange.collect { rate ->
                 rate?.let {}
@@ -120,7 +151,6 @@ class AdvancePlayerFragment : Fragment() {
                     binding.playerController.visibility = View.VISIBLE
                     binding.fullScreenViewContainer.visibility = View.GONE
                     binding.fullScreenViewContainer.removeAllViews()
-
                 }
             }
         }
@@ -151,7 +181,6 @@ class AdvancePlayerFragment : Fragment() {
             youTubeStreamPlayer.currentTime.collect { currentTime ->
                 if (currentTime > 0f) {
                     mainViewModel.setPlayCurrentTime(currentTime)
-
                 }
             }
         }
@@ -167,14 +196,14 @@ class AdvancePlayerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View? {
-        val videoIdList = arguments?.getStringArrayList(ARG_PARAM2)
+        val videoIdList = arguments?.getStringArrayList(argParam2)
         _binding = FragmentAdvancePlayerBinding.inflate(inflater, container, false)
 
         youTubePlayerView =
@@ -184,7 +213,6 @@ class AdvancePlayerFragment : Fragment() {
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT,
                     )
-
             }
 
         _binding?.playContainer?.removeAllViews()
@@ -200,23 +228,35 @@ class AdvancePlayerFragment : Fragment() {
                 youtubeStreamPlayerAdapter = youtubeStreamPlayerAdapter,
                 iFramePlayerOptions = iFramePlayerOptions,
             )
-        val videoID = videoIdList?.get(currentIndex)
-        youTubeStreamPlayer.initPlayer(networkHandle = false, videoId = videoID)
+        videoId = videoIdList?.get(currentIndex)
+        youTubeStreamPlayer.initPlayer(networkHandle = false, videoId = videoId)
         youTubeStreamPlayer.addFullscreenListener()
-        youTubeStreamPlayer.setMute(mute = true) //디폴트 false
+        youTubeStreamPlayer.setMute(mute = true) // 디폴트 false
 
-        //toggle
+        // toggle
         _binding?.fullscreenBtn?.setOnClickListener {
-            youTubeStreamPlayer.toggleFullscreen()
+            if (isFullscreen) {
+                youTubePlayerView.wrapContent()
+                binding.playerController.visibility = View.VISIBLE
+                binding.fullScreenViewContainer.visibility = View.VISIBLE
+            } else {
+                youTubePlayerView.matchParent()
+                binding.playerController.visibility = View.GONE
+                binding.fullScreenViewContainer.visibility = View.GONE
+            }
+            setFullScreen(!isFullscreen)
+            isFullscreen = !isFullscreen
         }
 
         return binding.root
-
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
-        val videoIdList = arguments?.getStringArrayList(ARG_PARAM2)
+        val videoIdList = arguments?.getStringArrayList(argParam2)
         val composeView =
             binding.root.findViewById<ComposeView>(R.id.player_controller)
         composeView?.setContent {
@@ -226,28 +266,24 @@ class AdvancePlayerFragment : Fragment() {
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun PlayController(videoList: ArrayList<String>?) {
-
-
         Scaffold(
             topBar = {},
-
-            ) { innerPadding ->
+        ) { innerPadding ->
 
             Box(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
             ) {
-
                 Column(
                     Modifier
                         .wrapContentSize()
                         .align(Alignment.TopStart)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
-
-                    ) {
+                ) {
                     DebugState()
                     PervNextPlay(videoList)
                     SpeedPlay()
@@ -257,7 +293,13 @@ class AdvancePlayerFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        youTubeStreamPlayer.start()
+    }
+
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun DebugState() {
         val playstate = mainViewModel.playState.collectAsState()
         val currentTime = mainViewModel.currentTime.collectAsState()
@@ -266,13 +308,13 @@ class AdvancePlayerFragment : Fragment() {
         Column(
             Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
+                .wrapContentHeight(),
         ) {
             Box(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .background(Color.LightGray)
+                    .background(Color.LightGray),
             ) {
                 Text(
                     stringResource(R.string.play_state),
@@ -280,7 +322,7 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentSize()
                         .padding(start = 5.dp),
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Column(
@@ -288,7 +330,7 @@ class AdvancePlayerFragment : Fragment() {
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .background(Color.Black),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     playstate.value,
@@ -297,8 +339,7 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentHeight()
                         .padding(start = 5.dp, end = 5.dp, top = 5.dp),
                     color = Color.White,
-
-                    )
+                )
                 Text(
                     String.format("currentTime :  %s", formatSecondsToTime(currentTime.value)),
                     Modifier
@@ -306,8 +347,7 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentHeight()
                         .padding(start = 5.dp, end = 5.dp),
                     color = Color.White,
-
-                    )
+                )
                 Text(
                     String.format("duration :  %s", formatSecondsToTime(duration.value)),
                     Modifier
@@ -315,60 +355,59 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentHeight()
                         .padding(start = 5.dp, end = 5.dp, bottom = 5.dp),
                     color = Color.White,
-
-                    )
-
+                )
             }
-
         }
-
-
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun OnOffRadioButton(
         isOn: Boolean,
         onToggle: (Boolean) -> Unit,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
     ) {
         Row(
-            modifier = modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(if (isOn) MaterialTheme.colorScheme.primary else Color(0xFFB0BEC5))
-                .clickable { onToggle(!isOn) }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(if (isOn) MaterialTheme.colorScheme.primary else Color(0xFFB0BEC5))
+                    .clickable { onToggle(!isOn) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             RadioButton(
                 selected = isOn,
                 onClick = { onToggle(!isOn) },
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = Color.White,
-                    unselectedColor = Color.White
-                )
+                colors =
+                    RadioButtonDefaults.colors(
+                        selectedColor = Color.White,
+                        unselectedColor = Color.White,
+                    ),
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = if (isOn) "ON" else "OFF",
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun PervNextPlay(videoList: List<String>?) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(top = 5.dp)
+                .padding(top = 5.dp),
         ) {
             Box(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .background(Color.LightGray)
+                    .background(Color.LightGray),
             ) {
                 Text(
                     stringResource(R.string.video_move),
@@ -376,63 +415,61 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentSize()
                         .padding(start = 5.dp),
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .height(60.dp), verticalAlignment = Alignment.CenterVertically
-
+                    .height(60.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(onClick = {
                     val playIndex = currentIndex - 1
                     if (playIndex >= 0 && playIndex < (videoList?.size ?: 0)) {
-                        videoList?.get(playIndex)
-                            ?.let { youTubeStreamPlayer.loadOrCueVideo(it, 0f) }
+                        videoList
+                            ?.get(playIndex)
+                            ?.let { youTubeStreamPlayer.loadVideo(it, 0f) }
                         currentIndex -= 1
                     } else {
                         Toast.makeText(context, R.string.first_video, Toast.LENGTH_SHORT).show()
                     }
-
                 }, Modifier.padding(start = 10.dp, end = 10.dp)) {
                     Text(stringResource(R.string.prev_play))
                 }
                 Button(onClick = {
                     val playIndex = currentIndex + 1
                     if (playIndex < (videoList?.size ?: 0)) {
-                        videoList?.get(playIndex)
-                            ?.let { youTubeStreamPlayer.loadOrCueVideo(it, 0f) }
+                        videoList
+                            ?.get(playIndex)
+                            ?.let { youTubeStreamPlayer.loadVideo(it, 0f) }
                         currentIndex += 1
                     } else {
                         Toast.makeText(context, R.string.last_video, Toast.LENGTH_SHORT).show()
                     }
-
-
                 }) {
                     Text(stringResource(R.string.next_play))
                 }
             }
-
         }
-
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun SpeedPlay() {
-        var selectedItem by remember { mutableStateOf(YouTubeStreamPlaybackRate.UNKNOWN) }
+        var selectedItem by remember { mutableStateOf(YouTubeStreamPlaybackRate.RATE_1) }
         Column(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(top = 5.dp)
+                .padding(top = 5.dp),
         ) {
             Box(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .background(Color.LightGray)
+                    .background(Color.LightGray),
             ) {
                 Text(
                     stringResource(R.string.speed_play),
@@ -440,44 +477,44 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentSize()
                         .padding(start = 5.dp),
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Row(
                 Modifier
                     .wrapContentWidth()
-                    .height(70.dp), verticalAlignment = Alignment.CenterVertically
-
+                    .height(70.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 SelectBox(
                     speedList,
                     selectedItem = selectedItem,
                     onItemSelected = { selectedItem = it },
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(16.dp)
+                    modifier =
+                        Modifier
+                            .wrapContentSize()
+                            .padding(16.dp),
                 )
                 youTubeStreamPlayer.setPlaybackRate(selectedItem)
             }
-
         }
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun SoundOnOff() {
         var isSoundOnOff by remember { mainViewModel.mutePlay }
         Column(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(top = 5.dp)
+                .padding(top = 5.dp),
         ) {
-
             Box(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .background(Color.LightGray)
+                    .background(Color.LightGray),
             ) {
                 Text(
                     stringResource(R.string.sound_on_off),
@@ -485,39 +522,39 @@ class AdvancePlayerFragment : Fragment() {
                         .wrapContentSize()
                         .padding(start = 5.dp),
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Row(
                 Modifier
                     .fillMaxWidth()
                     .height(40.dp)
-                    .padding(top = 5.dp), verticalAlignment = Alignment.CenterVertically
+                    .padding(top = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 youTubeStreamPlayer.setMute(mute = isSoundOnOff)
                 OnOffRadioButton(
                     isOn = isSoundOnOff,
-                    onToggle = { isSoundOnOff = it }
+                    onToggle = { isSoundOnOff = it },
                 )
-
             }
-
         }
     }
 
     @Composable
+    @Suppress("ktlint:standard:function-naming")
     fun SelectBox(
         items: List<YouTubeStreamPlaybackRate>,
         selectedItem: YouTubeStreamPlaybackRate,
         onItemSelected: (YouTubeStreamPlaybackRate) -> Unit,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
     ) {
         var expanded by remember { mutableStateOf(false) }
 
         Box(modifier = modifier) {
             OutlinedButton(
                 onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = selectedItem.name)
             }
@@ -525,7 +562,7 @@ class AdvancePlayerFragment : Fragment() {
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 items.forEach { item ->
                     DropdownMenuItem(
@@ -533,7 +570,7 @@ class AdvancePlayerFragment : Fragment() {
                         onClick = {
                             onItemSelected(item)
                             expanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -549,26 +586,50 @@ class AdvancePlayerFragment : Fragment() {
         return String.format(Locale.KOREA, "%02d:%02d:%02d", hours, minutes, secs)
     }
 
-    companion object {
+    fun setFullScreen(isFull: Boolean) {
+        val params = binding.playContainer.layoutParams as ConstraintLayout.LayoutParams
 
+        if (isFull) {
+            params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.dimensionRatio = null // 비율 해제
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        } else {
+            params.width = 0
+            params.height = 0
+            params.dimensionRatio = "H,16:9"
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET // bottom 제거
+            params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        }
+
+        binding.playContainer.layoutParams = params
+    }
+
+    companion object {
         @JvmStatic
         fun newInstance(videoIdList: List<String>?) =
             AdvancePlayerFragment().apply {
-                arguments = Bundle().apply {
-                    putStringArrayList(ARG_PARAM2, videoIdList?.toCollection(ArrayList()))
-                }
+                arguments =
+                    Bundle().apply {
+                        putStringArrayList(argParam2, videoIdList?.toCollection(ArrayList()))
+                    }
             }
 
-        val speedList = listOf<YouTubeStreamPlaybackRate>(
-            YouTubeStreamPlaybackRate.RATE_0_25,
-            YouTubeStreamPlaybackRate.RATE_0_5,
-            YouTubeStreamPlaybackRate.RATE_0_75,
-            YouTubeStreamPlaybackRate.RATE_1,
-            YouTubeStreamPlaybackRate.RATE_1_25,
-            YouTubeStreamPlaybackRate.RATE_1_5,
-            YouTubeStreamPlaybackRate.RATE_1_75,
-            YouTubeStreamPlaybackRate.RATE_2
-        )
+        val speedList =
+            listOf<YouTubeStreamPlaybackRate>(
+                YouTubeStreamPlaybackRate.RATE_0_25,
+                YouTubeStreamPlaybackRate.RATE_0_5,
+                YouTubeStreamPlaybackRate.RATE_0_75,
+                YouTubeStreamPlaybackRate.RATE_1,
+                YouTubeStreamPlaybackRate.RATE_1_25,
+                YouTubeStreamPlaybackRate.RATE_1_5,
+                YouTubeStreamPlaybackRate.RATE_1_75,
+                YouTubeStreamPlaybackRate.RATE_2,
+            )
     }
-
 }

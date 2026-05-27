@@ -7,7 +7,16 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.ktlint)
+}
+ktlint {
+    android.set(true)
+    outputToConsole.set(true)
+    enableExperimentalRules.set(true)
+}
 
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    debug.set(true)
 }
 
 android {
@@ -31,7 +40,7 @@ android {
     }
 
     buildTypes {
-        debug{
+        debug {
             buildConfigField(
                 "String",
                 "TEST_DEVICE_HASHED_ID",
@@ -74,12 +83,19 @@ android {
                     "debug_admobAppId",
                     "ca-app-pub-3940256099942544~3347511713",
                 )
+
+            buildConfigField(
+                "String",
+                "PEXABAY_API_KEY",
+                "\"${localProperties.getProperty("PEXABAY_API_KEY")}\"",
+            )
         }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -92,7 +108,7 @@ android {
     }
     buildFeatures {
         compose = true
-        viewBinding =true
+        viewBinding = true
         buildConfig = true
     }
 }
@@ -101,7 +117,6 @@ dependencies {
 
     implementation(project(":player-core"))
     implementation(project(":player-ui"))
-    api(project(":player-ad"))
     implementation(project(":player-utils"))
 
     implementation(libs.androidx.core.ktx)
@@ -120,13 +135,10 @@ dependencies {
     implementation(libs.androidx.multidex.multidex)
     implementation(libs.androidx.lifecycle.process)
 
-
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.com.google.accompanist.webview)
-
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -138,5 +150,4 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-
 }

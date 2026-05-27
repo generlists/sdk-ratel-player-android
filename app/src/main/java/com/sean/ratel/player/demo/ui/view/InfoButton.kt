@@ -11,10 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
-fun InfoButton(onClick:() ->Unit){
-
+@Suppress("ktlint:standard:function-naming")
+fun InfoButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {
@@ -27,5 +26,4 @@ fun InfoButton(onClick:() ->Unit){
             )
         }
     }
-
 }

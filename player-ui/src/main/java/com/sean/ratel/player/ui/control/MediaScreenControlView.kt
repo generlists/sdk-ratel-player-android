@@ -38,7 +38,7 @@ import com.sean.ratel.player.ui.control.component.NextButton
 import com.sean.ratel.player.ui.control.component.PlayPauseButton
 import com.sean.ratel.player.ui.control.component.PreviousButton
 import com.sean.ratel.player.ui.control.component.SeekBackButton
-import com.sean.ratel.player.utils.log.formatTimeFromFloat
+import com.sean.ratel.player.utils.formatTimeFromFloat
 
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)

@@ -57,6 +57,7 @@ dependencies {
 
     implementation(project(":player-core"))
     implementation(project(":player-utils"))
+    implementation(libs.so.smartlab.sdk.common.utils.android )
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -1,10 +1,8 @@
 package com.sean.ratel.player.demo
 
-
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +16,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sean.ratel.player.demo.ui.home.HomeTopBar
@@ -44,62 +40,45 @@ import com.sean.ratel.player.demo.ui.navigation.NavGraph
 import com.sean.ratel.player.demo.ui.theme.Background_op_20
 import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 import com.sean.ratel.player.ui.ThemeMode
-import com.sean.ratel.player.utils.log.RLog
-import so.smartlab.video.player.ad.admob.data.model.AdMobInitState
-import so.smartlab.video.player.ad.admob.ui.kind.FixedBannerView
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 fun DemoPlayApp(
     mainViewModel: MainViewModel,
-    requestBannerAdView: suspend () -> Unit,
-    requestInLineBannerView: suspend () -> Unit,
-    requestNativeAd: suspend () -> Unit,
-    showAppOpenAd: () -> Unit,
     finish: () -> Unit,
 ) {
     BackHandler {
         finish()
     }
 
-
     DemoplayerTheme {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route ?: Destination.Home.route
         val selectedTab = remember { mutableStateOf<MainTab>(MainTab.YOUTUBE) }
-        val appOpenComplete by mainViewModel.appOpenComplete.collectAsState()
-
-
-        LaunchedEffect(appOpenComplete) {
-            showAppOpenAd()
-        }
 
         Scaffold(
             modifier = Modifier.imePadding(),
             topBar = {
-                if (currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route
-                    && currentRoute != Destination.AdvancePlayer.route
+                if (currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route &&
+                    currentRoute != Destination.AdvancePlayer.route
                 ) {
                     HomeTopBar()
                 }
             },
-
             floatingActionButtonPosition = FabPosition.End,
         ) { innerPaddingModifier ->
 
-            val initAdMobState = mainViewModel.adMobinitState.collectAsStateWithLifecycle()
-            val fixedBannerState = mainViewModel.fixedBannerState.collectAsStateWithLifecycle()
-
-
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Background_op_20)
-                    .padding(innerPaddingModifier), verticalArrangement = Arrangement.Bottom
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Background_op_20)
+                        .padding(innerPaddingModifier),
+                verticalArrangement = Arrangement.Top,
             ) {
-
-                if (currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route
-                    && currentRoute != Destination.AdvancePlayer.route
+                if (currentRoute != Destination.EndPlayer.route && currentRoute != Destination.BasicPlayer.route &&
+                    currentRoute != Destination.AdvancePlayer.route
                 ) {
                     TopTabBar(changeSelectedIndex = {
                         selectedTab.value = it
@@ -112,8 +91,6 @@ fun DemoPlayApp(
                 NavGraph(
                     navController = navController,
                     modifier = Modifier.padding(innerPaddingModifier),
-                    requestInLineBannerView = requestInLineBannerView,
-                    requestNativeAd = requestNativeAd,
                     navigator = mainViewModel.navigator,
                     themeMode = ThemeMode.SYSTEM,
                     finish = finish,
@@ -124,20 +101,7 @@ fun DemoPlayApp(
                         MainTab.YOUTUBE -> navController.navigate(Destination.Home.route)
                         MainTab.DOWNLOAD -> navController.navigate(Destination.Download.route)
                         MainTab.BROWSER -> navController.navigate(Destination.Browser.route)
-
                     }
-                }
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-
-                    LaunchedEffect(initAdMobState.value) {
-                        if (initAdMobState.value == AdMobInitState.InitComplete) {
-                            RLog.d("ADView", "initAdMobState : ${initAdMobState}")
-                            requestBannerAdView()
-                        }
-                    }
-
-                    FixedBannerView(Color.Gray,Color.Black, Color.White, fixedBannerState.value)
-
                 }
             }
         }
@@ -162,9 +126,18 @@ fun TopTabBar(changeSelectedIndex: (MainTab) -> Unit) {
                 selected = selectedTabIndex == index,
                 onClick = {
                     selectedTabIndex = index
-                    changeSelectedIndex(if (selectedTabIndex == 0) MainTab.YOUTUBE else if (selectedTabIndex == 1) MainTab.DOWNLOAD else MainTab.BROWSER)
-                }
-
+                    changeSelectedIndex(
+                        if (selectedTabIndex ==
+                            0
+                        ) {
+                            MainTab.YOUTUBE
+                        } else if (selectedTabIndex == 1) {
+                            MainTab.DOWNLOAD
+                        } else {
+                            MainTab.BROWSER
+                        },
+                    )
+                },
             ) {
                 // 아이콘과 텍스트를 가로로 배치
                 Row(
@@ -174,7 +147,6 @@ fun TopTabBar(changeSelectedIndex: (MainTab) -> Unit) {
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-
                     Text(
                         text = stringResource(item.title),
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -192,6 +164,7 @@ fun TopTabBar(changeSelectedIndex: (MainTab) -> Unit) {
 }
 
 @Preview(showBackground = true)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun TopBarPreview() {
     DemoplayerTheme {

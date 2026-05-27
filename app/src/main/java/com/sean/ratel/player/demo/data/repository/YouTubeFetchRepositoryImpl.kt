@@ -8,12 +8,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ContentFetchRepositoryImpl
+class YouTubeFetchRepositoryImpl
     @Inject
-    constructor(private val localJsonService: LocalJsonService) : YouTubeRepository {
+    constructor(
+        private val localJsonService: LocalJsonService,
+    ) : YouTubeRepository {
+        override suspend fun getLocalContent(rawId: Int): Flow<YouTubeModel> = localJsonService.fetchContentFromJson(rawId)
 
-    override suspend fun getLocalContent(rawId: Int): Flow<YouTubeModel> = localJsonService.fetchContentFromJson(rawId)
-
-    override suspend fun getLocalContentList(rawId: Int): Flow<YouTubeModelList> = localJsonService.fetchContentListFromJson(rawId)
-
-}
+        override suspend fun getLocalContentList(rawId: Int): Flow<YouTubeModelList> = localJsonService.fetchContentListFromJson(rawId)
+    }

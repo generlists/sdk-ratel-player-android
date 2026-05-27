@@ -1,4 +1,5 @@
 package com.sean.ratel.player.demo.ui.home
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,32 +31,33 @@ import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 import com.sean.ratel.player.demo.ui.theme.TopColor
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 fun HomeTopBar() {
-
-        // 실제 TopBar 콘텐츠
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(TopColor)
-                .height(56.dp)
-                .padding(WindowInsets.statusBars.asPaddingValues()),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            Row(
-                modifier = Modifier
+    // 실제 TopBar 콘텐츠
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(TopColor)
+            .height(56.dp)
+            .padding(WindowInsets.statusBars.asPaddingValues()),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Row(
+            modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(start = 10.dp, bottom = 10.dp),
-
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TitleBox()
-                Spacer(modifier = Modifier.weight(1f))
-                OptionMenu({})
-            }
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TitleBox()
+            Spacer(modifier = Modifier.weight(1f))
+            OptionMenu({})
         }
+    }
 }
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 fun TitleBox() {
     Text(
         stringResource(R.string.title),
@@ -69,28 +71,26 @@ fun TitleBox() {
 }
 
 @Composable
-fun OptionMenu(
-    privacyOptionClick: () -> Unit,
-) {
-
-        Box(
-            modifier = Modifier.wrapContentSize(),
-        ) {
-            IconButton(onClick = privacyOptionClick) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = null,
-                    tint = Color.White,
-                )
-            }
+@Suppress("ktlint:standard:function-naming")
+fun OptionMenu(privacyOptionClick: () -> Unit) {
+    Box(
+        modifier = Modifier.wrapContentSize(),
+    ) {
+        IconButton(onClick = privacyOptionClick) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = null,
+                tint = Color.White,
+            )
         }
+    }
 }
 
-
 @Preview(showBackground = true)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 private fun HomeTopBarPreview() {
     DemoplayerTheme {
-        //HomeTopBar(Modifier, MainViewModel(), {})
+        // HomeTopBar(Modifier, MainViewModel(), {})
     }
 }

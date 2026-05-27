@@ -3,6 +3,7 @@
 package com.sean.ratel.player.demo.ui.download
 
 import android.content.Context
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
@@ -28,9 +29,9 @@ import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewNavigator
 import com.google.accompanist.web.rememberWebViewState
-import com.sean.ratel.player.utils.log.RLog
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun AccompanistBrowserScreen(initialUrl: String) {
     val context = LocalContext.current
@@ -40,11 +41,15 @@ fun AccompanistBrowserScreen(initialUrl: String) {
     val navigator = rememberWebViewNavigator()
 
     // 2. 브릿지 설정 (익스텐션 파싱 결과 수신용)
-    val chromeClient = object : AccompanistWebChromeClient() {
-        override fun onProgressChanged(view: WebView, newProgress: Int) {
-            super.onProgressChanged(view, newProgress)
+    val chromeClient =
+        object : AccompanistWebChromeClient() {
+            override fun onProgressChanged(
+                view: WebView,
+                newProgress: Int,
+            ) {
+                super.onProgressChanged(view, newProgress)
+            }
         }
-    }
 
     Scaffold(
         topBar = {
@@ -54,16 +59,16 @@ fun AccompanistBrowserScreen(initialUrl: String) {
                     if (state.isLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             // 주소창이나 로딩 바 등을 여기에 추가 가능
             if (state.isLoading) {
                 LinearProgressIndicator(
                     progress = state.loadingState.let { if (it is LoadingState.Loading) it.progress else 0f },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
@@ -77,13 +82,17 @@ fun AccompanistBrowserScreen(initialUrl: String) {
                     setupWebViewSettings(v, context)
                 },
                 chromeClient = chromeClient,
-                client = object : AccompanistWebViewClient() {
-                    override fun onPageFinished(view: WebView, url: String?) {
-                        super.onPageFinished(view, url)
-                        // 페이지 로딩 후 우리가 만든 FB 감지 스크립트 주입
-                        view.let { injectFacebookLogic(it) }
-                    }
-                }
+                client =
+                    object : AccompanistWebViewClient() {
+                        override fun onPageFinished(
+                            view: WebView,
+                            url: String?,
+                        ) {
+                            super.onPageFinished(view, url)
+                            // 페이지 로딩 후 우리가 만든 FB 감지 스크립트 주입
+                            view.let { injectFacebookLogic(it) }
+                        }
+                    },
             )
         }
     }
@@ -94,7 +103,10 @@ fun AccompanistBrowserScreen(initialUrl: String) {
     }
 }
 
-private fun setupWebViewSettings(webView: WebView, context: Context) {
+private fun setupWebViewSettings(
+    webView: WebView,
+    context: Context,
+) {
     webView.settings.apply {
         javaScriptEnabled = true
         domStorageEnabled = true
@@ -102,169 +114,178 @@ private fun setupWebViewSettings(webView: WebView, context: Context) {
     }
 
     // 네이티브 브릿지 등록
-    webView.addJavascriptInterface(object {
-        @JavascriptInterface
-        fun onVideoDetected(videoId: String, postUrl: String, sdUrl: String, hdUrl: String, audioUrl: String) {
-            // 네이티브 영역: 다운로드 로직 호출
-            RLog.d("FB_DEBUG", "--------------------------")
-            RLog.d("FB_DEBUG", "감지된 영상 ID: $videoId")
-            RLog.d("FB_DEBUG", "분석 페이지 URL: $postUrl")
-            RLog.d("FB_DEBUG", "✅ SD 재생 주소: $sdUrl")
-            RLog.d("FB_DEBUG", "✅ HD 재생 주소: $hdUrl")
-            RLog.d("FB_DEBUG", "✅ 오디오 주소: $audioUrl")
-            RLog.d("FB_DEBUG", "--------------------------")
-        }
-    }, "AndroidBridge")
+    webView.addJavascriptInterface(
+        object {
+            @JavascriptInterface
+            fun onVideoDetected(
+                videoId: String,
+                postUrl: String,
+                sdUrl: String,
+                hdUrl: String,
+                audioUrl: String,
+            ) {
+                // 네이티브 영역: 다운로드 로직 호출
+                Log.d("FB_DEBUG", "--------------------------")
+                Log.d("FB_DEBUG", "감지된 영상 ID: $videoId")
+                Log.d("FB_DEBUG", "분석 페이지 URL: $postUrl")
+                Log.d("FB_DEBUG", "✅ SD 재생 주소: $sdUrl")
+                Log.d("FB_DEBUG", "✅ HD 재생 주소: $hdUrl")
+                Log.d("FB_DEBUG", "✅ 오디오 주소: $audioUrl")
+                Log.d("FB_DEBUG", "--------------------------")
+            }
+        },
+        "AndroidBridge",
+    )
 }
 
 private fun injectFacebookLogic(webView: WebView) {
-    val jsCode = """
-    (function () {
+    val jsCode =
+        """
+        (function () {
 
-      /* =====================
-         Utils
-      ===================== */
-      function decode(str) {
-        if (!str) return "";
-        return str
-          .replace(/\\u0026/g, "&")
-          .replace(/\\\//g, "/")
-          .replace(/&amp;/g, "&");
-      }
-
-      /* =====================
-         VIDEO ID 추출 (feed)
-         ✔ innerHTML 금지
-         ✔ link 기반
-      ===================== */
-      function extractVideoId(container) {
-        const links = container.querySelectorAll("a[href]");
-        for (const a of links) {
-          const h = a.href;
-
-          // watch?v=
-          let m = h.match(/[?&]v=(\d+)/);
-          if (m) return m[1];
-
-          // /videos/{id}
-          m = h.match(/\/videos\/(\d+)/);
-          if (m) return m[1];
-
-          // /reel/{id}
-          m = h.match(/\/reel\/(\d+)/);
-          if (m) return m[1];
-        }
-        return null;
-      }
-
-      /* =====================
-         WATCH PAGE 파싱
-         (yt-dlp 동일 개념)
-      ===================== */
-      function parseWatchPage() {
-        const scripts = Array.from(document.querySelectorAll("script"))
-          .map(s => s.textContent || "")
-          .join("\\n");
-
-        const urls = [];
-        const re = /"base_url":"(https:[^"]+)"/g;
-        let m;
-        while ((m = re.exec(scripts)) !== null) {
-          urls.push(decode(m[1]));
-        }
-
-        let audio = "";
-        let sd = "";
-        let hd = "";
-
-        urls.forEach(u => {
-          if (u.includes("audio") && !audio) {
-            audio = u;
-          } else if (u.includes("mp4")) {
-            if ((u.includes("720") || u.includes("1080")) && !hd) {
-              hd = u;
-            } else if (!sd) {
-              sd = u;
-            }
+          /* =====================
+             Utils
+          ===================== */
+          function decode(str) {
+            if (!str) return "";
+            return str
+              .replace(/\\u0026/g, "&")
+              .replace(/\\\//g, "/")
+              .replace(/&amp;/g, "&");
           }
-        });
 
-        const idMatch = location.href.match(/[?&]v=(\d+)/);
-        const videoId = idMatch ? idMatch[1] : null;
+          /* =====================
+             VIDEO ID 추출 (feed)
+             ✔ innerHTML 금지
+             ✔ link 기반
+          ===================== */
+          function extractVideoId(container) {
+            const links = container.querySelectorAll("a[href]");
+            for (const a of links) {
+              const h = a.href;
 
-        window.AndroidBridge.onVideoDetected(
-          "FB_" + (videoId || "unknown"),
-          location.href,
-          sd,
-          hd,
-          audio
-        );
-      }
+              // watch?v=
+              let m = h.match(/[?&]v=(\d+)/);
+              if (m) return m[1];
 
-      /* =====================
-         FEED 버튼 삽입
-      ===================== */
-      function attachButtons() {
-        const videos = document.querySelectorAll("video:not(.fb-btn-attached)");
-        videos.forEach(v => {
-          v.classList.add("fb-btn-attached");
+              // /videos/{id}
+              m = h.match(/\/videos\/(\d+)/);
+              if (m) return m[1];
 
-          const container =
-            v.closest('[role="article"]') || v.parentElement;
-          if (!container) return;
+              // /reel/{id}
+              m = h.match(/\/reel\/(\d+)/);
+              if (m) return m[1];
+            }
+            return null;
+          }
 
-          container.style.position = "relative";
+          /* =====================
+             WATCH PAGE 파싱
+             (yt-dlp 동일 개념)
+          ===================== */
+          function parseWatchPage() {
+            const scripts = Array.from(document.querySelectorAll("script"))
+              .map(s => s.textContent || "")
+              .join("\\n");
 
-          const btn = document.createElement("div");
-          btn.innerHTML = "🎬";
-          btn.style.cssText = `
-            position:absolute;
-            top:10px; right:10px;
-            z-index:9999;
-            width:44px; height:44px;
-            background:white;
-            border-radius:50%;
-            border:2px solid #1877f2;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:22px;
-            cursor:pointer;
-            box-shadow:0 2px 6px rgba(0,0,0,.4);
-          `;
-
-          btn.onclick = e => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const videoId = extractVideoId(container);
-            if (!videoId) {
-              alert("video id not found");
-              return;
+            const urls = [];
+            const re = /"base_url":"(https:[^"]+)"/g;
+            let m;
+            while ((m = re.exec(scripts)) !== null) {
+              urls.push(decode(m[1]));
             }
 
-            // ✅ 반드시 watch 페이지로 이동
-            location.href = "https://www.facebook.com/watch/?v=" + videoId;
-          };
+            let audio = "";
+            let sd = "";
+            let hd = "";
 
-          container.appendChild(btn);
-        });
-      }
+            urls.forEach(u => {
+              if (u.includes("audio") && !audio) {
+                audio = u;
+              } else if (u.includes("mp4")) {
+                if ((u.includes("720") || u.includes("1080")) && !hd) {
+                  hd = u;
+                } else if (!sd) {
+                  sd = u;
+                }
+              }
+            });
 
-      /* =====================
-         MODE 분기
-      ===================== */
-      if (location.href.includes("/watch")) {
-        setTimeout(parseWatchPage, 1500);
-      } else {
-        const observer = new MutationObserver(attachButtons);
-        observer.observe(document.body, { childList: true, subtree: true });
-        attachButtons();
-      }
+            const idMatch = location.href.match(/[?&]v=(\d+)/);
+            const videoId = idMatch ? idMatch[1] : null;
 
-    })();
-    """.trimIndent()
+            window.AndroidBridge.onVideoDetected(
+              "FB_" + (videoId || "unknown"),
+              location.href,
+              sd,
+              hd,
+              audio
+            );
+          }
+
+          /* =====================
+             FEED 버튼 삽입
+          ===================== */
+          function attachButtons() {
+            const videos = document.querySelectorAll("video:not(.fb-btn-attached)");
+            videos.forEach(v => {
+              v.classList.add("fb-btn-attached");
+
+              const container =
+                v.closest('[role="article"]') || v.parentElement;
+              if (!container) return;
+
+              container.style.position = "relative";
+
+              const btn = document.createElement("div");
+              btn.innerHTML = "🎬";
+              btn.style.cssText = `
+                position:absolute;
+                top:10px; right:10px;
+                z-index:9999;
+                width:44px; height:44px;
+                background:white;
+                border-radius:50%;
+                border:2px solid #1877f2;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:22px;
+                cursor:pointer;
+                box-shadow:0 2px 6px rgba(0,0,0,.4);
+              `;
+
+              btn.onclick = e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const videoId = extractVideoId(container);
+                if (!videoId) {
+                  alert("video id not found");
+                  return;
+                }
+
+                // ✅ 반드시 watch 페이지로 이동
+                location.href = "https://www.facebook.com/watch/?v=" + videoId;
+              };
+
+              container.appendChild(btn);
+            });
+          }
+
+          /* =====================
+             MODE 분기
+          ===================== */
+          if (location.href.includes("/watch")) {
+            setTimeout(parseWatchPage, 1500);
+          } else {
+            const observer = new MutationObserver(attachButtons);
+            observer.observe(document.body, { childList: true, subtree: true });
+            attachButtons();
+          }
+
+        })();
+        """.trimIndent()
 
     webView.evaluateJavascript(jsCode, null)
 }
-

@@ -1,6 +1,3 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 apply(from = "publish.gradle.kts")
 plugins {
     alias(libs.plugins.android.library)
@@ -13,7 +10,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-
 android {
     namespace = "com.sean.ratel.player.core"
     compileSdk = 36
@@ -23,15 +19,22 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-
     }
 
     buildTypes {
+        debug{
+            manifestPlaceholders["IS_DEBUG"] = true
+            manifestPlaceholders["IS_DEBUG_UDP"] = false
+            manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = false
+        }
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["IS_DEBUG"] = false
+            manifestPlaceholders["IS_DEBUG_UDP"] = false
+            manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -46,16 +49,17 @@ android {
         buildConfig = true
         compose = true
     }
-
 }
 
 dependencies {
     api(project(":android-youtube-player"))
     implementation(project(":player-utils"))
+    implementation(libs.so.smartlab.sdk.common.utils.android )
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.media3.transformer)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -73,5 +77,4 @@ dependencies {
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-
 }

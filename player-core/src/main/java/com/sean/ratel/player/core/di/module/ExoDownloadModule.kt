@@ -9,6 +9,7 @@ import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
@@ -97,13 +98,19 @@ object ExoDownloadModule {
         cache: Cache,
         headerStore: HeaderStore
     ): DataSource.Factory {
-
+//    val cacheDataSourceFactory = CacheDataSource.Factory()
+//        .setCache(simpleCache)
+//        .setUpstreamDataSourceFactory(defaultHttpDataSourceFactory) // 💡 서버 찌르는 용
+//        .setCacheReadDataSourceFactory(FileDataSource.Factory())     // 💡 캐시 읽는 용
+//        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)        // 💡 에러 나도 일단 캐시로 비벼보기
         val dynamicHeaderFactory =
             DynamicHeaderDataSourceFactory(httpFactory, headerStore)
 
         val cachedHttpFactory= CacheDataSource.Factory()
             .setCache(cache)
             .setUpstreamDataSourceFactory(dynamicHeaderFactory)
+            .setCacheReadDataSourceFactory(FileDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
             .setCacheWriteDataSinkFactory(null)
 
         return UnifiedDataSourceFactory(

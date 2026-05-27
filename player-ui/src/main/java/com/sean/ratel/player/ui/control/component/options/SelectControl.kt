@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.sean.ratel.player.core.data.domain.model.ContentScale
+import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaySpeed
 import com.sean.ratel.player.core.data.domain.model.Quality
 
@@ -38,8 +39,8 @@ fun SelectControl(
     currentScale: MediaOptionValue.Scale? = null,
     scales: Array<ContentScale>? = null,
     currentQuality: MediaOptionValue.VideoQuality? = null,
-    qualityList: List<Pair<Quality,String>>? = null,
-    onSelected: (Pair<Quality,String>?,PlaySpeed?, ContentScale?) -> Unit,
+    qualityList: List<Pair<Quality, PlayMediaItem>>? = null,
+    onSelected: (Pair<Quality, PlayMediaItem>?, PlaySpeed?, ContentScale?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     Box(
@@ -71,8 +72,8 @@ private fun SpeedSelectPanel(
     currentQuality: MediaOptionValue.VideoQuality?,
     speeds: List<PlaySpeed>?,
     scales: Array<ContentScale>?,
-    qualityList: List<Pair<Quality, String>>?,
-    onSelected: (Pair<Quality,String>?,PlaySpeed?, ContentScale?) -> Unit
+    qualityList: List<Pair<Quality, PlayMediaItem>>?,
+    onSelected: (Pair<Quality,PlayMediaItem>?,PlaySpeed?, ContentScale?) -> Unit
 ) {
 
 

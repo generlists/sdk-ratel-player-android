@@ -61,7 +61,6 @@ import com.sean.ratel.player.core.data.domain.model.Resolution
 import com.sean.ratel.player.core.data.domain.model.SampleBandWidth
 import com.sean.ratel.player.core.data.domain.model.track.AudioTrack
 import com.sean.ratel.player.core.data.domain.model.track.VideoTrack
-import com.sean.ratel.player.utils.log.RLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -74,6 +73,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import so.smartlab.common.utils.log.RLog
 import java.util.TreeMap
 import kotlin.math.roundToInt
 
@@ -210,7 +210,7 @@ class MediaExoStreamPlayer(
     override fun start(uri: Uri, cacheKey: String?) {
 
         player?.let { release() }
-        RLog.d("MediaScreen","start")
+        RLog.d("MediaScreen","start!!!!!!!!!!!!!!!!!! $uri  $cacheKey")
         _playbackState.update { PlaybackState.Idle(playerIndex) }
 
 
@@ -247,7 +247,7 @@ class MediaExoStreamPlayer(
     ) {
 
         player?.release()
-        RLog.d("MediaScreen","start")
+        RLog.d("MediaScreen","start!!!!!!!!!!!!!!")
         _playbackState.update { PlaybackState.Idle()}
 
         player = createPlayer()?.apply {
@@ -813,8 +813,10 @@ class MediaExoStreamPlayer(
             ).
             build()
 
+       val mediaDatsourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(getDefaultDatasource())
+        Log.d("MediaScreen","datasourceFactory : ${datasourceFactory}")
         return ExoPlayer.Builder(context)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(getDefaultDatasource()))
+            .setMediaSourceFactory(mediaDatsourceFactory)
             .setTrackSelector(trackSelector)
             .setBandwidthMeter(getBandwidthMeter())
             .setLoadControl(loadControlBuilder)

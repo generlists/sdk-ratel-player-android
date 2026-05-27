@@ -11,10 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
-fun OptionButton(onClick:() ->Unit){
-
+@Suppress("ktlint:standard:function-naming")
+fun OptionButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {

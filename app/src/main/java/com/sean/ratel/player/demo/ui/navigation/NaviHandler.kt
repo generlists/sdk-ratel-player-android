@@ -1,4 +1,4 @@
-package com.sean.ratel.player.demo.ui.navigation//package com.sean.ratel.player.demo.ui.navigation
+package com.sean.ratel.player.demo.ui.navigation // package com.sean.ratel.player.demo.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 internal fun NavHandler(
     navController: NavController,
     navigator: Navigator,
@@ -17,8 +18,8 @@ internal fun NavHandler(
             .onEach {
                 if (it.popBackstack) navController.popBackStack()
                 navController.navigate(it.route) {
-                    launchSingleTop = true // 중복된 인스턴스 생성 방지
-                    restoreState = true // 이전 상태 복원
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }.launchIn(this)
 

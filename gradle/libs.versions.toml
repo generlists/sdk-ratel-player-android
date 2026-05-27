@@ -10,7 +10,7 @@ activityCompose = "1.12.1"
 composeBom = "2024.09.00"
 appcompat = "1.7.1"
 material = "1.13.0"
-hilt ="2.49"
+hilt ="2.52"
 ksp = "2.0.21-1.0.25"
 retrofit2 = "2.9.0"
 okhttp3 = "4.9.3"
@@ -29,9 +29,12 @@ google-ad ="23.5.0"
 foundationVersion = "1.10.2"
 lifecycle-process = "2.8.3"
 multidex = "2.0.1"
-
+media3Transformer = "1.10.0"
+ktlint = "12.1.1"
+utils="0.0.1"
 
 [libraries]
+so-smartlab-sdk-common-utils-android ={ module = "so.smartlab.sdk.common:utils-android", version.ref = "utils" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -88,6 +91,7 @@ androidx-foundation = { group = "androidx.compose.foundation", name = "foundatio
 
 google-play-service-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "google-ad"}
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
+androidx-media3-transformer = { group = "androidx.media3", name = "media3-transformer", version.ref = "media3Transformer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -96,6 +100,7 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 android-library = { id = "com.android.library", version.ref = "agp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 maven-publish = { id = "maven-publish" }
 signing = { id = "signing" }
 kotlin-parcelize = { id = "kotlin-parcelize" }

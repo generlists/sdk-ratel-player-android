@@ -11,9 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
+@Suppress("ktlint:standard:function-naming")
 @Composable
-fun ShareButton(onClick:() ->Unit) {
+fun ShareButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {
