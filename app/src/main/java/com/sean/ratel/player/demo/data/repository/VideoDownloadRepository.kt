@@ -4,46 +4,30 @@ import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.sean.ratel.player.core.data.domain.model.DownloadInfo
 import com.sean.ratel.player.core.data.domain.model.HttpHeaders
 import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.core.data.player.download.VideoDownloadManager
-import com.sean.ratel.player.demo.data.download.FacebookDownloadResponse
-import com.sean.ratel.player.demo.data.download.InstagramVideoResponse
-import com.sean.ratel.player.demo.data.download.TikTokVideoResponse
-import com.sean.ratel.player.demo.data.download.api.ShortFormDownloadApi
+import com.sean.ratel.player.demo.data.download.PixabayVideoResponse
+import com.sean.ratel.player.demo.data.download.api.PixaBayApi
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
-import com.sean.ratel.player.demo.data.download.domain.DownloadModel
-import com.sean.ratel.player.demo.data.download.domain.DownloadResponse
 import com.sean.ratel.player.demo.data.download.domain.DownloadResponseDeserializer
 import com.sean.ratel.player.demo.data.download.domain.VideoDownloadedInfo
+import com.sean.ratel.player.demo.di.qualifier.PixaBayApiKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
 import javax.inject.Inject
 
 class VideoDownloadRepository
     @Inject
     constructor(
         @ApplicationContext val context: Context,
-        private val videoDownloadApi: ShortFormDownloadApi,
+        private val pixaBayApi: PixaBayApi,
         private val videoDownloadManager: VideoDownloadManager,
+        @PixaBayApiKey private val apiKey: String,
     ) {
-        suspend fun fetchSampleUrl(rawId: Int): Flow<DownloadModel> =
-            flow {
-                val jsonString =
-                    context.resources
-                        .openRawResource(rawId)
-                        .bufferedReader()
-                        .use { it.readText() }
-
-                val type = object : TypeToken<DownloadModel>() {}.type
-
-                val response: DownloadModel = Gson().fromJson(jsonString, type)
-                emit(response)
-            }
-
         fun addDownload(
             id: String,
             title: String,
@@ -52,16 +36,15 @@ class VideoDownloadRepository
             cookies: String? = null,
             downloadedInfo: VideoDownloadedInfo? = null,
         ) {
-            // https://video.twimg.com/amplify_video/2039915509064646656/pl/mp4a/64000/D-rsMm6EWfVonkzJ.m3u8
             videoDownloadManager.startDownload(
                 downloadId = id,
                 downloadQuality = Quality.SD,
-                downLoadUrl = "https://video.twimg.com/amplify_video/2039915509064646656/pl/mp4a/64000/D-rsMm6EWfVonkzJ.m3u8",
-                brandName = "FACEBOOK",
+                downLoadUrl = url,
+                brandName = DownloadBland.PIXABAY.name,
                 headers = headers,
                 cookies = cookies,
                 convertMp4 = true,
-                fileName = "FaceBook_SD_$id.m3u8",
+                fileName = "DownloadBland.${DownloadBland.PIXABAY.name}.name_SD_$id.mp4",
                 notificationMessage = title,
                 requestExtra = downloadedInfo?.toByteArray(),
             )
@@ -70,37 +53,6 @@ class VideoDownloadRepository
         fun addDownLoadEventListener(listener: (DownloadInfo) -> Unit) {
             videoDownloadManager.addDownloadEventListener(listener)
         }
-
-        fun requestFaceBookReelsDownload(
-            url: String,
-            cookies: String,
-            userAgent: String,
-            accept: String,
-        ): Flow<FacebookDownloadResponse?> =
-            flow {
-                val response =
-                    videoDownloadApi.requestFaceBookReelsDownloadUrl(
-                        url,
-                        cookies,
-                        userAgent,
-                        accept,
-                    )
-                emit(response)
-            }
-
-        fun requestTikTokVideoDownload(url: String): Flow<TikTokVideoResponse?> =
-
-            flow {
-                val response = videoDownloadApi.requestTikTokVideoDownloadUrl(url)
-                emit(response)
-            }
-
-        fun requestInstgramReelsDownloadUrl(url: String): Flow<InstagramVideoResponse?> =
-
-            flow {
-                val response = videoDownloadApi.requestInstagramReelsDownloadUrl(url)
-                emit(response)
-            }
 
         fun getDownloadedItem(): List<com.sean.ratel.player.core.data.domain.model.DownloadedInfo> =
             videoDownloadManager.getDownloadedItems()
@@ -121,14 +73,35 @@ class VideoDownloadRepository
                 val gson =
                     GsonBuilder()
                         .registerTypeAdapter(
-                            DownloadResponse::class.java,
+                            PixabayVideoResponse::class.java,
                             DownloadResponseDeserializer(downloadBland),
                         ).create()
 
                 gson.fromJson(json, VideoDownloadedInfo::class.java)
             } catch (e: Exception) {
-                Log.e("VideoDownloadRepository", "$e")
                 null
             }
         }
+
+        fun requestPixaBayDownload(
+            query: String,
+            perPage: Int = 20,
+            page: Int = 1,
+        ): Flow<PixabayVideoResponse?> =
+            flow {
+                try {
+                    val response =
+                        pixaBayApi.pixabaySearchVideos(
+                            apiKey,
+                            query,
+                            perPage,
+                            page,
+                        )
+                    emit(response)
+                } catch (e: HttpException) {
+                    val errorBody = e.response()?.errorBody()?.string()
+                    Log.e("TAG", "Code: ${e.code()}")
+                    Log.e("TAG", "Error Body: $errorBody") // ← 실제 원인 여기 나옴
+                }
+            }
     }

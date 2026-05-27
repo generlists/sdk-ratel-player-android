@@ -1,7 +1,6 @@
 package com.sean.ratel.player.demo.ui.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +10,17 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
+import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
+import com.sean.ratel.player.core.util.launch
+import com.sean.ratel.player.core.util.repeatOnStart
 import com.sean.ratel.player.demo.databinding.FragmentBasicPlayerBinding
 import com.sean.ratel.player.demo.di.qualifier.NotControl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class BasicPlayerFragment : Fragment() {
@@ -26,7 +28,6 @@ class BasicPlayerFragment : Fragment() {
     private var param1: String? = null
     private var _binding: FragmentBasicPlayerBinding? = null
     private val binding get() = _binding!!
-
 
     lateinit var youTubePlayerView: YouTubePlayerView
     private lateinit var youTubeStreamPlayer: YouTubeStreamPlayer
@@ -38,6 +39,48 @@ class BasicPlayerFragment : Fragment() {
 
     @Inject
     lateinit var youtubeStreamPlayerTracker: YouTubePlayerTracker
+
+    init {
+        repeatOnStart {
+            youTubeStreamPlayer.playbackState.collect { state ->
+                when (state) {
+                    is YouTubeStreamPlaybackState.Prepared -> {
+
+                        param1?.let {
+                            youTubeStreamPlayer.loadVideo(it, 0f)
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.UnStarted -> {
+                        // delay 로 시작 시간 확보
+                        launch {
+                            delay(500)
+                            youTubeStreamPlayer.start()
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.Buffering -> {
+                    }
+
+                    YouTubeStreamPlaybackState.Paused -> {
+                    }
+
+                    YouTubeStreamPlaybackState.Playing -> {
+                    }
+
+                    YouTubeStreamPlaybackState.Ended -> {
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        youTubeStreamPlayer.start()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +96,6 @@ class BasicPlayerFragment : Fragment() {
     ): View? {
         val videoId = arguments?.getString(argsParm1) ?: ""
         _binding = FragmentBasicPlayerBinding.inflate(inflater, container, false)
-        Log.d("hbungshin","videoId : $videoId")
 
         youTubePlayerView =
             YouTubePlayerView(requireActivity()).apply {
@@ -62,13 +104,11 @@ class BasicPlayerFragment : Fragment() {
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT,
                     )
-
             }
 
         _binding?.playContainer?.removeAllViews()
         _binding?.playContainer?.addView(youTubePlayerView)
         youtubeStreamPlayerAdapter = YouTubeStreamPlayerAdapterImpl(youTubePlayerView)
-
 
         youTubeStreamPlayer =
             YouTubeStreamPlayerImpl(

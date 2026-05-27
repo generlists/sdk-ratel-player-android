@@ -12,10 +12,6 @@ object Destination {
 
     data object Browser : Screen("browser")
 
-    data object FaceBook : Screen("facebook")
-
-    data object TikTok : Screen("tiktok")
-
     data object EndPlayer : DynamicScreen("endPlayer", "contentId", "startIndex")
 
     data object BasicPlayer : DynamicScreen("basic_player", "contentId", "startIndex")

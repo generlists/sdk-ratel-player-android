@@ -97,7 +97,6 @@ internal class LegacyYouTubePlayerView(
     playerOptions: IFramePlayerOptions,
     videoId: String?
   ) {
-    Log.d("hbungshin","isYouTubePlayerReady : $isYouTubePlayerReady")
     if (isYouTubePlayerReady) {
       throw IllegalStateException("This YouTubePlayerView has already been initialized.")
     }
@@ -109,7 +108,6 @@ internal class LegacyYouTubePlayerView(
     initialize = {
       webViewYouTubePlayer.initialize({ it.addListener(youTubePlayerListener) }, playerOptions, videoId)
     }
-    Log.d("hbungshin","initialize : $initialize")
 
     if (!handleNetworkEvents) {
       initialize()

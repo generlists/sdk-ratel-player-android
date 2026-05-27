@@ -3,8 +3,12 @@ package com.sean.ratel.player.demo.ui.screen
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sean.ratel.player.core.data.domain.model.InfoType
+import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
+import com.sean.ratel.player.core.data.domain.model.Quality
+import com.sean.ratel.player.demo.data.download.domain.VideoDownloadedInfo
 import com.sean.ratel.player.ui.MediaOptions
 import com.sean.ratel.player.ui.control.component.options.MediaOptionKey
 import com.sean.ratel.player.ui.control.component.options.MediaOptionValue
@@ -14,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,10 +26,15 @@ class VideoEndViewModel
     @Inject
     constructor(
         @ApplicationContext val context: Context,
-        val imageShareManager: ImageShareManager
+        val imageShareManager: ImageShareManager,
     ) : ViewModel() {
         private val _mediaOptions = MutableStateFlow(MediaOptions())
         val mediaOptions: StateFlow<MediaOptions> = _mediaOptions
+
+        private val _endTransferList =
+            MutableStateFlow<List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>?>(null)
+        val endTransferList: StateFlow<List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>?> =
+            _endTransferList
 
         fun setUpdateMediaOption(
             key: MediaOptionKey,
@@ -84,55 +94,6 @@ class VideoEndViewModel
         }
 
         fun getDummyData(): PreviewInfoData {
-//        val mainInfoList = listOf<Pair<String,String>>(
-//            "스크랩 앱" to "FACEBOOK",
-//            "스크랩 일자" to "2026.02.21",
-//            "조회수" to "1345k",
-//            "작성자" to "hbungshin",
-//            "설명" to "동해물과 백두산이 마르고 닳토록 하느님이 보호하사 우리나라만세 무궁화삼천리 화려강산 대한사람 대한으로 길이 보전하세 남산위의 저소나무"
-//        )
-//
-//
-//        val subInfoList = listOf<Pair<String,String>>(
-//
-//            "재생 시간" to "00:11",
-//            "포스트 url" to "https://www.facebook.com/share/r/123456",
-//            "저장 경로" to "/storage/emulator/0/Download/scrap_pro",
-//            "SD 파일명(크기)" to "FACEBOO_SD_1234543444444.mp4(20MB)",
-//            "HD 파일명(크기)" to "FACEBOO_HD_1234543444444.mp4(3G)",
-//            "AUDIO 파일명(크기)" to "FACEBOO_AUDIO_1234543444444.mp4(1.7MB)",
-//        )
-//
-//        return PreviewInfoData(
-//            infoType = InfoType.ScrapVideoInfo,
-//            bitmap =null ,
-//            title = "그날을 어찌 있을 수있겠냐마는",
-//            mainInfoList =mainInfoList ,
-//            subInfoList =subInfoList,
-//            confirmText = "확인",
-//            cancelText = "취소"
-//        )
-//        val mainInfoList = listOf<Pair<String, String>>(
-//            "파일 이름" to localVideoItem.displayName,
-//            "폴더 명" to localVideoItem.bucketName,
-//            "재생 시간" to TimeUtil.formatDuration(localVideoItem.duration.toDouble()),
-//            "상대 경로" to localVideoItem.relativePath,
-//            "저장 위치" to localVideoItem.filePath,
-//            "파일 크기 " to localVideoItem.size.toReadableSize()
-//        )
-//        val subInfoList = listOf<Pair<String, String>>(
-//            "타입" to (localVideoItem.mimeType?:"video/mp4"),
-//            "추가 시간" to localVideoItem.dateAdded.toLocalDateKst().toString(),
-//            "해상도" to "${localVideoItem.width} x ${localVideoItem.height}",
-//            "소유자" to badgeFromOwner(localVideoItem.ownerPackageName).name,
-//            "orientation" to (mapVideoOrientation(localVideoItem.orientation?:0,localVideoItem.width?:0,localVideoItem.height?:0).name)
-//        )
-//        return PreviewInfoData(
-//            infoType = InfoType.VideoInfo,
-//            title = localVideoItem.displayName,
-//            mainInfoList = mainInfoList,
-//            subInfoList = subInfoList
-//        )
             val mainLocalInfoList =
                 listOf<Pair<String, String>>(
                     "메인 폴더" to "카메라",
@@ -155,11 +116,63 @@ class VideoEndViewModel
             return PreviewInfoData(
                 infoType = InfoType.LocalVideoInfo,
                 bitmap = null,
-                title = "영상정보이다 개새끼야 ",
+                title = "영상정보 이다 ",
                 mainInfoList = mainLocalInfoList,
                 subInfoList = subLocalInfoList,
                 confirmText = "확인",
                 cancelText = "취소",
             )
+        }
+
+        fun fetchList(
+            startIndex: Int,
+            itemList: List<VideoDownloadedInfo>,
+        ) {
+            viewModelScope.launch {
+                var videoList = listOf<Pair<String, List<Pair<Quality, PlayMediaItem>>>>()
+
+                itemList.map { item ->
+
+                    var qualityList = listOf<Pair<Quality, PlayMediaItem>>()
+
+                    Quality.entries.forEach { quality ->
+
+                        when {
+                            quality == Quality.SD -> {
+                                val addList =
+                                    listOf(
+                                        Pair(
+                                            Quality.SD,
+                                            PlayMediaItem(
+                                                item.requestId + "_" + "SD",
+                                                item.requestUrl,
+                                                "file://${item.realDownloadPath}",
+                                            ),
+                                        ),
+                                    )
+                                qualityList = qualityList + addList
+                            }
+                        }
+                    }
+
+                    videoList = videoList + listOf(Pair(item.requestId, qualityList))
+
+                    val headVideoList =
+                        videoList.subList(
+                            startIndex.coerceIn(0, videoList.size),
+                            videoList.size,
+                        )
+
+                    val tailVideoList = videoList.subList(0, startIndex.coerceAtMost(videoList.size))
+
+                    _endTransferList.value = headVideoList + tailVideoList
+                    _endTransferList.value?.forEach {
+                        Log.d(
+                            "hbungshin",
+                            "리스트 크기: $it",
+                        )
+                    }
+                }
+            }
         }
     }

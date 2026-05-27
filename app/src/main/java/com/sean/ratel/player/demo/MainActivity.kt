@@ -12,12 +12,10 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     val mainViewModel by viewModels<MainViewModel>()
-    val openAd = false // 앱시작 광고할때 true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             DemoPlayApp(
                 mainViewModel = mainViewModel,
                 finish = { finish() },

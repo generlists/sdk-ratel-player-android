@@ -4,4 +4,8 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class DownloadApiBaseUrl
+annotation class PixaBayApiBaseUrl
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PixaBayApiKey

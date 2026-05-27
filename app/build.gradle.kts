@@ -83,7 +83,14 @@ android {
                     "debug_admobAppId",
                     "ca-app-pub-3940256099942544~3347511713",
                 )
+
+            buildConfigField(
+                "String",
+                "PEXABAY_API_KEY",
+                "\"${localProperties.getProperty("PEXABAY_API_KEY")}\"",
+            )
         }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -110,7 +117,6 @@ dependencies {
 
     implementation(project(":player-core"))
     implementation(project(":player-ui"))
-    //api(project(":player-ad"))
     implementation(project(":player-utils"))
 
     implementation(libs.androidx.core.ktx)

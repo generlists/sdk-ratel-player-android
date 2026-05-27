@@ -47,7 +47,6 @@ class MainViewModel
                 loadBasicJsonData()
                 loadAdvanceJsonData()
             }
-
         }
 
         suspend fun loadBasicJsonData() {

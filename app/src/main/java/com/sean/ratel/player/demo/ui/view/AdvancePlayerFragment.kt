@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
@@ -59,12 +60,14 @@ import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerE
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
+import com.sean.ratel.player.core.util.launch
 import com.sean.ratel.player.core.util.repeatOnStart
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.R
 import com.sean.ratel.player.demo.databinding.FragmentAdvancePlayerBinding
 import com.sean.ratel.player.demo.di.qualifier.WithControl
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import java.util.Locale
 import javax.inject.Inject
 
@@ -79,6 +82,7 @@ class AdvancePlayerFragment : Fragment() {
     private lateinit var youtubeStreamPlayerAdapter: YouTubeStreamPlayerAdapter
     private var currentIndex = 0
     private var isFullscreen = false
+    private var videoId: String? = null
 
     lateinit var mainViewModel: MainViewModel
 
@@ -90,6 +94,36 @@ class AdvancePlayerFragment : Fragment() {
     lateinit var youtubeStreamPlayerTracker: YouTubePlayerTracker
 
     init {
+        repeatOnStart {
+            youTubeStreamPlayer.playbackState.collect { state ->
+                when (state) {
+                    is YouTubeStreamPlaybackState.Prepared -> {
+
+                        videoId?.let {
+                            youTubeStreamPlayer.loadVideo(it, 0f)
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.UnStarted -> {
+                        // delay 로 시작 시간 확보
+                        launch {
+                            delay(500)
+                            youTubeStreamPlayer.start()
+                        }
+                    }
+
+                    YouTubeStreamPlaybackState.Buffering -> {}
+
+                    YouTubeStreamPlaybackState.Paused -> {}
+
+                    YouTubeStreamPlaybackState.Playing -> {}
+
+                    YouTubeStreamPlaybackState.Ended -> {}
+
+                    else -> {}
+                }
+            }
+        }
         repeatOnStart {
             youTubeStreamPlayer.videoSpeedChange.collect { rate ->
                 rate?.let {}
@@ -194,14 +228,24 @@ class AdvancePlayerFragment : Fragment() {
                 youtubeStreamPlayerAdapter = youtubeStreamPlayerAdapter,
                 iFramePlayerOptions = iFramePlayerOptions,
             )
-        val videoID = videoIdList?.get(currentIndex)
-        youTubeStreamPlayer.initPlayer(networkHandle = false, videoId = videoID)
+        videoId = videoIdList?.get(currentIndex)
+        youTubeStreamPlayer.initPlayer(networkHandle = false, videoId = videoId)
         youTubeStreamPlayer.addFullscreenListener()
         youTubeStreamPlayer.setMute(mute = true) // 디폴트 false
 
         // toggle
         _binding?.fullscreenBtn?.setOnClickListener {
-            youTubeStreamPlayer.toggleFullscreen()
+            if (isFullscreen) {
+                youTubePlayerView.wrapContent()
+                binding.playerController.visibility = View.VISIBLE
+                binding.fullScreenViewContainer.visibility = View.VISIBLE
+            } else {
+                youTubePlayerView.matchParent()
+                binding.playerController.visibility = View.GONE
+                binding.fullScreenViewContainer.visibility = View.GONE
+            }
+            setFullScreen(!isFullscreen)
+            isFullscreen = !isFullscreen
         }
 
         return binding.root
@@ -247,6 +291,11 @@ class AdvancePlayerFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        youTubeStreamPlayer.start()
     }
 
     @Composable
@@ -381,7 +430,7 @@ class AdvancePlayerFragment : Fragment() {
                     if (playIndex >= 0 && playIndex < (videoList?.size ?: 0)) {
                         videoList
                             ?.get(playIndex)
-                            ?.let { youTubeStreamPlayer.loadOrCueVideo(it, 0f) }
+                            ?.let { youTubeStreamPlayer.loadVideo(it, 0f) }
                         currentIndex -= 1
                     } else {
                         Toast.makeText(context, R.string.first_video, Toast.LENGTH_SHORT).show()
@@ -394,7 +443,7 @@ class AdvancePlayerFragment : Fragment() {
                     if (playIndex < (videoList?.size ?: 0)) {
                         videoList
                             ?.get(playIndex)
-                            ?.let { youTubeStreamPlayer.loadOrCueVideo(it, 0f) }
+                            ?.let { youTubeStreamPlayer.loadVideo(it, 0f) }
                         currentIndex += 1
                     } else {
                         Toast.makeText(context, R.string.last_video, Toast.LENGTH_SHORT).show()
@@ -409,7 +458,7 @@ class AdvancePlayerFragment : Fragment() {
     @Composable
     @Suppress("ktlint:standard:function-naming")
     fun SpeedPlay() {
-        var selectedItem by remember { mutableStateOf(YouTubeStreamPlaybackRate.UNKNOWN) }
+        var selectedItem by remember { mutableStateOf(YouTubeStreamPlaybackRate.RATE_1) }
         Column(
             Modifier
                 .fillMaxWidth()
@@ -535,6 +584,30 @@ class AdvancePlayerFragment : Fragment() {
         val secs = totalSeconds % 60
 
         return String.format(Locale.KOREA, "%02d:%02d:%02d", hours, minutes, secs)
+    }
+
+    fun setFullScreen(isFull: Boolean) {
+        val params = binding.playContainer.layoutParams as ConstraintLayout.LayoutParams
+
+        if (isFull) {
+            params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.dimensionRatio = null // 비율 해제
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        } else {
+            params.width = 0
+            params.height = 0
+            params.dimensionRatio = "H,16:9"
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET // bottom 제거
+            params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        }
+
+        binding.playContainer.layoutParams = params
     }
 
     companion object {

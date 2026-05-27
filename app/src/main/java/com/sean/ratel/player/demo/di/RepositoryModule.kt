@@ -22,6 +22,5 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideContentRepository(localJsonService: LocalJsonService): YouTubeRepository =
-        YouTubeFetchRepositoryImpl(localJsonService)
+    fun provideContentRepository(localJsonService: LocalJsonService): YouTubeRepository = YouTubeFetchRepositoryImpl(localJsonService)
 }

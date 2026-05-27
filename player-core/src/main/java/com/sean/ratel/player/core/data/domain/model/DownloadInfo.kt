@@ -5,27 +5,26 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 
 @OptIn(UnstableApi::class)
-data class DownloadInfo
-    (
+data class DownloadInfo(
     val id: String,
-    val downloadUrl:String,
-    val message:String,
+    val downloadUrl: String,
+    val message: String,
     val brandName: String,
     val mimeType: String?,
     val quality: Quality,
     val state: DownloadState,
     val progress: Int,
     val bytesDownloaded: Long,
-    val percentDownloaded:Float,
+    val percentDownloaded: Float,
     val contentLength: Long,
-    )
+)
 
 data class DownloadedInfo(
     val id: String,
     val originalUri: String,
     val state: Int,
     val percent: Float,
-    val  customData:ByteArray
+    val customData: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -50,10 +49,11 @@ data class DownloadedInfo(
         result = 31 * result + customData.contentHashCode()
         return result
     }
-
 }
 
-enum class DownloadState(val state: Int) {
+enum class DownloadState(
+    val state: Int,
+) {
     IDLE(-1),
     QUEUED(0),
     STOPPED(1),
@@ -62,49 +62,58 @@ enum class DownloadState(val state: Int) {
     FAILED(4),
     REMOVING(5),
     RESTARTED(6),
-    PAUSED(7);
+    PAUSED(7),
+    ;
+
     companion object {
-        fun from(state: Int?): DownloadState =
-            DownloadState.entries.firstOrNull { it.state == state } ?: IDLE
+        fun from(state: Int?): DownloadState = DownloadState.entries.firstOrNull { it.state == state } ?: IDLE
     }
 }
 
 @OptIn(UnstableApi::class)
-fun Download.toInfo(downloadUrl:String,brandName: String, downloadQuality: Quality, message: String): DownloadInfo {
+fun Download.toInfo(
+    downloadUrl: String,
+    brandName: String,
+    downloadQuality: Quality,
+    message: String,
+): DownloadInfo {
     val progress =
-        if (contentLength > 0) ((bytesDownloaded * 100) / contentLength).toInt()
-        else 0
+        if (contentLength > 0) {
+            ((bytesDownloaded * 100) / contentLength).toInt()
+        } else {
+            0
+        }
 
     return DownloadInfo(
         id = request.id,
         downloadUrl = downloadUrl,
         mimeType = request.mimeType,
         quality = downloadQuality,
-        state = when (state) {
-            Download.STATE_QUEUED -> DownloadState.QUEUED
-            Download.STATE_DOWNLOADING -> DownloadState.DOWNLOADING
-            Download.STATE_COMPLETED -> DownloadState.COMPLETED
-            Download.STATE_FAILED -> DownloadState.FAILED
-            Download.STATE_REMOVING -> DownloadState.REMOVING
-            Download.STATE_STOPPED -> DownloadState.STOPPED
-            Download.STATE_RESTARTING -> DownloadState.RESTARTED
-            else -> DownloadState.PAUSED
-        },
+        state =
+            when (state) {
+                Download.STATE_QUEUED -> DownloadState.QUEUED
+                Download.STATE_DOWNLOADING -> DownloadState.DOWNLOADING
+                Download.STATE_COMPLETED -> DownloadState.COMPLETED
+                Download.STATE_FAILED -> DownloadState.FAILED
+                Download.STATE_REMOVING -> DownloadState.REMOVING
+                Download.STATE_STOPPED -> DownloadState.STOPPED
+                Download.STATE_RESTARTING -> DownloadState.RESTARTED
+                else -> DownloadState.PAUSED
+            },
         progress = progress,
         bytesDownloaded = bytesDownloaded,
         percentDownloaded = percentDownloaded,
         contentLength = contentLength,
         brandName = brandName,
         message = message,
-
     )
 }
 
 data class DownloadAppParam(
-    val downloadUrl:String,
-    val brandName:String,
+    val downloadUrl: String,
+    val brandName: String,
     val quality: Quality,
     val isConvertMp4: Boolean,
     val fileName: String?,
-    val notificationMessage: String
+    val notificationMessage: String,
 )

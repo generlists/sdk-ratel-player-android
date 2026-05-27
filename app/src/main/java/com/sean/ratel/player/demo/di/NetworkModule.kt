@@ -1,8 +1,10 @@
 package com.sean.ratel.player.demo.di
 
 import com.google.gson.GsonBuilder
-import com.sean.ratel.player.demo.data.download.api.ShortFormDownloadApi
-import com.sean.ratel.player.demo.di.qualifier.DownloadApiBaseUrl
+import com.sean.ratel.player.demo.BuildConfig
+import com.sean.ratel.player.demo.data.download.api.PixaBayApi
+import com.sean.ratel.player.demo.di.qualifier.PixaBayApiBaseUrl
+import com.sean.ratel.player.demo.di.qualifier.PixaBayApiKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,14 +20,14 @@ import javax.inject.Singleton
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideShortFormDownloadApi(
-        @DownloadApiBaseUrl baseUrl: String,
+    fun providePixaBayApi(
+        @PixaBayApiBaseUrl baseUrl: String,
         okHttpClient: OkHttpClient,
-    ): ShortFormDownloadApi =
-        createService(
+    ): PixaBayApi =
+        createPixaBayService(
             baseUrl,
             okHttpClient,
-            ShortFormDownloadApi::class.java,
+            PixaBayApi::class.java,
         )
 
     @Provides
@@ -37,8 +39,8 @@ object NetworkModule {
             .writeTimeout(60L, TimeUnit.SECONDS)
             .build()
 
-    fun <T> createService(
-        @DownloadApiBaseUrl baseUrl: String,
+    fun <T> createPixaBayService(
+        @PixaBayApiBaseUrl baseUrl: String,
         okHttpClient: OkHttpClient,
         service: Class<T>,
     ): T =
@@ -52,6 +54,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @DownloadApiBaseUrl
-    fun provideShortFormDownloadBaseUrl(): String = "http://10.64.120.81:8000"
+    @PixaBayApiKey
+    fun providePixabayApiKey(): String = BuildConfig.PEXABAY_API_KEY
+
+    @Provides
+    @Singleton
+    @PixaBayApiBaseUrl
+    fun providePixaBayDownloadBaseUrl(): String = "https://pixabay.com/api/"
 }

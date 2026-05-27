@@ -1,6 +1,5 @@
 package com.sean.ratel.player.ui.control
 
-
 import android.content.Context
 import android.util.Log
 import android.view.SurfaceHolder
@@ -78,12 +77,11 @@ fun MediaScreen(
     qualityStartIndex: Int,
     topBar: @Composable (onInfoClick: (PreviewInfoData) -> Unit, onOptionClick: () -> Unit) -> Unit,
     onOptionChanged: (MediaOptionKey, MediaOptionValue) -> Unit,
-    viewModel: PlayerViewModel = hiltViewModel()
+    viewModel: PlayerViewModel = hiltViewModel(),
 ) {
-
     viewModel.setMediaList(mediaList)
 
-    //https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+    // https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
 
     val isHWYAccelerated by viewModel.isHWYAccelerated.collectAsState()
     val context = LocalContext.current
@@ -98,43 +96,38 @@ fun MediaScreen(
 
     val audioOnly by viewModel.audioOnly.collectAsState()
 
-
     val scale = mediaOptions.collectAsState()
-
 
     val isEndVideo = viewModel.isPlayEnd.collectAsState()
     val isSeeking by viewModel.isSeek.collectAsState()
 
     val currentIndex = viewModel.mediaStreamPlayer.currentIndex.collectAsState()
 
-
     var forceUpdate by remember { mutableStateOf(false) }
 
     val playList = viewModel.mediaList.collectAsState()
-
 
     var playerView =
         remember { derivedStateOf { getPlayerView(context = context, viewModel = viewModel) } }
 
     var errorState by remember { mutableStateOf(Pair(false, Pair<Int, String?>(200, null))) }
 
-    //콘트롤러가 바뀌면 리컴파일 됨  필요
+    // 콘트롤러가 바뀌면 리컴파일 됨  필요
     LaunchedEffect(Unit) {
-        RLog.d("MediaScreen", "$playList ,$qualityStartIndex , $startIndex")
+        RLog.d("TAG", "$playList ,$qualityStartIndex , $startIndex")
         start(
             viewModel = viewModel,
             qualityStartIndex = qualityStartIndex,
             startIndex = startIndex,
             connectFailError = false,
-            playList = playList.value
+            playList = playList.value,
         )
 
-        //초기값
+        // 초기값
         viewModel.setVideoQualityChanged(
             qualityChanged = false,
-            videoQuality = playList.value[startIndex].second[qualityStartIndex]
-        ) //최초  첫번째 현재 재생중 퀄러티
-
+            videoQuality = playList.value[startIndex].second[qualityStartIndex],
+        ) // 최초  첫번째 현재 재생중 퀄러티
 
         playerView.value.player = viewModel.mediaStreamPlayer.getPlayer()
 
@@ -142,7 +135,6 @@ fun MediaScreen(
     }
 
     LaunchedEffect(viewModel.currentItemIndex) {
-
         val currentIndex = viewModel.mediaStreamPlayer.currentIndex
         val mediaItem = viewModel.videoQualityChanged
         val optionQualityChanged = viewModel.optionQualityChanged
@@ -153,10 +145,12 @@ fun MediaScreen(
             viewModel.setCurrentIndex(currentIndex)
 
             if (optionQualityChanged.value) {
-                (viewModel.mediaStreamPlayer.replaceMediaItem(
-                    currentIndex,
-                    viewModel.buildMediaItem(mediaItem, isConnectError = false)
-                ))
+                (
+                    viewModel.mediaStreamPlayer.replaceMediaItem(
+                        currentIndex,
+                        viewModel.buildMediaItem(mediaItem, isConnectError = false),
+                    )
+                )
                 viewModel.audioOnly(false)
             }
 
@@ -164,21 +158,20 @@ fun MediaScreen(
                 viewModel.setQuality(playList.value[currentIndex].second)
                 RLog.d(
                     "MediaScreen",
-                    "입력 퀄러티 값   : ${playList.value[currentIndex].second} $currentIndex"
+                    "입력 퀄러티 값   : ${playList.value[currentIndex].second} $currentIndex",
                 )
             }
 
             Triple(currentIndex, mediaItem, qualityList)
         }.collect {
-
             RLog.d("MediaScreen", "현재 퀄리티   : ${it.second}")
             RLog.d(
                 "MediaScreen",
-                "현재 퀄리티  : ${it.second?.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}"
+                "현재 퀄리티  : ${it.second?.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}",
             )
             RLog.d(
                 "MediaScreen",
-                "오디오모드 사용여부 체크: ${!optionQualityChanged.value && it.third.value[startIndex].first == Quality.AUDIO}"
+                "오디오모드 사용여부 체크: ${!optionQualityChanged.value && it.third.value[startIndex].first == Quality.AUDIO}",
             )
             if (it.second.first == Quality.AUDIO ||
                 (!optionQualityChanged.value && it.third.value[qualityStartIndex].first == Quality.AUDIO)
@@ -201,18 +194,21 @@ fun MediaScreen(
         }
     }
 
-    //View
-    Box(modifier = modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
+    // View
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Color.Black),
+    ) {
         // PlayerView를 Compose에 삽입
-        //BG->FG
+        // BG->FG
         key(forceUpdate) {
-
             AndroidView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
                 factory = { _ ->
                     val view = playerView.value
                     view.setBackgroundColor(android.graphics.Color.BLACK)
@@ -226,7 +222,7 @@ fun MediaScreen(
                     if (view.player !== viewModel.mediaStreamPlayer.getPlayer()) {
                         view.player = viewModel.mediaStreamPlayer.getPlayer()
                     }
-                }
+                },
             )
         }
 
@@ -235,31 +231,27 @@ fun MediaScreen(
                 .fillMaxSize()
                 .clickable(
                     indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
+                    interactionSource = remember { MutableInteractionSource() },
                 ) {
                     hideControls = !hideControls
                 },
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
-
-
             AnimatedVisibility(
                 visible = if (isEndVideo.value) true else !hideControls,
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) {
                 MediaScreenControlView(
                     Modifier.background(Color.Transparent),
-                    viewModel
+                    viewModel,
                 )
             }
-
         }
 
-        //외부 뷰 넘기기
+        // 외부 뷰 넘기기
         topBar({ infoData ->
             showInfoDialog.value = Pair(true, infoData)
-
         }, {
             showOption = true
         })
@@ -267,7 +259,7 @@ fun MediaScreen(
         if (showOption) {
             Box(
                 Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
             ) {
                 val failStr = stringResource(R.string.player_control_capture_fail)
 
@@ -282,11 +274,11 @@ fun MediaScreen(
                     onInfo = { info ->
                         info?.let {
                             showInfoDialog.value = Pair(true, it)
-
                         } ?: run {
                             Toast.makeText(context, failStr, Toast.LENGTH_LONG).show()
                         }
-                    })
+                    },
+                )
             }
         }
 
@@ -313,88 +305,86 @@ fun MediaScreen(
                     themeMode = themeMode,
                     onConfirm = { infoType ->
                         scope.launch {
-
                             previewInfoData.bitmap?.let { bitmap ->
 
                                 if (infoType == InfoType.ScreenShot) {
                                     viewModel.saveCaptureFile(
                                         context,
                                         previewInfoData.infoType,
-                                        bitmap
+                                        bitmap,
                                     )
 
                                     // 옵션 변경
                                     onOptionChanged(
                                         MediaOptionKey.SCREEN_CAPTURE,
-                                        MediaOptionValue.ObjectValue(previewInfoData.copy(bitmap = bitmap))
+                                        MediaOptionValue.ObjectValue(previewInfoData.copy(bitmap = bitmap)),
                                     )
                                 }
-
                             } ?: run {
-                                if (infoType == InfoType.ScreenShot)
+                                if (infoType == InfoType.ScreenShot) {
                                     Toast.makeText(context, fileSaveFail, Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
 
                         showInfoDialog.value = Pair(false, null)
-
-
-                    }, onDismiss = {
+                    },
+                    onDismiss = {
                         showInfoDialog.value = Pair(false, null)
-                    })
+                    },
+                )
             }
         }
     }
 
-
-    //종료 체크
+    // 종료 체크
     DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
 
-        val observer = LifecycleEventObserver { _, event ->
-
-            when (event) {
-
-                Lifecycle.Event.ON_STOP -> {
-                    Log.d(
-                        "MediaScreen",
-                        "홈 버튼 눌렀네? 여기서 release 하든 pause 하든 해야 해! ${viewModel.videoQualityChanged.value}"
-                    )
-                    //여기 호출되면 잔상이 남음..
-                    viewModel.setSaveTimeMs(viewModel.mediaStreamPlayer.currentPosition.value ?: 0L)
-                    viewModel.setSaveCurrentId(playList.value[viewModel.currentItemIndex.value].first)
-                    viewModel.audioOnly(viewModel.audioOnly.value)
-
-
-                    //resume 후 stop 처리
-                    if (!viewModel.isPlaying.value)
-                        viewModel.mediaStreamPlayer.resume()
-
-                    viewModel.mediaStreamPlayer.stop()
-                    forceUpdate = false
-                }
-
-                Lifecycle.Event.ON_RESUME -> {
-
-                    if (viewModel.isStop.value) {
-                        viewModel.setIsStop(false)
-                        playerView.value.player = null
-                        viewModel.mediaStreamPlayer.release()
-
-                        playerView = mutableStateOf(getPlayerView(context, viewModel))
-
-                        play(
-                            viewModel,
-                            qualityStartIndex,
-                            viewModel.saveCurrentId.value,
-                            playerView.value
+                when (event) {
+                    Lifecycle.Event.ON_STOP -> {
+                        Log.d(
+                            "MediaScreen",
+                            "홈 버튼 눌렀네? 여기서 release 하든 pause 하든 해야 해! ${viewModel.videoQualityChanged.value}",
                         )
-                        forceUpdate = true
+                        // 여기 호출되면 잔상이 남음..
+                        viewModel.setSaveTimeMs(viewModel.mediaStreamPlayer.currentPosition.value ?: 0L)
+                        viewModel.setSaveCurrentId(playList.value[viewModel.currentItemIndex.value].first)
+                        viewModel.audioOnly(viewModel.audioOnly.value)
+
+                        // resume 후 stop 처리
+                        if (!viewModel.isPlaying.value) {
+                            viewModel.mediaStreamPlayer.resume()
+                        }
+
+                        viewModel.mediaStreamPlayer.stop()
+                        forceUpdate = false
+                    }
+
+                    Lifecycle.Event.ON_RESUME -> {
+                        if (viewModel.isStop.value) {
+                            viewModel.setIsStop(false)
+                            playerView.value.player = null
+                            viewModel.mediaStreamPlayer.release()
+
+                            playerView = mutableStateOf(getPlayerView(context, viewModel))
+
+                            play(
+                                viewModel,
+                                qualityStartIndex,
+                                viewModel.saveCurrentId.value,
+                                playerView.value,
+                            )
+                            forceUpdate = true
+                        }
+                    }
+
+                    else -> {
+                        Unit
                     }
                 }
-
-                else -> Unit
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
@@ -404,9 +394,7 @@ fun MediaScreen(
             viewModel.mediaStreamPlayer.clearVideoSurface()
             viewModel.mediaStreamPlayer.stop()
             viewModel.mediaStreamPlayer.release()
-
         }
-
     }
 
     LaunchedEffect(viewModel.mediaStreamPlayer.playbackState) {
@@ -414,31 +402,28 @@ fun MediaScreen(
             Log.d("MediaScreen", "state : $state")
             when (state) {
                 is PlaybackState.Prepared -> {}
-                is PlaybackState.Playing -> {
 
+                is PlaybackState.Playing -> {
                     viewModel.setRepeatMode(mediaOptions.value.repeatMode)
                     viewModel.setPlaying(isPlaying = true)
                     viewModel.setPlayAllEnd(false)
                     viewModel.setDuration()
-
                 }
 
                 is PlaybackState.MediaTransition -> {
-
                     if (state.reason == MediaStreamTransitionReason.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-                        //인덱스 초기화,오디오 모드
+                        // 인덱스 초기화,오디오 모드
                         RLog.d(
                             "MediaScreen",
-                            "MediaTransition size ${playList.value.size} , currentIndex : ${currentIndex}"
+                            "MediaTransition size ${playList.value.size} , currentIndex : $currentIndex",
                         )
                         viewModel.setRepeatMode(mediaOptions.value.repeatMode)
                         viewModel.setCurrentTime()
                         viewModel.audioOnly(false)
                         viewModel.setVideoQualityChanged(
                             qualityChanged = false,
-                            videoQuality = playList.value[currentIndex.value].second[qualityStartIndex]
+                            videoQuality = playList.value[currentIndex.value].second[qualityStartIndex],
                         )
-
                     }
                 }
 
@@ -458,42 +443,41 @@ fun MediaScreen(
     }
     LaunchedEffect(viewModel.mediaStreamPlayer.playbackState) {
         viewModel.mediaStreamPlayer.playbackErrorState.collect { state ->
-            Log.e("MediaScreen", "state : ${state}")
+            Log.e("MediaScreen", "state : $state")
             when (state) {
                 is PlaybackState.Error -> {
-                    //재생 url 만료
+                    // 재생 url 만료
                     errorState = Pair(true, getErrorMessage(context, state.errorCode))
-
                 }
 
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
         }
-
     }
     if (errorState.first) {
         PlayerErrorDialog(
             true,
-            title = String.format(
-                stringResource(R.string.player_error),
-                "${errorState.second.first}"
-            ),
+            title =
+                String.format(
+                    stringResource(R.string.player_error),
+                    "${errorState.second.first}",
+                ),
             message = errorState.second.second ?: stringResource(R.string.player_unkwnown_error),
             onConfirm = {
                 errorState = Pair(false, Pair(200, null))
-                if(errorState.second.first == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS){
+                if (errorState.second.first == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS) {
                     start(
                         viewModel = viewModel,
                         qualityStartIndex = qualityStartIndex,
                         startIndex = 0,
                         connectFailError = true,
-                        playList = mediaList
+                        playList = mediaList,
                     )
-
-                }else{
+                } else {
                     viewModel.setReset(reset = true)
                 }
-
             },
             onDismiss = {
                 errorState = Pair(false, Pair(200, null))
@@ -503,71 +487,79 @@ fun MediaScreen(
     }
 }
 
-private fun getErrorMessage(context: Context, errorCode: Int) =
-
-    when (errorCode) {
-        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED -> Pair(
+private fun getErrorMessage(
+    context: Context,
+    errorCode: Int,
+) = when (errorCode) {
+    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED -> {
+        Pair(
             errorCode,
-            context.getString(R.string.player_error_protocal)
+            context.getString(R.string.player_error_protocal),
         )
-
-        PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> Pair(
-            errorCode,
-            context.getString(R.string.player_error_file_not_founded)
-        )
-
-        PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> Pair(
-            errorCode,
-            context.getString(R.string.player_error_connect_error)
-        )
-
-        else -> Pair(errorCode, context.getString(R.string.player_error_unknown_error))
-
     }
 
+    PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> {
+        Pair(
+            errorCode,
+            context.getString(R.string.player_error_file_not_founded),
+        )
+    }
+
+    PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> {
+        Pair(
+            errorCode,
+            context.getString(R.string.player_error_connect_error),
+        )
+    }
+
+    else -> {
+        Pair(errorCode, context.getString(R.string.player_error_unknown_error))
+    }
+}
 
 @OptIn(UnstableApi::class)
-private fun getPlayerView(context: Context, viewModel: PlayerViewModel): PlayerView {
-
-    return PlayerView(context).apply {
+private fun getPlayerView(
+    context: Context,
+    viewModel: PlayerViewModel,
+): PlayerView =
+    PlayerView(context).apply {
         useController = false
         // 1. SurfaceView의 Holder를 가져와서 콜백을 달아줘
-        (videoSurfaceView as? SurfaceView)?.holder?.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                RLog.d("MediaScreen", "surfaceCreated")
-            }
+        (videoSurfaceView as? SurfaceView)?.holder?.addCallback(
+            object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) {
+                    RLog.d("MediaScreen", "surfaceCreated")
+                }
 
-            override fun surfaceChanged(
-                holder: SurfaceHolder,
-                format: Int,
-                width: Int,
-                height: Int
-            ) {
-                // 화면 크기 바뀌었을 때 (회전 등)
-                RLog.d("MediaScreen", "surfaceChanged: $width x $height")
-            }
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int,
+                ) {
+                    // 화면 크기 바뀌었을 때 (회전 등)
+                    RLog.d("MediaScreen", "surfaceChanged: $width x $height")
+                }
 
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                RLog.d("MediaScreen", "surfaceDestroyed")
-                viewModel.mediaStreamPlayer.clearVideoSurface()
-            }
-        })
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
+                    RLog.d("MediaScreen", "surfaceDestroyed")
+                    viewModel.mediaStreamPlayer.clearVideoSurface()
+                }
+            },
+        )
 
         viewModel.setSurfaceView(videoSurfaceView)
     }
-
-}
 
 private fun play(
     viewModel: PlayerViewModel,
     qualityStartIndex: Int,
     savedId: String,
-    playerView: PlayerView
+    playerView: PlayerView,
 ) {
-
     val mediaList = viewModel.reorderMediaList(viewModel.mediaList.value, savedId)
-    RLog.d("MediaScreen", "savedId : ${savedId}")
-    RLog.d("MediaScreen", "playList : ${mediaList}")
+    RLog.d("MediaScreen", "savedId : $savedId")
+    RLog.d("MediaScreen", "playList : $mediaList")
 
     viewModel.setMediaList(mediaList)
 
@@ -576,14 +568,14 @@ private fun play(
         qualityStartIndex = qualityStartIndex,
         startIndex = 0,
         connectFailError = false,
-        playList = mediaList
+        playList = mediaList,
     )
     viewModel.seekTo(0, viewModel.saveTimeMs.value)
     viewModel.setQuality(mediaList[0].second)
     viewModel.setVideoQualityChanged(
         qualityChanged = false,
-        videoQuality = viewModel.videoQualityChanged.value
-    ) //포그라운드 넘어가기전 화질
+        videoQuality = viewModel.videoQualityChanged.value,
+    ) // 포그라운드 넘어가기전 화질
 
     playerView.player = viewModel.mediaStreamPlayer.getPlayer()
 
@@ -594,21 +586,26 @@ private fun start(
     viewModel: PlayerViewModel,
     qualityStartIndex: Int,
     startIndex: Int,
-    connectFailError:Boolean,
-    playList: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>
+    connectFailError: Boolean,
+    playList: List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>,
 ) {
     viewModel.mediaStreamPlayer.start(
-        items = playList.map {
-            viewModel.buildMediaItem(
-                playMediaItem = it.second[qualityStartIndex],
-                isConnectError = connectFailError
-            )
-        },
-        startIndex = startIndex
+        items =
+            playList.map {
+                viewModel.buildMediaItem(
+                    playMediaItem = it.second[qualityStartIndex],
+                    isConnectError = connectFailError,
+                )
+            },
+        startIndex = startIndex,
     )
 }
 
-private fun buttonEnabled(size: Int, currentIndex: Int, viewModel: PlayerViewModel) {
+private fun buttonEnabled(
+    size: Int,
+    currentIndex: Int,
+    viewModel: PlayerViewModel,
+) {
     RLog.d("MediaScreen", "$size , $currentIndex")
     if (size == 0) return
     if (size > 1) {

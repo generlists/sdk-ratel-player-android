@@ -13,14 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,24 +31,20 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.sean.ratel.player.core.data.domain.model.DownloadInfo
 import com.sean.ratel.player.core.data.domain.model.DownloadState
-import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
-import com.sean.ratel.player.core.data.domain.model.Quality
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.navigation.Destination
 import dagger.hilt.android.UnstableApi
-import java.net.URLEncoder
-import kotlin.math.floor
 
 @OptIn(UnstableApi::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun DownloadFacebook(
+fun DownloadPixaBay(
     mainViewModel: MainViewModel,
     viewModel: VideoDownloadViewModel,
 ) {
-    var buttonClick = remember { mutableStateOf<String>("테스트 영상") }
+    val buttonClick = remember { mutableStateOf<String>("테스트 영상") }
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier
@@ -81,22 +76,22 @@ fun DownloadFacebook(
         }
 
         if (buttonClick.value == "테스트 영상") {
-            FaceBookDownload(mainViewModel, viewModel)
+            SampleDownloadList(mainViewModel, viewModel)
         } else if (buttonClick.value == "다운로드한 목록") {
-            DownloadListFacebook(viewModel)
+            SampleDownloadedList(viewModel)
         }
     }
 }
 
 @Composable
 @Suppress("ktlint:standard:function-naming")
-fun FaceBookDownload(
+fun SampleDownloadList(
     mainViewModel: MainViewModel,
     viewModel: VideoDownloadViewModel,
 ) {
-    val items = viewModel.downloadFaceBookList.collectAsState()
+    // val items = viewModel.downloadFaceBookList.collectAsState()
+    val item by viewModel.pixcabayVideoList.collectAsState()
     val statusText = viewModel.downloads.collectAsState()
-    val location = floor(Math.random() * items.value.size)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -104,7 +99,7 @@ fun FaceBookDownload(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(
-            count = items.value.size,
+            count = item.size,
         ) { index ->
             Column(
                 Modifier
@@ -112,46 +107,47 @@ fun FaceBookDownload(
                     .background(Color.White)
                     .padding(start = 7.dp, end = 7.dp),
             ) {
-                val requestId = items.value[index].requestId
-                val url = items.value[index].url
+                val item = item[index]
+                val requestId = item.id
+                val name = item.name
+                val url = item.videos.large.url
 
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        item.videos.large.url,
+                        Modifier.weight(0.7f),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
 
-                    Row(
+                    Box(
                         Modifier
                             .fillMaxWidth()
+                            .weight(0.3f)
                             .height(60.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        contentAlignment = Alignment.CenterEnd,
                     ) {
-                        Text(
-                            items.value[index].url,
-                            Modifier.weight(0.7f),
-                            fontSize = 12.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        val status = item.downloadState ?: "Ready"
 
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(0.3f)
-                                .height(60.dp),
-                            contentAlignment = Alignment.CenterEnd,
-                        ) {
-                            val status = items.value[index].downloadState ?: "Ready"
-
-                            Button(onClick = {
-                                viewModel.requestFacebookDownloadUrl(requestId, url)
-                            }) {
-                                Text(status, fontSize = 12.sp)
-                            }
+                        Button(onClick = {
+                            viewModel.requestFreeDownload(requestId, name, url, item)
+                        }) {
+                            Text(status, fontSize = 12.sp)
                         }
                     }
-
-                    StateCheck(requestId, statusText.value, viewModel)
                 }
+
+                StateCheck(requestId, statusText.value, viewModel)
             }
         }
     }
+}
 
 @Composable
 @Suppress("ktlint:standard:function-naming")
@@ -161,8 +157,6 @@ fun StateCheck(
     viewModel: VideoDownloadViewModel,
 ) {
     val state = downloadInfo?.get(requestId)?.state
-
-    if (state == null) return
 
     when (state) {
         DownloadState.COMPLETED -> {
@@ -221,12 +215,14 @@ fun StateCheck(
 @OptIn(UnstableApi::class)
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun DownloadListFacebook(viewModel: VideoDownloadViewModel) {
+fun SampleDownloadedList(viewModel: VideoDownloadViewModel) {
     val items =
         viewModel.downloadedList
             .collectAsState()
             .value
-            .filter { it.downloadBrand == DownloadBland.FACEBOOK }
+            .filter { it.downloadBrand == DownloadBland.PIXABAY }
+
+    Log.d("hbungshin", "size : ${items.size}")
 
     Box(
         Modifier
@@ -237,14 +233,6 @@ fun DownloadListFacebook(viewModel: VideoDownloadViewModel) {
             contentPadding = PaddingValues(vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items.forEachIndexed { index, info ->
-                if (index == 1) {
-                    info.screen = listOf<Quality>(Quality.AUDIO)
-                } else {
-                    info.screen = listOf<Quality>(Quality.SD, Quality.HD, Quality.AUDIO)
-                }
-            }
-
             items(
                 count = items.size,
             ) { text ->
@@ -254,68 +242,21 @@ fun DownloadListFacebook(viewModel: VideoDownloadViewModel) {
                         .background(Color.White)
                         .padding(end = 7.dp)
                         .clickable {
-                            val navArgument =
-                                items.joinToString(",") { q ->
-                                    val encodedId = URLEncoder.encode(q.requestId, "UTF-8")
-
-                                    val listPart =
-                                        q.screen.joinToString("|") { quality ->
-
-                                            val rawUrl =
-                                                when (quality.name) {
-                                                    "AUDIO" -> q.requestId + "_SD"
-                                                    "HD" -> q.requestId + "_SD"
-                                                    "SD" -> q.requestId + "_SD"
-                                                    else -> ""
-                                                }
-                                            val url =
-                                                when (quality.name) {
-                                                    "AUDIO" -> q.requestId + "_SD"
-                                                    "HD" -> q.requestId + "_SD"
-                                                    "SD" -> q.requestId + "_SD"
-                                                    else -> ""
-                                                }
-                                            val encodedUrl =
-                                                if (rawUrl.isNotBlank()) {
-                                                    val item =
-                                                        PlayMediaItem(
-                                                            mediaKey = quality.name,
-                                                            mediaUrl = rawUrl,
-                                                            filePath = "",
-                                                        )
-                                                    URLEncoder.encode(
-                                                        "${item.mediaKey}|${item.mediaUrl}",
-                                                        "UTF-8",
-                                                    )
-                                                } else {
-                                                    ""
-                                                }
-//
-//                                        val encodedUrl = if (quality.name == "AUDIO") {
-//                                            URLEncoder.encode(q.requestId + "_SD", "UTF-8")
-//
-//                                        } else if (quality.name == "HD") {
-//                                            URLEncoder.encode(q.requestId + "_SD", "UTF-8")
-//                                        } else if (quality.name == "SD") {
-//                                            URLEncoder.encode(q.requestId + "_SD", "UTF-8")
-//                                        } else {
-//                                        }
-
-                                            "${quality.name}@$encodedUrl"
-                                        }
-                                    "$encodedId:$listPart"
-                                }
-
-                            Log.d("hbungshin", "$navArgument")
                             viewModel.navigator.navigateTo(
                                 Destination.EndPlayer.dynamicRoute(
-                                    contentId = navArgument,
+                                    contentId = items[text].requestId,
                                     startIndex = text,
                                 ),
                             )
                         },
                 ) {
-                    val videoThumbnail = items.get(text).downloadResponse.thumbnail
+                    val videoThumbnail =
+                        items
+                            .get(text)
+                            .downloadResponse
+                            ?.videos
+                            ?.large
+                            ?.thumbnail
 
                     Row(
                         Modifier
@@ -331,7 +272,7 @@ fun DownloadListFacebook(viewModel: VideoDownloadViewModel) {
                             )
                         }
                         Text(
-                            items[text].downloadResponse.title,
+                            items[text].downloadResponse?.name ?: "",
                             Modifier
                                 .weight(0.7f)
                                 .padding(start = 5.dp),

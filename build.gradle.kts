@@ -27,7 +27,6 @@ subprojects {
             "player-core" -> "${versionProps["CORE_VERSION"]}$suffix"
             "player-utils" -> "${versionProps["UTIL_VERSION"]}$suffix"
             "player-ui" -> "${versionProps["UI_VERSION"]}$suffix"
-            "player-ad" -> "${versionProps["AD_VERSION"]}$suffix"
             "android-youtube-player" -> "${versionProps["YOUTUBE_PLAYER_VERSION"] ?: "1.0.0"}$suffix"
             else -> versionProps["VERSION_NAME"].toString() // 기본값
         }
@@ -54,7 +53,6 @@ tasks.register("publishAll") {
             ":player-utils" to "UTIL",
             ":player-core" to "CORE",
             ":player-ui" to "UI",
-            ":player-ad" to "AD",
         )
 
     // 2. UPDATED가 true인 모듈만 찾아서 배포 태스크를 dependsOn에 추가
@@ -86,8 +84,5 @@ tasks.register("publishAll") {
     }
     project(":player-ui").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
         mustRunAfter(":player-core:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
-    }
-    project(":player-ad").tasks.named("publishReleasePublicationToAndroidPlayerSDKPackageRepository") {
-        mustRunAfter(":player-utils:publishReleasePublicationToAndroidPlayerSDKPackageRepository")
     }
 }

@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.update
 
 class YouTubeStreamPlayerImpl(
     private val lifecycle: Lifecycle,
-    private val autoPlay:Boolean,
+    private val autoPlay: Boolean,
     private val youtubeStreamPlayerAdapter: YouTubeStreamPlayerAdapter,
     private val iFramePlayerOptions: IFramePlayerOptions,
     private val youtubeStreamPlayerTracker: YouTubePlayerTracker? = null,
@@ -38,7 +38,7 @@ class YouTubeStreamPlayerImpl(
     YouTubeStreamPlayer {
     private var youTubeStreamPlayer: YouTubePlayer? = null
     private var initialPlayer: Boolean = false
-    private var videoId:String? = null
+    private var videoId: String? = null
 
     private val _playbackState =
         MutableStateFlow<YouTubeStreamPlaybackState>(
@@ -68,9 +68,11 @@ class YouTubeStreamPlayerImpl(
     private val _exitFullScreen = MutableStateFlow<Boolean>(false)
     override val exitFullScreen: StateFlow<Boolean> = _exitFullScreen.asStateFlow()
 
-
-    override fun initPlayer(networkHandle: Boolean?,videoId: String?) {
-        Log.d("hbungshin","videoId : $videoId")
+    override fun initPlayer(
+        networkHandle: Boolean?,
+        videoId: String?,
+    ) {
+        Log.d("TAG", "videoId : $videoId")
 
         if (initialPlayer) return
 
@@ -78,11 +80,11 @@ class YouTubeStreamPlayerImpl(
             this,
             networkHandle ?: false,
             iFramePlayerOptions,
-            videoId
+            videoId,
         )
         this.initialPlayer = true
         this.videoId = videoId
-        Log.d("hbungshin","initialPlayer : $initialPlayer")
+        Log.d("TAG", "initialPlayer : $initialPlayer")
     }
 
     @SuppressLint("RestrictedApi")
@@ -164,11 +166,11 @@ class YouTubeStreamPlayerImpl(
         }
 
     override fun onReady(youTubePlayer: YouTubePlayer) {
-        Log.d("hbungshin","$videoId , youTubePlayer : $youTubePlayer $autoPlay")
+        Log.d("hbungshin", "$videoId , youTubePlayer : $youTubePlayer $autoPlay")
         youTubeStreamPlayer = youTubePlayer
         youTubeStreamPlayer?.addListener(this)
 
-        if(autoPlay) videoId?.let{loadOrCueVideo(it, 0f)}
+        if (autoPlay) videoId?.let { loadOrCueVideo(it, 0f) }
 
         _playbackState.update { YouTubeStreamPlaybackState.Prepared(this) }
     }
@@ -177,7 +179,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         state: PlayerState,
     ) {
-        Log.d("hbungshin","state : $state")
+        Log.d("hbungshin", "state : $state")
         _playbackState.update { (getConvertPlayerStateToYouTubeStreamPlaybackState(state)) }
     }
 
@@ -185,14 +187,13 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         playbackQuality: PlayerConstants.PlaybackQuality,
     ) {
-
     }
 
     override fun onPlaybackRateChange(
         youTubePlayer: YouTubePlayer,
         playbackRate: PlaybackRate,
     ) {
-        _videoSpeedChange.update {getConvertPlaybackRateToYouTubePlaybackRate(playbackRate)  }
+        _videoSpeedChange.update { getConvertPlaybackRateToYouTubePlaybackRate(playbackRate) }
     }
 
     override fun onError(
@@ -232,19 +233,35 @@ class YouTubeStreamPlayerImpl(
 
     private fun getConvertPlayerStateToYouTubeStreamPlaybackState(state: PlayerState): YouTubeStreamPlaybackState =
         when (state) {
-            PlayerState.UNKNOWN -> YouTubeStreamPlaybackState.UnKnown
-            PlayerState.UNSTARTED -> YouTubeStreamPlaybackState.UnStarted
-            PlayerState.VIDEO_CUED -> YouTubeStreamPlaybackState.Prepared(this)
+            PlayerState.UNKNOWN -> {
+                YouTubeStreamPlaybackState.UnKnown
+            }
+
+            PlayerState.UNSTARTED -> {
+                YouTubeStreamPlaybackState.UnStarted
+            }
+
+            PlayerState.VIDEO_CUED -> {
+                YouTubeStreamPlaybackState.Prepared(this)
+            }
+
             PlayerState.PLAYING -> {
                 setMute(true)
                 YouTubeStreamPlaybackState.Playing
             }
-            PlayerState.PAUSED -> YouTubeStreamPlaybackState.Paused
+
+            PlayerState.PAUSED -> {
+                YouTubeStreamPlaybackState.Paused
+            }
+
             PlayerState.BUFFERING -> {
                 setMute(true)
                 YouTubeStreamPlaybackState.Buffering
             }
-            PlayerState.ENDED -> YouTubeStreamPlaybackState.Ended
+
+            PlayerState.ENDED -> {
+                YouTubeStreamPlaybackState.Ended
+            }
         }
 
     private fun getConvertPlayerErrorToYouTubeStreamPlayerError(error: PlayerConstants.PlayerError): YouTubeStreamPlayerError =
@@ -268,6 +285,7 @@ class YouTubeStreamPlayerImpl(
             PlaybackRate.RATE_1_75 -> YouTubeStreamPlaybackRate.RATE_1_75
             PlaybackRate.RATE_2 -> YouTubeStreamPlaybackRate.RATE_2
         }
+
     private fun getConvertYouTubePlaybackRatYoPlaybackRate(rate: YouTubeStreamPlaybackRate): PlaybackRate =
         when (rate) {
             YouTubeStreamPlaybackRate.UNKNOWN -> PlaybackRate.UNKNOWN
@@ -293,19 +311,16 @@ class YouTubeStreamPlayerImpl(
         youTubeStreamPlayer?.setShuffle(shuffle)
     }
 
-    override fun addFullscreenListener(): Boolean  =  youtubeStreamPlayerAdapter.addFullscreenListener(this)
-
+    override fun addFullscreenListener(): Boolean = youtubeStreamPlayerAdapter.addFullscreenListener(this)
 
     override fun removeFullscreenListener(): Boolean = youtubeStreamPlayerAdapter.removeFullscreenListener(this)
 
-
     override fun onEnterFullscreen(
         fullscreenView: View,
-        exitFullscreen: () -> Unit
+        exitFullscreen: () -> Unit,
     ) {
         _fullScreenView.update { fullscreenView }
         _exitFullScreen.update { false }
-
     }
 
     override fun onExitFullscreen() {
