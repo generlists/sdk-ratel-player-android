@@ -1,6 +1,5 @@
 package com.sean.ratel.player.ui.control
 
-
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,34 +37,32 @@ import com.sean.ratel.player.ui.control.component.NextButton
 import com.sean.ratel.player.ui.control.component.PlayPauseButton
 import com.sean.ratel.player.ui.control.component.PreviousButton
 import com.sean.ratel.player.ui.control.component.SeekBackButton
-import com.sean.ratel.player.utils.formatTimeFromFloat
-
+import com.sean.ratel.player.utils.PlayerUtils.formatTimeFromFloat
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun MediaScreenControlView(
     modifier: Modifier,
-    viewModel: PlayerViewModel
+    viewModel: PlayerViewModel,
 ) {
-
     Box(
         modifier
             .fillMaxSize()
-           .background(Color.Transparent)
+            .background(Color.Transparent),
     ) {
-
         BottomSeekBarArea(modifier, viewModel)
     }
 }
 
-
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
-
+fun BottomSeekBarArea(
+    modifier: Modifier,
+    viewModel: PlayerViewModel,
+) {
     val currentTime by viewModel.currentTimeMs.collectAsState()
     val duration by viewModel.durationMs.collectAsStateWithLifecycle()
-
 
     val progressRate =
         if (duration == 0L) 0f else (currentTime.toFloat() / duration.toFloat())
@@ -75,12 +72,11 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
         progress = progressRate
     }
 
-
     Column(
         Modifier
-            .fillMaxSize(), verticalArrangement = Arrangement.Bottom
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
     ) {
-
         TimeArea(duration, currentTime)
         CustomSeekBar(
             progress = progress,
@@ -89,19 +85,18 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
                 viewModel.isSeek(true)
                 progress = newProgress
             },
+            onSeekCommit = { finalProgress ->
 
-                onSeekCommit = { finalProgress ->
+                progress = finalProgress
 
-                    progress = finalProgress
+                if (duration > 0L) {
+                    val seekMs = (finalProgress * duration).toLong()
+                    viewModel.seekTo(seekMs)
+                    viewModel.play()
 
-                    if (duration > 0L) {
-                        val seekMs = (finalProgress * duration).toLong()
-                        viewModel.seekTo(seekMs)
-                        viewModel.play()
-
-                        viewModel.isSeek(false)
-                    }
-                },
+                    viewModel.isSeek(false)
+                }
+            },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -110,12 +105,13 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 30.dp)
-                .wrapContentHeight(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 30.dp)
+                    .wrapContentHeight(),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             SeekBackButton(viewModel)
             Spacer(Modifier.width(5.dp))
@@ -132,7 +128,10 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun TimeArea(duration: Long, currentTime: Long) {
+fun TimeArea(
+    duration: Long,
+    currentTime: Long,
+) {
     Row(
         Modifier
             .fillMaxWidth()

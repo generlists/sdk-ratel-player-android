@@ -15,4 +15,12 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintDimensionRatio="H,16:9"/>
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/player_controller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="@id/play_container"
+        app:layout_constraintEnd_toEndOf="@id/play_container"
+        app:layout_constraintTop_toTopOf="@id/play_container"
+        app:layout_constraintBottom_toBottomOf="@id/play_container"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
