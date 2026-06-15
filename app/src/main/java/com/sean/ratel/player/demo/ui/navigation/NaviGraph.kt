@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.sean.ratel.player.core.data.player.pip.PIPManager
 import com.sean.ratel.player.demo.MainActivity
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.ui.download.AccompanistBrowserScreen
@@ -27,6 +28,7 @@ fun NavGraph(
     navController: NavHostController,
     themeMode: ThemeMode,
     startDestination: String = Destination.Home.route,
+    pipManager: PIPManager,
     navigator: Navigator,
     finish: () -> Unit = {},
 ) {
@@ -88,6 +90,7 @@ fun NavGraph(
                     modifier = modifier,
                     urls = it,
                     startIndex = startIndex,
+                    pipManager = pipManager,
                     themeMode = themeMode,
                     downloadViewModel = videoDownloadViewModel,
                 )

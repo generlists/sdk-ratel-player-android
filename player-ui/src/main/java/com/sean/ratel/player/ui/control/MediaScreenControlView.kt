@@ -1,6 +1,5 @@
 package com.sean.ratel.player.ui.control
 
-
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,34 +37,35 @@ import com.sean.ratel.player.ui.control.component.NextButton
 import com.sean.ratel.player.ui.control.component.PlayPauseButton
 import com.sean.ratel.player.ui.control.component.PreviousButton
 import com.sean.ratel.player.ui.control.component.SeekBackButton
-import com.sean.ratel.player.utils.formatTimeFromFloat
-
+import com.sean.ratel.player.ui.control.component.options.OptionButton
+import com.sean.ratel.player.utils.PlayerUtils.formatTimeFromFloat
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun MediaScreenControlView(
     modifier: Modifier,
-    viewModel: PlayerViewModel
+    viewModel: PlayerViewModel,
+    optionClick: () -> Unit = {},
 ) {
-
     Box(
         modifier
             .fillMaxSize()
-           .background(Color.Transparent)
+            .background(Color.Transparent),
     ) {
-
-        BottomSeekBarArea(modifier, viewModel)
+        BottomSeekBarArea(modifier, viewModel, optionClick)
     }
 }
 
-
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
-
+fun BottomSeekBarArea(
+    modifier: Modifier,
+    viewModel: PlayerViewModel,
+    optionClick: () -> Unit,
+) {
     val currentTime by viewModel.currentTimeMs.collectAsState()
     val duration by viewModel.durationMs.collectAsStateWithLifecycle()
-
 
     val progressRate =
         if (duration == 0L) 0f else (currentTime.toFloat() / duration.toFloat())
@@ -75,13 +75,13 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
         progress = progressRate
     }
 
-
     Column(
         Modifier
-            .fillMaxSize(), verticalArrangement = Arrangement.Bottom
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
     ) {
 
-        TimeArea(duration, currentTime)
+        TimePlayOptionArea(duration, currentTime, optionClick)
         CustomSeekBar(
             progress = progress,
             onSeekPreview = { newProgress ->
@@ -89,19 +89,18 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
                 viewModel.isSeek(true)
                 progress = newProgress
             },
+            onSeekCommit = { finalProgress ->
 
-                onSeekCommit = { finalProgress ->
+                progress = finalProgress
 
-                    progress = finalProgress
+                if (duration > 0L) {
+                    val seekMs = (finalProgress * duration).toLong()
+                    viewModel.seekTo(seekMs)
+                    viewModel.play()
 
-                    if (duration > 0L) {
-                        val seekMs = (finalProgress * duration).toLong()
-                        viewModel.seekTo(seekMs)
-                        viewModel.play()
-
-                        viewModel.isSeek(false)
-                    }
-                },
+                    viewModel.isSeek(false)
+                }
+            },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -110,12 +109,13 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 30.dp)
-                .wrapContentHeight(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 30.dp)
+                    .wrapContentHeight(),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             SeekBackButton(viewModel)
             Spacer(Modifier.width(5.dp))
@@ -132,18 +132,23 @@ fun BottomSeekBarArea(modifier: Modifier, viewModel: PlayerViewModel) {
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun TimeArea(duration: Long, currentTime: Long) {
+fun TimePlayOptionArea(
+    duration: Long,
+    currentTime: Long,
+    optionClick:()->Unit
+) {
     Row(
         Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(bottom = 10.dp),
+            .wrapContentHeight(),
+            //.padding(bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = if (currentTime > 0.0f) formatTimeFromFloat(currentTime.toFloat()) else "",
             Modifier
                 .wrapContentSize()
-                .padding(start = 15.dp, top = 5.dp),
+                .padding(start = 15.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
@@ -154,7 +159,7 @@ fun TimeArea(duration: Long, currentTime: Long) {
             text = if (currentTime > 0.0f) "/" else "",
             Modifier
                 .wrapContentSize()
-                .padding(start = 5.dp, top = 5.dp),
+                .padding(start = 5.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
@@ -165,12 +170,15 @@ fun TimeArea(duration: Long, currentTime: Long) {
             text = if (currentTime > 0.0f) formatTimeFromFloat(duration.toFloat()) else "00:00",
             Modifier
                 .wrapContentSize()
-                .padding(start = 5.dp, top = 5.dp),
+                .padding(start = 5.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp,
             color = if (LocalInspectionMode.current) Color.Black else Color.White,
         )
+        OptionButton(onClick = {
+            optionClick()
+        })
     }
 }

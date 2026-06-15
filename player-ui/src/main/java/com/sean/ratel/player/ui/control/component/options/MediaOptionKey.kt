@@ -9,5 +9,6 @@ enum class MediaOptionKey {
     SCREEN_BRIGHT,
     SCREEN_VOLUME,
     SCREEN_CAPTURE,
-    SCREEN_SCALE
+    SCREEN_SCALE,
+    SCREEN_PIP,
 }

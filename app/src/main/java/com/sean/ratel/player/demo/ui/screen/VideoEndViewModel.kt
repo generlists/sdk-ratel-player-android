@@ -1,6 +1,8 @@
 package com.sean.ratel.player.demo.ui.screen
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +10,7 @@ import com.sean.ratel.player.core.data.domain.model.InfoType
 import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
 import com.sean.ratel.player.core.data.domain.model.Quality
+import com.sean.ratel.player.core.data.domain.model.Resolution
 import com.sean.ratel.player.demo.data.download.domain.VideoDownloadedInfo
 import com.sean.ratel.player.ui.MediaOptions
 import com.sean.ratel.player.ui.control.component.options.MediaOptionKey
@@ -30,6 +33,8 @@ class VideoEndViewModel
     ) : ViewModel() {
         private val _mediaOptions = MutableStateFlow(MediaOptions())
         val mediaOptions: StateFlow<MediaOptions> = _mediaOptions
+        private val _resolution = MutableStateFlow<Resolution>(Resolution(0, 0, 1.7f))
+        val resolution: StateFlow<Resolution> = _resolution
 
         private val _endTransferList =
             MutableStateFlow<List<Pair<String, List<Pair<Quality, PlayMediaItem>>>>?>(null)
@@ -88,12 +93,44 @@ class VideoEndViewModel
                         // setShuffle(value.value)
                     }
                 }
+
+                key == MediaOptionKey.SCREEN_PIP && value is MediaOptionValue.Toggle -> {
+                    _mediaOptions.update { currentOptions ->
+                        currentOptions.copy(pip = value)
+//                        val intent =
+//                            Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS").apply {
+//                                data = "package:${context.packageName}".toUri()
+//                            }
+//                        pipSettingsLauncher.launch(intent)
+
+                        // preference 저장
+                        // setScreenBrightness(value.value)
+                    }
+                    // 한번이라도 pip 를 클릭해서 enter 해야 enable,disable 가능
+                    val intent =
+                        Intent(
+                            "android.settings.PICTURE_IN_PICTURE_SETTINGS",
+                            Uri.parse("package:${context.packageName}"),
+                        )
+                    intent.apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+
+                    context.startActivity(intent)
+                }
             }
 
             Log.d("optionChanged", "after optionChanged ${_mediaOptions.value}")
         }
 
-        fun getDummyData(): PreviewInfoData {
+        fun setResolution(resolution: Resolution) {
+            _resolution.value = resolution
+        }
+
+        fun getDummyData(
+            id: String,
+            memoText: String,
+        ): PreviewInfoData {
             val mainLocalInfoList =
                 listOf<Pair<String, String>>(
                     "메인 폴더" to "카메라",
@@ -116,7 +153,9 @@ class VideoEndViewModel
             return PreviewInfoData(
                 infoType = InfoType.LocalVideoInfo,
                 bitmap = null,
-                title = "영상정보 이다 ",
+                title = "영상정보 이다",
+                id = id,
+                memoText = memoText,
                 mainInfoList = mainLocalInfoList,
                 subInfoList = subLocalInfoList,
                 confirmText = "확인",

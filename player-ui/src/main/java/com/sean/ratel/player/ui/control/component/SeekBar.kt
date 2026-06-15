@@ -30,21 +30,20 @@ import androidx.compose.ui.unit.dp
 fun CustomSeekBar(
     modifier: Modifier = Modifier,
     progress: Float, // 0f ~ 1f
-    onSeekPreview: (Float) -> Unit,   // 드래그 중
-    onSeekCommit: (Float) -> Unit,    // 손 놓았을 때
+    onSeekPreview: (Float) -> Unit, // 드래그 중
+    onSeekCommit: (Float) -> Unit, // 손 놓았을 때
     barHeight: Dp = 4.dp,
     thumbRadius: Dp = 8.dp,
     backgroundColor: Color = Color.DarkGray,
-    progressColor: Color = Color.White
+    progressColor: Color = Color.White,
 ) {
-
     BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(20.dp)
-       )
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(20.dp),
+    )
     {
-
         val widthPx = constraints.maxWidth.toFloat()
         val density = LocalDensity.current
         val thumbPx = with(density) { thumbRadius.toPx() }
@@ -56,41 +55,39 @@ fun CustomSeekBar(
 
         // 터치 처리 레이어
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(widthPx) {
-                    detectTapGestures { offset ->
-                        val p = progressFromX(offset.x)
-                        onSeekPreview(p)
-                        onSeekCommit(p) // 탭은 즉시 이동
-                    }
-                }
-                .pointerInput(widthPx) {
-                    var lastX = 0f
-
-                    detectDragGestures(
-
-
-                        onDrag = { change, _ ->
-                            change.consume()
-
-                            lastX = change.position.x
-                            onSeekPreview(progressFromX(lastX))
-                        },
-
-                        onDragEnd = {
-                            onSeekCommit(progressFromX(lastX))
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .pointerInput(widthPx) {
+                        detectTapGestures { offset ->
+                            val p = progressFromX(offset.x)
+                            onSeekPreview(p)
+                            onSeekCommit(p) // 탭은 즉시 이동
                         }
-                    )
-                }
+                    }.pointerInput(widthPx) {
+                        var lastX = 0f
+
+                        detectDragGestures(
+                            onDrag = { change, _ ->
+                                change.consume()
+
+                                lastX = change.position.x
+                                onSeekPreview(progressFromX(lastX))
+                            },
+                            onDragEnd = {
+                                onSeekCommit(progressFromX(lastX))
+                            },
+                        )
+                    },
         ) {
             /* -------------------------
              * Track (배경 + 진행)
              * ------------------------- */
             Canvas(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .fillMaxWidth(),
             ) {
                 val barHeightPx = barHeight.toPx()
                 val barTop = center.y - barHeightPx / 2f
@@ -100,18 +97,19 @@ fun CustomSeekBar(
                     color = backgroundColor,
                     topLeft = Offset(0f, barTop),
                     size = Size(size.width, barHeightPx),
-                    cornerRadius = CornerRadius(barHeightPx / 2f)
+                    cornerRadius = CornerRadius(barHeightPx / 2f),
                 )
 
                 // 진행 바
                 drawRoundRect(
                     color = progressColor,
                     topLeft = Offset(0f, barTop),
-                    size = Size(
-                        size.width * progress.coerceIn(0f, 1f),
-                        barHeightPx
-                    ),
-                    cornerRadius = CornerRadius(barHeightPx / 2f)
+                    size =
+                        Size(
+                            size.width * progress.coerceIn(0f, 1f),
+                            barHeightPx,
+                        ),
+                    cornerRadius = CornerRadius(barHeightPx / 2f),
                 )
             }
 
@@ -119,23 +117,24 @@ fun CustomSeekBar(
              * Thumb
              * ------------------------- */
             Canvas(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .offset {
-                        IntOffset(
-                            x = (
-                                    progress.coerceIn(0f, 1f) *
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .offset {
+                            IntOffset(
+                                x =
+                                    (
+                                        progress.coerceIn(0f, 1f) *
                                             (widthPx - thumbPx * 2f)
                                     ).toInt(),
-                            y = 0
-                        )
-                    }
-                    .size(thumbRadius * 2)
+                                y = 0,
+                            )
+                        }.size(thumbRadius * 2),
             ) {
                 drawCircle(
                     color = progressColor,
                     radius = size.minDimension / 2f,
-                    center = center
+                    center = center,
                 )
             }
         }

@@ -15,12 +15,16 @@ import androidx.media3.common.util.UnstableApi
 
 @OptIn(UnstableApi::class)
 @Composable
-fun ReplayButton(onclick:()->Unit) {
+fun ReplayButton(onclick: () -> Unit) {
     IconButton(onClick = onclick) {
-      Icon(Icons.Default.Replay , contentDescription = "replay", modifier  = Modifier
-        .width(38.dp)
-        .height(38.dp),
-        tint = Color.White)
+        Icon(
+            Icons.Default.Replay,
+            contentDescription = "replay",
+            modifier =
+                Modifier
+                    .width(38.dp)
+                    .height(38.dp),
+            tint = Color.White,
+        )
     }
-
 }

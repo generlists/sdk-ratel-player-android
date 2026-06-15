@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sean.ratel.player.core.data.player.pip.PIPManager
 import com.sean.ratel.player.demo.ui.home.HomeTopBar
 import com.sean.ratel.player.demo.ui.home.MainTab
 import com.sean.ratel.player.demo.ui.navigation.Destination
@@ -45,6 +46,7 @@ import com.sean.ratel.player.ui.ThemeMode
 @Suppress("ktlint:standard:function-naming")
 fun DemoPlayApp(
     mainViewModel: MainViewModel,
+    pipManager: PIPManager,
     finish: () -> Unit,
 ) {
     BackHandler {
@@ -93,6 +95,7 @@ fun DemoPlayApp(
                     modifier = Modifier.padding(innerPaddingModifier),
                     navigator = mainViewModel.navigator,
                     themeMode = ThemeMode.SYSTEM,
+                    pipManager = pipManager,
                     finish = finish,
                 )
 

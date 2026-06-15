@@ -80,11 +80,10 @@ import kotlin.math.roundToInt
 @UnstableApi
 class MediaExoStreamPlayer(
     private val context: Context,
-    private val datasourceFactory:DataSource.Factory,
-   // userAgentProvider: UserAgentProvider
-):MediaStreamPlayer,
-  Player.Listener{
-
+    private val datasourceFactory: DataSource.Factory,
+    // userAgentProvider: UserAgentProvider
+) : MediaStreamPlayer,
+    Player.Listener {
     private var player: ExoPlayer? = null
     private var bufferForPlaybackMs: Int = BUFFER_FOR_PLAYBACK_TIME
     private var bufferForPlaybackAfterRebufferMs: Int = BUFFER_FOR_PLAYBACK_AFTER_REBUFFER
@@ -92,10 +91,11 @@ class MediaExoStreamPlayer(
     private var minBufferMs: Int = MIN_BUFFER_PLAYBACK_TIME
     private var isPreparing = false
     private var playerIndex: Int? = null
-    private var userAgent: String = "exoplayer"//userAgentProvider.userAgent
+    private var userAgent: String = "exoplayer" // userAgentProvider.userAgent
 
     private val defaultBandwidthMeter =
-        DefaultBandwidthMeter.Builder(context)
+        DefaultBandwidthMeter
+            .Builder(context)
             .setResetOnNetworkTypeChange(true)
             /** Network changes invalidate existing data **/
             // .setInitialBitrateEstimate(Integer.MAX_VALUE.toLong()) // later tuning
@@ -106,18 +106,17 @@ class MediaExoStreamPlayer(
 
     private val _playbackErrorState = MutableStateFlow<PlaybackState>(PlaybackState.Idle(playerIndex))
 
-    override val playbackErrorState: Flow<PlaybackState>
-       =_playbackErrorState
+    override val playbackErrorState: Flow<PlaybackState> =
+        _playbackErrorState
 
-    private  val _isMute = MutableStateFlow(PlayMuteInfo(0,false))
+    private val _isMute = MutableStateFlow(PlayMuteInfo(0, false))
     override val isMute: StateFlow<PlayMuteInfo> = _isMute
 
-    private  val _volume = MutableStateFlow(0f)
+    private val _volume = MutableStateFlow(0f)
     override val volume: StateFlow<Float> = _volume
-    private val _lastSystemVolume= MutableStateFlow<Float>(0f)
+    private val _lastSystemVolume = MutableStateFlow<Float>(0f)
 
-
-    private val _maximumVideoQuality =  MutableStateFlow<Int>(Int.MAX_VALUE)
+    private val _maximumVideoQuality = MutableStateFlow<Int>(Int.MAX_VALUE)
     override val maximumVideoQuality: StateFlow<Int> = _maximumVideoQuality
 
     private val _videoTracks = MutableStateFlow<List<VideoTrack>>(emptyList())
@@ -126,10 +125,8 @@ class MediaExoStreamPlayer(
     override val videoTracks: StateFlow<List<VideoTrack>> = _videoTracks
     override val audioTracks: StateFlow<List<AudioTrack>> = _audioTracks
 
-
     private val _selectedAudioTrack = MutableStateFlow<AudioTrack?>(null)
     override val selectedAudioTrack: StateFlow<AudioTrack?> = _selectedAudioTrack
-
 
     private val _selectedVideoTrack = MutableStateFlow<VideoTrack?>(null)
     override val selectedVideoTrack: StateFlow<VideoTrack?> = _selectedVideoTrack
@@ -140,26 +137,21 @@ class MediaExoStreamPlayer(
     private val _seekForWardIncrement = MutableStateFlow<Long>(SEEK_FOWARD_INCREMENTS_MS)
     override val seekForwardIncrement: StateFlow<Long> = _seekForWardIncrement
 
-
     private val _playSpeed = MutableStateFlow<PlaySpeed>(PlaySpeed.PlaySpeed_1_0)
     override val playSpeed: StateFlow<PlaySpeed> = _playSpeed
-
 
     private val _mediaType = MutableStateFlow<Set<Int>>(setOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_VIDEO))
     override val mediaType: StateFlow<Set<Int>> = _mediaType
 
-
     private val _duration = MutableStateFlow<Long?>(null)
-    override val  duration: StateFlow<Long?> = _duration
-
+    override val duration: StateFlow<Long?> = _duration
 
     private val _isShuffleOn = MutableStateFlow<Boolean>(false)
     override val isShuffleOn: StateFlow<Boolean> = _isShuffleOn
 
+    private val _currentPosition = MutableStateFlow<Long?>(null)
 
-    private val _currentPosition= MutableStateFlow<Long?>(null)
-
-    override val  currentPosition:StateFlow<Long?> = _currentPosition
+    override val currentPosition: StateFlow<Long?> = _currentPosition
 
     private val _repeatMode = MutableStateFlow<RepeatMode>(RepeatMode.REPEAT_OFF)
     override val repeatMode: StateFlow<RepeatMode> = _repeatMode
@@ -170,20 +162,18 @@ class MediaExoStreamPlayer(
     private val _currentIndex = MutableStateFlow<Int>(0)
     override val currentIndex: StateFlow<Int> = _currentIndex
 
-
-
-    private val _resolution = MutableStateFlow(
-        Resolution(
-            1080,
-            720,
-            1F
+    private val _resolution =
+        MutableStateFlow(
+            Resolution(
+                1080,
+                720,
+                1F,
+            ),
         )
-    )
     override val resolution: Flow<Resolution> = _resolution
 
     private val _sampleBandWidth = MutableStateFlow(SampleBandWidth(0, 0L, 0L))
     override val sampleBandWidth: Flow<SampleBandWidth> = _sampleBandWidth
-
 
     override fun setPlayerConfig(configurations: Configurations) {
         this.bufferForPlaybackAfterRebufferMs =
@@ -207,71 +197,69 @@ class MediaExoStreamPlayer(
         }
     }
 
-    override fun start(uri: Uri, cacheKey: String?) {
-
+    override fun start(
+        uri: Uri,
+        cacheKey: String?,
+    ) {
         player?.let { release() }
-        RLog.d("MediaScreen","start!!!!!!!!!!!!!!!!!! $uri  $cacheKey")
+        RLog.d("MediaScreen", "start!!!!!!!!!!!!!!!!!! $uri  $cacheKey")
         _playbackState.update { PlaybackState.Idle(playerIndex) }
 
+        player =
+            createPlayer()?.apply {
+                initListener(this)
+                isPreparing = true
+                _playbackState.update {
+                    PlaybackState.Preparing(playerIndex)
+                }
 
-        player = createPlayer()?.apply {
-            initListener(this)
-            isPreparing = true
-            _playbackState.update {
-                PlaybackState.Preparing(playerIndex)
+                setMediaSource(getMediaSource(uri, cacheKey))
+                _mediaType.value = detectMediaType(datasourceFactory, uri)
+
+                prepare()
+                mutePlay(_isMute.value)
+                setShuffleOn(_isShuffleOn.value)
+                setRepeat(_repeatMode.value)
+
+                playWhenReady = true
             }
-
-            setMediaSource(getMediaSource(uri, cacheKey))
-            _mediaType.value = detectMediaType(datasourceFactory,uri)
-
-            prepare()
-            mutePlay(_isMute.value)
-            setShuffleOn(_isShuffleOn.value)
-            setRepeat(_repeatMode.value)
-
-            playWhenReady = true
-        }
 
         RLog.d(
             "PLAYER",
-            "play = ${uri} userAgent : $userAgent ,  player : $player , cacheKey : ${cacheKey}"
+            "play = $uri userAgent : $userAgent ,  player : $player , cacheKey : $cacheKey",
         )
-
     }
-
 
     override fun start(
         items: List<MediaItem>,
-        startIndex:Int,
-        cacheKey: String?
+        startIndex: Int,
+        cacheKey: String?,
     ) {
-
         player?.release()
-        RLog.d("MediaScreen","start!!!!!!!!!!!!!!")
-        _playbackState.update { PlaybackState.Idle()}
+        RLog.d("MediaScreen", "start!!!!!!!!!!!!!!")
+        _playbackState.update { PlaybackState.Idle() }
 
-        player = createPlayer()?.apply {
-            initListener(this)
+        player =
+            createPlayer()?.apply {
+                initListener(this)
 
-            isPreparing = true
-            _playbackState.update {
-                PlaybackState.Preparing()
+                isPreparing = true
+                _playbackState.update {
+                    PlaybackState.Preparing()
+                }
+
+                setMediaItems(items, startIndex, C.TIME_UNSET)
+
+                prepare()
+                // _mediaType.value = detectMediaType(datasourceFactory,uri)
+
+                mutePlay(_isMute.value)
+
+                playWhenReady = true
             }
-
-            setMediaItems(items,startIndex,C.TIME_UNSET)
-
-            prepare()
-            //_mediaType.value = detectMediaType(datasourceFactory,uri)
-
-            mutePlay(_isMute.value)
-
-            playWhenReady = true
-        }
-
     }
 
     override fun rePlay(mediaIndex: Int) {
-
         seekTo(mediaIndex, 0)
 
         isPreparing = true
@@ -283,19 +271,18 @@ class MediaExoStreamPlayer(
         mutePlay(_isMute.value)
 
         player?.playWhenReady = true
-
     }
 
     override fun replaceMediaItem(
         index: Int,
-        newMediaItem: MediaItem
+        newMediaItem: MediaItem,
     ) {
-        //player?.replaceMediaItem(index, newMediaItem)  todo 안됨
+        // player?.replaceMediaItem(index, newMediaItem)  todo 안됨
 
         val wasPlaying = player?.isPlaying == true
 
         val currentIndex = player?.currentMediaItemIndex ?: return
-        val currentPosition = player?.currentPosition?:0
+        val currentPosition = player?.currentPosition ?: 0
         player?.stop()
         player?.removeMediaItem(currentIndex)
         player?.addMediaItem(currentIndex, newMediaItem)
@@ -306,23 +293,17 @@ class MediaExoStreamPlayer(
         }
         player?.prepare()
 
-
         player?.playWhenReady = wasPlaying
-
     }
-
 
     override fun start(uri: Uri) {
-        start(uri,null)
+        start(uri, null)
     }
 
-    override fun isPrevItem(): Boolean
-        = player?.hasPreviousMediaItem() ?: false
+    override fun isPrevItem(): Boolean = player?.hasPreviousMediaItem() ?: false
 
-
-    override fun pervPlay(isReset:Boolean) {
-
-        if(isReset){
+    override fun pervPlay(isReset: Boolean) {
+        if (isReset) {
             player?.let { p ->
                 p.stop()
                 p.seekToPreviousMediaItem()
@@ -334,20 +315,18 @@ class MediaExoStreamPlayer(
         player?.seekToPreviousMediaItem()
     }
 
-    override fun isNextItem(): Boolean
-        = player?.hasNextMediaItem() ?: false
+    override fun isNextItem(): Boolean = player?.hasNextMediaItem() ?: false
 
-
-    override fun nextPlay(isReset:Boolean) {
-      if(isReset){
-          player?.let { p ->
-              p.stop()
-              p.seekToNextMediaItem()
-              p.prepare()
-              p.play()
-          }
-          return
-      }
+    override fun nextPlay(isReset: Boolean) {
+        if (isReset) {
+            player?.let { p ->
+                p.stop()
+                p.seekToNextMediaItem()
+                p.prepare()
+                p.play()
+            }
+            return
+        }
         player?.seekToNextMediaItem()
     }
 
@@ -369,31 +348,48 @@ class MediaExoStreamPlayer(
             player.playWhenReady = true
         }
         when (player.playbackState) {
-            ExoPlayer.STATE_BUFFERING -> if (player.playWhenReady) _playbackState.update {
-                PlaybackState.Buffering(
-                    playerIndex
-                )
+            ExoPlayer.STATE_BUFFERING -> {
+                if (player.playWhenReady) {
+                    _playbackState.update {
+                        PlaybackState.Buffering(
+                            playerIndex,
+                        )
+                    }
+                }
             }
 
-            ExoPlayer.STATE_READY -> _playbackState.update {
-                PlaybackState.Playing(
-                    player = this,
-                    playerIndex
-                )
+            ExoPlayer.STATE_READY -> {
+                _playbackState.update {
+                    PlaybackState.Playing(
+                        player = this,
+                        playerIndex,
+                    )
+                }
             }
 
-            else -> Unit
+            else -> {
+                Unit
+            }
         }
     }
+
     override fun clearVideoSurface() = setVideoSurfaceView(null)
 
     override fun setMute(mute: Boolean) {
         _isMute.update { PlayMuteInfo(0, mute) }
     }
-    override fun setMute(playIndex: Int, mute: Boolean) {
+
+    override fun setMute(
+        playIndex: Int,
+        mute: Boolean,
+    ) {
         _isMute.update { PlayMuteInfo(playIndex, mute) }
     }
-    override fun setMaximumVideoQuality(quality: Int, isUserSelect: Boolean) {
+
+    override fun setMaximumVideoQuality(
+        quality: Int,
+        isUserSelect: Boolean,
+    ) {
         RLog.d(TAG, "setMaximumVideoQuality() called with: quality = $quality")
         val videoTracks = videoTracks.value
 //        if (videoTracks.all { track -> track.height != null }) {
@@ -415,11 +411,12 @@ class MediaExoStreamPlayer(
         }
         val bitrate = bitrateMap.ceilingEntry(quality)?.value ?: Int.MAX_VALUE
         player?.apply {
-            trackSelectionParameters = trackSelectionParameters
-                .buildUpon()
-                .clearVideoSizeConstraints()
-                .setMaxVideoBitrate(bitrate)
-                .build()
+            trackSelectionParameters =
+                trackSelectionParameters
+                    .buildUpon()
+                    .clearVideoSizeConstraints()
+                    .setMaxVideoBitrate(bitrate)
+                    .build()
         }
         configurations(context) {
             playConfiguration(
@@ -429,7 +426,7 @@ class MediaExoStreamPlayer(
                 minBufferMs = minBufferMs,
                 maximumVideoQuality = quality,
                 seekBackIncrementMs = _seekBackIncrement.value,
-                seekForwardIncrementMs = _seekForWardIncrement.value
+                seekForwardIncrementMs = _seekForWardIncrement.value,
             )
         }
     }
@@ -453,11 +450,13 @@ class MediaExoStreamPlayer(
         player?.volume = volume
     }
 
-
-    override fun onDeviceVolumeChanged(volume: Int, muted: Boolean) {
+    override fun onDeviceVolumeChanged(
+        volume: Int,
+        muted: Boolean,
+    ) {
         super.onDeviceVolumeChanged(volume, muted)
 
-        RLog.d("PLAYER","volume : $volume ,muted : $muted")
+        RLog.d("PLAYER", "volume : $volume ,muted : $muted")
 
         // volume: 현재 시스템 볼륨 (정수 0~15)
         // 시스템 볼륨이 위로(+) 눌렸는지 확인
@@ -465,21 +464,20 @@ class MediaExoStreamPlayer(
 
         // 핵심 조건: "앱이 뮤트인데 시스템 볼륨을 키웠는가?"
         if ((player?.volume ?: 0f) <= 0f && isVolumeUp) {
-            val maxVol = player?.deviceVolume?.toFloat()?:15f
+            val maxVol = player?.deviceVolume?.toFloat() ?: 15f
             val newAppVolume = volume / maxVol
 
             // 소수점 한 자리로 예쁘게 깎아서 앱 볼륨에 강제 주입!
             val rounded = (newAppVolume * 10).roundToInt() / 10.0f
             player?.volume = rounded
 
-            _volume.update { rounded}
+            _volume.update { rounded }
         }
 
         setMute(muted)
 
         // 시스템 볼륨값 업데이트 (다음 비교를 위해)
-        _lastSystemVolume.update {volume.toFloat()}
-
+        _lastSystemVolume.update { volume.toFloat() }
     }
 
     override fun pause() {
@@ -498,41 +496,42 @@ class MediaExoStreamPlayer(
 
     override fun seekTo(msec: Long) {
         player?.seekTo(msec)
-
     }
 
-    override fun seekTo(mediaIndex:Int,msec: Long){
-        player?.seekTo(mediaIndex,msec)
+    override fun seekTo(
+        mediaIndex: Int,
+        msec: Long,
+    ) {
+        player?.seekTo(mediaIndex, msec)
     }
 
     override fun isPlaying(): Boolean {
-        RLog.d("Player","playbackState : ${player?.playbackState} , playWhenReady : ${player?.playWhenReady}")
+        RLog.d("Player", "playbackState : ${player?.playbackState} , playWhenReady : ${player?.playWhenReady}")
         return player != null &&
-                player?.playbackState == ExoPlayer.STATE_READY &&
-                player?.playWhenReady == true
+            player?.playbackState == ExoPlayer.STATE_READY &&
+            player?.playWhenReady == true
     }
 
-    override fun isPlayComplete(): Boolean = player != null &&
+    override fun isPlayComplete(): Boolean =
+        player != null &&
             player?.playbackState == ExoPlayer.STATE_ENDED
-
-
-
 
     override fun getBufferedPosition(): Long = player?.bufferedPosition ?: 0
 
     override fun release() {
-        RLog.d("MediaScreen","release() player : $player")
+        RLog.d("MediaScreen", "release() player : $player")
         _playbackState.update { PlaybackState.Release(playerIndex) }
         clearVideoSurface()
         player?.clearMediaItems()
-        player?.also {
-            it.removeListener(this)
-            it.release()
-        }.also { player = null }
+        player
+            ?.also {
+                it.removeListener(this)
+                it.release()
+            }.also { player = null }
         player = null
-        RLog.d("MediaScreen","release() release")
+        RLog.d("MediaScreen", "release() release")
         _playbackState.update { PlaybackState.Idle(playerIndex) }
-        //todo 캔슬되면 다시 무조건 생성해야함
+        // todo 캔슬되면 다시 무조건 생성해야함
         playerInternalScope.cancel()
     }
 
@@ -543,22 +542,33 @@ class MediaExoStreamPlayer(
     override fun setVideoSurfaceView(surface: SurfaceView?) {
         player?.setVideoSurfaceView(surface)
     }
+
     @Deprecated("Deprecated in Java")
-    override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-        RLog.d("MediaScreen","onPlayerStateChanged playbackState : $playbackState playWhenReady : ${playWhenReady}")
+    override fun onPlayerStateChanged(
+        playWhenReady: Boolean,
+        playbackState: Int,
+    ) {
+        RLog.d("MediaScreen", "onPlayerStateChanged playbackState : $playbackState playWhenReady : $playWhenReady")
         when (playbackState) {
-            Player.STATE_IDLE -> _playbackState.update { PlaybackState.Idle(playerIndex) }
-            Player.STATE_BUFFERING -> if (playWhenReady) _playbackState.update { PlaybackState.Buffering(playerIndex) }
+            Player.STATE_IDLE -> {
+                _playbackState.update { PlaybackState.Idle(playerIndex) }
+            }
+
+            Player.STATE_BUFFERING -> {
+                if (playWhenReady) _playbackState.update { PlaybackState.Buffering(playerIndex) }
+            }
+
             Player.STATE_READY -> {
                 if (playWhenReady) {
                     if (isPreparing) {
-                        _playbackState.update { PlaybackState.Prepared(this,playerIndex) }
+                        _playbackState.update { PlaybackState.Prepared(this, playerIndex) }
                         isPreparing = false
                     }
-                    _playbackState.update { PlaybackState.Playing(this,playerIndex) }
+                    _playbackState.update { PlaybackState.Playing(this, playerIndex) }
                     player?.duration?.let {
-                        if (it > 0)
+                        if (it > 0) {
                             _duration.update { player?.duration }
+                        }
                     }
 
                     startPositionUpdates(playerInternalScope)
@@ -574,9 +584,13 @@ class MediaExoStreamPlayer(
             }
         }
     }
-    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+
+    override fun onTimelineChanged(
+        timeline: Timeline,
+        reason: Int,
+    ) {
         if (timeline.isEmpty) return
-        val playerIndex = player?.currentMediaItemIndex?:0
+        val playerIndex = player?.currentMediaItemIndex ?: 0
 
         val window = Timeline.Window()
         timeline.getWindow(playerIndex, window)
@@ -584,12 +598,12 @@ class MediaExoStreamPlayer(
         val duration = window.durationMs
 
         if (duration > 0 && duration != C.TIME_UNSET) {
-            _duration.update{duration}
+            _duration.update { duration }
         }
     }
 
     override fun onPlayerError(error: PlaybackException) {
-        Log.e("MediaScreen","cause : ${error.cause}")
+        Log.e("MediaScreen", "cause : ${error.cause}")
         when (error.errorCode) {
             PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW -> {
                 // restart play
@@ -597,14 +611,16 @@ class MediaExoStreamPlayer(
                 if (uri == null) {
                     dispatchError(error.errorCode, error.cause)
                 } else {
-                    //todo error  처리
+                    // todo error  처리
                     val prevVolume = _isMute.value
-                    //start(uri, null)
+                    // start(uri, null)
                     _isMute.update { prevVolume }
                 }
             }
 
-            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> dispatchError(error.errorCode, error.cause)
+            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> {
+                dispatchError(error.errorCode, error.cause)
+            }
 
             else -> {
                 dispatchError(error.errorCode, error.cause)
@@ -612,13 +628,15 @@ class MediaExoStreamPlayer(
         }
     }
 
-    override fun onVideoSizeChanged(videoSize: VideoSize) = _resolution.update {
-        Resolution(
-            videoSize.width,
-            videoSize.height,
-            videoSize.pixelWidthHeightRatio
-        )
-    }
+    override fun onVideoSizeChanged(videoSize: VideoSize) =
+        _resolution.update {
+            Resolution(
+                videoSize.width,
+                videoSize.height,
+                videoSize.pixelWidthHeightRatio,
+            )
+        }
+
     override fun onTracksChanged(tracks: Tracks) {
         RLog.d(TAG, "onTracksChanged() tracks = $tracks")
         val videoTracks = mutableListOf<VideoTrack>()
@@ -636,21 +654,24 @@ class MediaExoStreamPlayer(
         }
         _videoTracks.update { videoTracks }
         _audioTracks.update { audioTracks }
-
     }
-    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+
+    override fun onMediaItemTransition(
+        mediaItem: MediaItem?,
+        reason: Int,
+    ) {
         _currentIndex.value = player?.currentMediaItemIndex ?: 0
         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
             Log.d("PLAYER", "이전 아이템 재생 완료 후 자동 전환됨")
 
-            val duration = player?.duration?:0L
+            val duration = player?.duration ?: 0L
 
             if (duration > 0) {
                 _duration.update { duration }
             } else {
                 CoroutineScope(Dispatchers.Main).launch {
-                    delay(100)   // 50ms 딜레이
-                    val duration = player?.duration?:0L
+                    delay(100) // 50ms 딜레이
+                    val duration = player?.duration ?: 0L
                     _duration.update { duration }
                 }
             }
@@ -658,30 +679,29 @@ class MediaExoStreamPlayer(
             _playbackState.update {
                 PlaybackState.MediaTransition(
                     mediaItem,
-                    MediaStreamTransitionReason.convertToValueToEnum(reason)
+                    MediaStreamTransitionReason.convertToValueToEnum(reason),
                 )
             }
-
         }
     }
-    private fun startPositionUpdates(scope: CoroutineScope) {
 
+    private fun startPositionUpdates(scope: CoroutineScope) {
         positionJob?.cancel()
 
         // despose ->resume 일때 release 후에 재생성
-        //플레이어가 null 이 되면서 activie ->false 로 재생성
+        // 플레이어가 null 이 되면서 activie ->false 로 재생성
         if (!playerInternalScope.isActive) {
             playerInternalScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         }
 
-        positionJob = playerInternalScope.launch {
-
-            while (isActive) {
-                val p = player?.currentPosition ?: 0L
-                _currentPosition.value = p
-                delay(250)
+        positionJob =
+            playerInternalScope.launch {
+                while (isActive) {
+                    val p = player?.currentPosition ?: 0L
+                    _currentPosition.value = p
+                    delay(250)
+                }
             }
-        }
     }
 
     private fun stopPositionUpdates() {
@@ -693,14 +713,15 @@ class MediaExoStreamPlayer(
         val tracks = mutableListOf<VideoTrack>()
         for (i in 0 until group.length) {
             group.getTrackFormat(i).apply {
-                val track = VideoTrack(
-                    id,
-                    if (bitrate == Format.NO_VALUE) null else bitrate,
-                    if (width == Format.NO_VALUE) null else width,
-                    if (height == Format.NO_VALUE) null else height,
-                    if (frameRate == Format.NO_VALUE.toFloat()) null else frameRate,
-                    language
-                )
+                val track =
+                    VideoTrack(
+                        id,
+                        if (bitrate == Format.NO_VALUE) null else bitrate,
+                        if (width == Format.NO_VALUE) null else width,
+                        if (height == Format.NO_VALUE) null else height,
+                        if (frameRate == Format.NO_VALUE.toFloat()) null else frameRate,
+                        language,
+                    )
                 tracks.add(track)
             }
         }
@@ -717,45 +738,57 @@ class MediaExoStreamPlayer(
         }
         return tracks
     }
+
     private fun initListener(player: ExoPlayer?) =
         player?.run {
             addListener(this@MediaExoStreamPlayer)
         }
 
-    //네트워크
-    private fun getMediaSource(uri: Uri,cacheKey:String?): MediaSource =
+    // 네트워크
+    private fun getMediaSource(
+        uri: Uri,
+        cacheKey: String?,
+    ): MediaSource =
         when (Util.inferContentType(uri)) {
             C.CONTENT_TYPE_HLS -> {
-                HlsMediaSource.Factory(getDefaultDatasource()).setAllowChunklessPreparation(true)
+                HlsMediaSource
+                    .Factory(getDefaultDatasource())
+                    .setAllowChunklessPreparation(true)
                     .setLoadErrorHandlingPolicy(
-                        DefaultLoadErrorHandlingPolicy(HLS_REQUEST_RETRY_COUNT)
-                    ).createMediaSource(getMediaItem(uri,cacheKey))
+                        DefaultLoadErrorHandlingPolicy(HLS_REQUEST_RETRY_COUNT),
+                    ).createMediaSource(getMediaItem(uri, cacheKey))
             }
 
-            else -> ProgressiveMediaSource.Factory(getDefaultDatasource())
-                .createMediaSource(MediaItem.Builder().setUri(uri).build())
+            else -> {
+                ProgressiveMediaSource
+                    .Factory(getDefaultDatasource())
+                    .createMediaSource(MediaItem.Builder().setUri(uri).build())
+            }
         }
 
-
-
-
-    private fun getMediaItem(uri: Uri,cacheKey:String?): MediaItem {
-        return MediaItem.Builder()
-            .setCustomCacheKey(cacheKey?:"")
+    private fun getMediaItem(
+        uri: Uri,
+        cacheKey: String?,
+    ): MediaItem =
+        MediaItem
+            .Builder()
+            .setCustomCacheKey(cacheKey ?: "")
             .setUri(uri)
             .setMimeType(MimeTypes.APPLICATION_M3U8)
             .build()
-    }
 
-    fun buildMediaItems(uris: List<Uri>,cacheKey:String?): List<MediaItem> =
-    uris.map { uri ->
-        MediaItem.Builder()
-            .setCustomCacheKey(cacheKey?:"")
-            .setUri(uri)
-            .setMimeType(MimeTypes.VIDEO_MP4)
-            .build()
-    }
-
+    fun buildMediaItems(
+        uris: List<Uri>,
+        cacheKey: String?,
+    ): List<MediaItem> =
+        uris.map { uri ->
+            MediaItem
+                .Builder()
+                .setCustomCacheKey(cacheKey ?: "")
+                .setUri(uri)
+                .setMimeType(MimeTypes.VIDEO_MP4)
+                .build()
+        }
 
 //    fun getMediaItem(
 //        items: List<Uri>
@@ -793,71 +826,71 @@ class MediaExoStreamPlayer(
 //    }
     @OptIn(UnstableApi::class)
     private fun createPlayer(): ExoPlayer? {
-        val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(
-            TARGET_DURATION_MS,
-            (TARGET_DURATION_MS * QUALITY_DECREASE_SCALE).toInt(),
-            (TARGET_DURATION_MS * QUALITY_DECREASE_SCALE).toInt(),
-            AdaptiveTrackSelection.DEFAULT_BANDWIDTH_FRACTION
-        )
+        val videoTrackSelectionFactory =
+            AdaptiveTrackSelection.Factory(
+                TARGET_DURATION_MS,
+                (TARGET_DURATION_MS * QUALITY_DECREASE_SCALE).toInt(),
+                (TARGET_DURATION_MS * QUALITY_DECREASE_SCALE).toInt(),
+                AdaptiveTrackSelection.DEFAULT_BANDWIDTH_FRACTION,
+            )
         val renderersFactory = DefaultRenderersFactory(context)
         renderersFactory.setEnableDecoderFallback(true) // 소프트웨어 코덱 사용
 
         val trackSelector = DefaultTrackSelector(context, videoTrackSelectionFactory)
-        val loadControlBuilder = DefaultLoadControl.Builder()
-            .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
-            .setBufferDurationsMs(
-                minBufferMs,
-                maxBufferMs,
-                bufferForPlaybackMs,
-                bufferForPlaybackAfterRebufferMs
-            ).
-            build()
+        val loadControlBuilder =
+            DefaultLoadControl
+                .Builder()
+                .setAllocator(DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
+                .setBufferDurationsMs(
+                    minBufferMs,
+                    maxBufferMs,
+                    bufferForPlaybackMs,
+                    bufferForPlaybackAfterRebufferMs,
+                ).build()
 
-       val mediaDatsourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(getDefaultDatasource())
-        Log.d("MediaScreen","datasourceFactory : ${datasourceFactory}")
-        return ExoPlayer.Builder(context)
+        val mediaDatsourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(getDefaultDatasource())
+        Log.d("MediaScreen", "datasourceFactory : $datasourceFactory")
+        return ExoPlayer
+            .Builder(context)
             .setMediaSourceFactory(mediaDatsourceFactory)
             .setTrackSelector(trackSelector)
             .setBandwidthMeter(getBandwidthMeter())
             .setLoadControl(loadControlBuilder)
-            .setSeekBackIncrementMs(_seekBackIncrement.value?:SEEK_BACK_INCREMENTS_MS)
-            .setSeekForwardIncrementMs(_seekForWardIncrement.value?:SEEK_BACK_INCREMENTS_MS)
-
+            .setSeekBackIncrementMs(_seekBackIncrement.value ?: SEEK_BACK_INCREMENTS_MS)
+            .setSeekForwardIncrementMs(_seekForWardIncrement.value ?: SEEK_BACK_INCREMENTS_MS)
             .setRenderersFactory(renderersFactory)
-            .setDeviceVolumeControlEnabled(true) //디바인스 볼륨 전달
+            .setDeviceVolumeControlEnabled(true) // 디바인스 볼륨 전달
             .build()
     }
 
-    override fun getPlayer(): ExoPlayer? {
-        return player
-    }
-
+    override fun getPlayer(): ExoPlayer? = player
 
     private fun getBandwidthMeter(): DefaultBandwidthMeter =
 
         defaultBandwidthMeter.apply {
             addEventListener(
                 Handler(Looper.getMainLooper()),
-                bandwidthMeterEventListener
+                bandwidthMeterEventListener,
             )
         }
 
-    private fun getDefaultDatasource(): DataSource.Factory= datasourceFactory
+    private fun getDefaultDatasource(): DataSource.Factory = datasourceFactory
 
-
-    private fun getLastSystemVolume():Int {
+    private fun getLastSystemVolume(): Int {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
     }
-
 
     private val bandwidthMeterEventListener =
         BandwidthMeter.EventListener { elapsedMs: Int, bytes: Long, bitrate: Long ->
             _sampleBandWidth.update { SampleBandWidth(elapsedMs, bytes, bitrate) }
         }
 
-    private fun dispatchError(errorCode: Int, cause: Throwable?) {
-        _playbackErrorState.update { PlaybackState.Error(errorCode, cause,playerIndex) }
+    private fun dispatchError(
+        errorCode: Int,
+        cause: Throwable?,
+    ) {
+        _playbackErrorState.update { PlaybackState.Error(errorCode, cause, playerIndex) }
     }
 
     private fun mutePlay(muteInfo: PlayMuteInfo) {
@@ -872,15 +905,16 @@ class MediaExoStreamPlayer(
     enum class MediaType {
         AUDIO,
         VIDEO,
-        UNKNOWN
+        UNKNOWN,
     }
 
     fun detectMediaTypeFromMediaItem(
         context: Context,
-        mediaItem: MediaItem
+        mediaItem: MediaItem,
     ): MediaType {
-        val uri = mediaItem.localConfiguration?.uri
-            ?: return MediaType.UNKNOWN
+        val uri =
+            mediaItem.localConfiguration?.uri
+                ?: return MediaType.UNKNOWN
 
         if (uri.scheme == ContentResolver.SCHEME_FILE) {
             return detectByMetadataRetriever(uri)
@@ -891,16 +925,16 @@ class MediaExoStreamPlayer(
 
     fun detectByExtractor(
         context: Context,
-        uri: Uri
+        uri: Uri,
     ): MediaType {
-
         val dataSourceFactory =
             DefaultDataSourceFactory(context)
 
-        val trackTypes = detectMediaType(
-            dataSourceFactory,
-            uri
-        )
+        val trackTypes =
+            detectMediaType(
+                dataSourceFactory,
+                uri,
+            )
 
         return when {
             trackTypes.contains(C.TRACK_TYPE_VIDEO) -> MediaType.VIDEO
@@ -908,17 +942,17 @@ class MediaExoStreamPlayer(
             else -> MediaType.UNKNOWN
         }
     }
+
     private fun detectMediaType(
         dataSourceFactory: DataSource.Factory,
-        uri: Uri
+        uri: Uri,
     ): Set<Int> {
-
-        //C.TRACK_TYPE_UNKNOWN = -1
-        //C.TRACK_TYPE_DEFAULT = 0
-        //C.TRACK_TYPE_AUDIO   = 1
-        //C.TRACK_TYPE_VIDEO   = 2
-        //C.TRACK_TYPE_TEXT    = 3
-        //C.TRACK_TYPE_METADATA = 4
+        // C.TRACK_TYPE_UNKNOWN = -1
+        // C.TRACK_TYPE_DEFAULT = 0
+        // C.TRACK_TYPE_AUDIO   = 1
+        // C.TRACK_TYPE_VIDEO   = 2
+        // C.TRACK_TYPE_TEXT    = 3
+        // C.TRACK_TYPE_METADATA = 4
 
         val extractors = DefaultExtractorsFactory().createExtractors()
         val dataSource = dataSourceFactory.createDataSource()
@@ -926,11 +960,12 @@ class MediaExoStreamPlayer(
         val dataSpec = DataSpec(uri)
         val length = dataSource.open(dataSpec)
 
-        val input = DefaultExtractorInput(
-            dataSource,
-            0,
-            length
-        )
+        val input =
+            DefaultExtractorInput(
+                dataSource,
+                0,
+                length,
+            )
 
         val trackTypes = mutableSetOf<Int>()
 
@@ -941,19 +976,26 @@ class MediaExoStreamPlayer(
                     continue
                 }
 
-                extractor.init(object : ExtractorOutput {
-                    override fun track(id: Int, type: Int): TrackOutput {
-                        trackTypes.add(type)
-                        return DummyTrackOutput()
-                    }
+                extractor.init(
+                    object : ExtractorOutput {
+                        override fun track(
+                            id: Int,
+                            type: Int,
+                        ): TrackOutput {
+                            trackTypes.add(type)
+                            return DummyTrackOutput()
+                        }
 
-                    override fun endTracks() {}
-                    override fun seekMap(seekMap: SeekMap) {}
-                })
+                        override fun endTracks() {}
+
+                        override fun seekMap(seekMap: SeekMap) {}
+                    },
+                )
 
                 // 🔥 이게 핵심: read()를 실제로 호출
                 val positionHolder = PositionHolder()
-                repeat(5) {   // 몇 프레임만 읽어도 충분
+                repeat(5) {
+                    // 몇 프레임만 읽어도 충분
                     extractor.read(input, positionHolder)
                 }
 
@@ -972,7 +1014,7 @@ class MediaExoStreamPlayer(
             retriever.setDataSource(uri.path!!)
             val hasVideo =
                 retriever.extractMetadata(
-                    MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO
+                    MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO,
                 )
             if (hasVideo == "yes") MediaType.VIDEO else MediaType.AUDIO
         } catch (e: Exception) {
@@ -982,17 +1024,22 @@ class MediaExoStreamPlayer(
         }
     }
 
-    override fun getVideoCapture(view: View, infoCallback: (Bitmap?) -> Unit) {
-        when{
-            view is SurfaceView -> captureSurfaceView(view,infoCallback)
-            else->Unit
+    override fun getVideoCapture(
+        view: View,
+        infoCallback: (Bitmap?) -> Unit,
+    ) {
+        when {
+            view is SurfaceView -> captureSurfaceView(view, infoCallback)
+            else -> Unit
         }
     }
 
-
-    private fun captureSurfaceView(surfaceView: SurfaceView, infoCallback: (Bitmap?) -> Unit) {
+    private fun captureSurfaceView(
+        surfaceView: SurfaceView,
+        infoCallback: (Bitmap?) -> Unit,
+    ) {
         // 1. 빈 비트맵 생성 (SurfaceView 크기만큼)
-        if(surfaceView.width>0 && surfaceView.height>0){
+        if (surfaceView.width > 0 && surfaceView.height > 0) {
             val bitmap = createBitmap(surfaceView.width, surfaceView.height)
 
             // 2. PixelCopy 실행 (SurfaceView 내용을 비트맵으로 복사)
@@ -1007,20 +1054,18 @@ class MediaExoStreamPlayer(
                     { result ->
                         if (result == PixelCopy.SUCCESS) {
                             infoCallback(bitmap)
-                        }else{
+                        } else {
                             infoCallback(null)
                         }
                     },
-                    Handler(Looper.getMainLooper())
+                    Handler(Looper.getMainLooper()),
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }else {
+        } else {
             infoCallback(null)
         }
-
-
     }
 
     companion object {
@@ -1035,7 +1080,5 @@ class MediaExoStreamPlayer(
         private const val MAX_VIDEO_QUALITY = Int.MAX_VALUE
         private const val SEEK_BACK_INCREMENTS_MS = 5_000L
         private const val SEEK_FOWARD_INCREMENTS_MS = 5_000L
-
     }
-
 }
