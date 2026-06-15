@@ -1,8 +1,17 @@
 package com.sean.ratel.player.demo.ui.screen
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.util.Log
+import android.util.Size
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,11 +27,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sean.ratel.player.core.data.domain.model.InfoType
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
+import com.sean.ratel.player.core.data.player.pip.PIPManager
+import com.sean.ratel.player.core.data.player.pip.PipResult
 import com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 import com.sean.ratel.player.demo.data.download.domain.DownloadBland
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
@@ -41,11 +54,17 @@ fun EndPlayerScreen(
     themeMode: ThemeMode,
     urls: String,
     startIndex: Int,
+    pipManager: PIPManager,
     playerViewModel: PlayerViewModel = hiltViewModel(),
     endViewModel: VideoEndViewModel = hiltViewModel(),
     downloadViewModel: VideoDownloadViewModel,
 ) {
     val context = LocalContext.current
+    val activity = context as Activity
+    var visibleRect by remember { mutableStateOf(Rect()) }
+    var screenSize by remember { mutableStateOf(Size(0, 0)) }
+    val shareLauncher = GetShareLauncher(activity)
+
     var shareButtonClick by remember {
         mutableStateOf<Pair<Boolean, PreviewInfoData?>>(
             Pair(
@@ -61,6 +80,13 @@ fun EndPlayerScreen(
             .filter { it.downloadBrand == DownloadBland.PIXABAY }
 
     val mediaList by endViewModel.endTransferList.collectAsState()
+    LaunchedEffect(playerViewModel.mediaStreamPlayer) {
+        playerViewModel.mediaStreamPlayer.resolution.collect { resolution ->
+            if (resolution.width > 0 && resolution.height > 0) {
+                endViewModel.setResolution(resolution)
+            }
+        }
+    }
 
     LaunchedEffect(downloadedItemList) {
         endViewModel.fetchList(startIndex, downloadedItemList)
@@ -69,7 +95,17 @@ fun EndPlayerScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .onGloballyPositioned { layoutCoordinates ->
+                val positionInWindow = layoutCoordinates.positionInWindow()
+                screenSize = Size(layoutCoordinates.size.width, layoutCoordinates.size.height)
+                visibleRect =
+                    Rect(
+                        positionInWindow.x.toInt(),
+                        positionInWindow.y.toInt(),
+                        (positionInWindow.x + layoutCoordinates.size.width).toInt(),
+                        (positionInWindow.y + layoutCoordinates.size.height).toInt(),
+                    )
+            }.background(Color.Black),
         contentAlignment = Alignment.Center,
     ) {
         mediaList?.let {
@@ -81,7 +117,7 @@ fun EndPlayerScreen(
                 startIndex = 0,
                 listStartIndex = startIndex,
                 qualityStartIndex = 0,
-                topBar = { onInfoClick, onOptionClick ->
+                topBar = { onInfoClick ->
                     EndTopBar(
                         modifier = Modifier,
                         historyBack = {},
@@ -92,14 +128,33 @@ fun EndPlayerScreen(
                                 }
                             }, endViewModel.mediaOptions.value.speed)
                         },
-                        infoClick = { onInfoClick(endViewModel.getDummyData()) },
-                        bookMarkClick = {},
-                        optionClick = { onOptionClick() },
+                        infoClick = { result ->
+                            onInfoClick(
+                                endViewModel.getDummyData(
+                                    it[startIndex].first,
+                                    "memo 좋은날!!",
+                                ),
+                            ) { confirmed ->
+                                result(confirmed)
+                            }
+                        },
+                        bookMarkClick = {
+                            onClickPipAction(
+                                context = context,
+                                visibleRect = visibleRect,
+                                screenSize = screenSize,
+                                pipManager = pipManager,
+                                playerViewModel = playerViewModel,
+                                endPlayerViewModel = endViewModel,
+                            )
+                        },
                     )
                 },
                 onOptionChanged = { k, v ->
                     Log.d("LOG_TAG", "optionChanged k = $k v = $v")
                     endViewModel.setUpdateMediaOption(k, v)
+                },
+                updateMemo = { type, id, memo ->
                 },
             )
         }
@@ -109,7 +164,7 @@ fun EndPlayerScreen(
 
         if (shareButtonClick.first) {
             shareButtonClick.second?.let { previewInfoData ->
-                PrevViewInfoDialog(previewInfoData, themeMode, onConfirm = { infoType ->
+                PrevViewInfoDialog(previewInfoData, themeMode, onMemoChange = { a, b, c -> }, onConfirm = { infoType ->
                     scope.launch {
                         previewInfoData.bitmap?.let { bitmap ->
 
@@ -128,7 +183,7 @@ fun EndPlayerScreen(
                                         } ?: run {
                                             uri
                                         }
-
+                                    Log.d("hbungshin", "ssssssssss")
                                     openShareSheet = Pair(true, uri)
                                 },
                             )
@@ -153,9 +208,74 @@ fun EndPlayerScreen(
                     imageShareManager = endViewModel.imageShareManager,
                     onDismiss = { openShareSheet = Pair(false, null) },
                     onClick = {
+                        Log.d("공유!!!", "$it")
                     },
+                    shareLauncher = shareLauncher,
                 )
             }
         }
+    }
+}
+
+@Composable
+@Suppress("ktlint:standard:function-naming")
+fun GetShareLauncher(activity: Activity?): ManagedActivityResultLauncher<Intent, ActivityResult>? {
+    activity?.let {
+        // Compose에서 ActivityResultLauncher 등록
+        return rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            Log.d("shareAppLinkButton", "result : $result")
+            if (result.resultCode == Activity.RESULT_OK) {
+            }
+        }
+    }
+    return null
+}
+
+fun onClickPipAction(
+    context: Context,
+    visibleRect: Rect,
+    screenSize: Size,
+    pipManager: PIPManager,
+    playerViewModel: PlayerViewModel,
+    endPlayerViewModel: VideoEndViewModel,
+) {
+    val isPlaying = playerViewModel.isPlaying
+    val resolution = endPlayerViewModel.resolution
+    val isFirst = playerViewModel.isFirst()
+    val isLast = playerViewModel.isLast()
+    val pageId = playerViewModel.currentItemIndex.value
+
+    Log.d("PIP_CLICK", "isPlaying : ${isPlaying.value} , resolution : ${resolution.value} visibleRect : $visibleRect")
+
+    val enterPipMode =
+        pipManager.enterPipMode(
+            screenSize,
+            visibleRect,
+            isPlaying = isPlaying.value,
+            isFirst = isFirst,
+            isLast = isLast,
+        )
+
+    when (enterPipMode) {
+        PipResult.NoSystemFeature -> {
+            Toast
+                .makeText(
+                    context,
+                    "시스템 오류",
+                    Toast.LENGTH_LONG,
+                ).show()
+        }
+
+        PipResult.NoPermission -> {
+            // permission 으로 이동
+        }
+
+        PipResult.Success -> {
+            pipManager.setPIPClick(pageId.toString(), true)
+        }
+
+        else -> {}
     }
 }

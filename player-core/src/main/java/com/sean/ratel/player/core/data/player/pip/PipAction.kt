@@ -11,13 +11,20 @@ import com.sean.ratel.player.core.R
 private const val REQUEST_CODE_PLAY = 1
 private const val REQUEST_CODE_PAUSE = 2
 private const val REQUEST_CODE_SKIP_PREVIOUS = 3
-private const val REQUEST_CODE_SKIP_NEXT = 4
+private const val REQUEST_CODE_SKIP_PREVIOUS_DISABLED = 4
+private const val REQUEST_CODE_SKIP_NEXT = 5
+private const val REQUEST_CODE_SKIP_NEXT_DISABLED = 6
+private const val REQUEST_CODE_REPLAY = 7
+
 private const val INTENT_ACTION_OF_PIP = "splay.intent.action.pip"
 private const val INTENT_EXTRA_NAME_OF_PIP = "splay.intent.extra.pip"
 private const val INTENT_EXTRA_VALUE_OF_PLAY = 1
 private const val INTENT_EXTRA_VALUE_OF_PAUSE = 2
 private const val INTENT_EXTRA_VALUE_OF_PREVIOUS = 3
-private const val INTENT_EXTRA_VALUE_OF_NEXT = 4
+private const val INTENT_EXTRA_VALUE_OF_PREVIOUS_DISABLED = 4
+private const val INTENT_EXTRA_VALUE_OF_NEXT = 5
+private const val INTENT_EXTRA_VALUE_OF_NEXT_DISABLED = 6
+private const val INTENT_EXTRA_VALUE_OF_REPLAY = 7
 
 /**
  * An enum class to create [RemoteAction] of PIP
@@ -52,6 +59,13 @@ enum class PipAction(
         intentExtraValue = INTENT_EXTRA_VALUE_OF_PREVIOUS,
         iconDrawableResId = R.drawable.pip_skip_previous,
     ),
+    SKIP_PREVIOUS_DISABLED(
+        requestCode = REQUEST_CODE_SKIP_PREVIOUS_DISABLED,
+        intentAction = INTENT_ACTION_OF_PIP,
+        intentExtraName = INTENT_EXTRA_NAME_OF_PIP,
+        intentExtraValue = INTENT_EXTRA_VALUE_OF_PREVIOUS_DISABLED,
+        iconDrawableResId = R.drawable.pip_skip_previous_disabled,
+    ),
     SKIP_NEXT(
         requestCode = REQUEST_CODE_SKIP_NEXT,
         intentAction = INTENT_ACTION_OF_PIP,
@@ -59,13 +73,48 @@ enum class PipAction(
         intentExtraValue = INTENT_EXTRA_VALUE_OF_NEXT,
         iconDrawableResId = R.drawable.pip_skip_next,
     ),
+    SKIP_NEXT_DISABLED(
+        requestCode = REQUEST_CODE_SKIP_NEXT_DISABLED,
+        intentAction = INTENT_ACTION_OF_PIP,
+        intentExtraName = INTENT_EXTRA_NAME_OF_PIP,
+        intentExtraValue = INTENT_EXTRA_VALUE_OF_NEXT_DISABLED,
+        iconDrawableResId = R.drawable.pip_skip_next_disabled,
+    ),
+    REPLAY(
+        requestCode = REQUEST_CODE_REPLAY,
+        intentAction = INTENT_ACTION_OF_PIP,
+        intentExtraName = INTENT_EXTRA_NAME_OF_PIP,
+        intentExtraValue = INTENT_EXTRA_VALUE_OF_REPLAY,
+        iconDrawableResId = R.drawable.pip_replay,
+    ),
     ;
 
     companion object {
-        fun getRemoteAction(
+        fun getRemoteActionPlayPause(
             context: Context,
             isPlaying: Boolean,
-        ): RemoteAction = getRemoteAction(context, if (isPlaying) PAUSE else PLAY)
+            isEndPlay: Boolean,
+        ): RemoteAction =
+            getRemoteAction(
+                context,
+                if (isPlaying) {
+                    PAUSE
+                } else if (isEndPlay) {
+                    REPLAY
+                } else {
+                    PLAY
+                },
+            )
+
+        fun getRemoteActionSkipPrevious(
+            context: Context,
+            isFirst: Boolean,
+        ): RemoteAction = getRemoteAction(context, if (isFirst) SKIP_PREVIOUS_DISABLED else SKIP_PREVIOUS)
+
+        fun getRemoteActionSkipNext(
+            context: Context,
+            isLast: Boolean,
+        ): RemoteAction = getRemoteAction(context, if (isLast) SKIP_NEXT_DISABLED else SKIP_NEXT)
 
         fun getIntentFilter() = IntentFilter(INTENT_ACTION_OF_PIP)
 
@@ -87,10 +136,28 @@ enum class PipAction(
                 INTENT_EXTRA_VALUE_OF_PREVIOUS
         }
 
+        fun isPreviousDisabledAction(intent: Intent?): Boolean {
+            if (!hasPipAction(intent)) return false
+            return intent?.getIntExtra(INTENT_EXTRA_NAME_OF_PIP, 0) ==
+                INTENT_EXTRA_VALUE_OF_PREVIOUS_DISABLED
+        }
+
         fun isNextAction(intent: Intent?): Boolean {
             if (!hasPipAction(intent)) return false
             return intent?.getIntExtra(INTENT_EXTRA_NAME_OF_PIP, 0) ==
                 INTENT_EXTRA_VALUE_OF_NEXT
+        }
+
+        fun isNextDisabledAction(intent: Intent?): Boolean {
+            if (!hasPipAction(intent)) return false
+            return intent?.getIntExtra(INTENT_EXTRA_NAME_OF_PIP, 0) ==
+                INTENT_EXTRA_VALUE_OF_NEXT_DISABLED
+        }
+
+        fun isReplayAction(intent: Intent?): Boolean {
+            if (!hasPipAction(intent)) return false
+            return intent?.getIntExtra(INTENT_EXTRA_NAME_OF_PIP, 0) ==
+                INTENT_EXTRA_VALUE_OF_REPLAY
         }
 
         private fun hasPipAction(intent: Intent?): Boolean = intent?.action == INTENT_ACTION_OF_PIP
@@ -112,6 +179,7 @@ enum class PipAction(
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
             val icon = Icon.createWithResource(context, action.iconDrawableResId)
+
             return RemoteAction(icon, "", "", intent)
         }
     }

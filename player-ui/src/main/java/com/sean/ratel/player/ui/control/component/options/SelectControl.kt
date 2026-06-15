@@ -29,7 +29,6 @@ import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaySpeed
 import com.sean.ratel.player.core.data.domain.model.Quality
 
-
 @OptIn(UnstableApi::class)
 @Composable
 fun SelectControl(
@@ -44,11 +43,13 @@ fun SelectControl(
     onDismiss: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth().padding(bottom = 16.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant)
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .background(MaterialTheme.colorScheme.outlineVariant)
+                .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center,
     ) {
         SpeedSelectPanel(
             currentActionMenu = currentActionMenu,
@@ -58,7 +59,7 @@ fun SelectControl(
             speeds = speeds,
             scales = scales,
             qualityList = qualityList,
-            onSelected = onSelected
+            onSelected = onSelected,
         )
     }
 }
@@ -73,31 +74,26 @@ private fun SpeedSelectPanel(
     speeds: List<PlaySpeed>?,
     scales: Array<ContentScale>?,
     qualityList: List<Pair<Quality, PlayMediaItem>>?,
-    onSelected: (Pair<Quality,PlayMediaItem>?,PlaySpeed?, ContentScale?) -> Unit
+    onSelected: (Pair<Quality, PlayMediaItem>?, PlaySpeed?, ContentScale?) -> Unit,
 ) {
-
-
     Column(
-        modifier = Modifier
-            .background(
-                color =MaterialTheme.colorScheme.outlineVariant,
-
+        modifier =
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.outlineVariant,
                 )
-           // .padding(top = 20.dp, end = 20.dp)
-            .clickable(enabled = false) {},
-        horizontalAlignment = Alignment.CenterHorizontally
+                // .padding(top = 20.dp, end = 20.dp)
+                .clickable(enabled = false) {},
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-
         FlowRow(
             modifier = Modifier,
-            itemVerticalAlignment=Alignment.CenterVertically,
-
+            itemVerticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             when (currentActionMenu) {
                 MediaOptionKey.VIDEO_QUALITY -> {
-
                     qualityList?.forEach { quality ->
 
                         OptionsButton(
@@ -107,18 +103,18 @@ private fun SpeedSelectPanel(
                             null,
                             currentQuality = currentQuality,
                             quality = quality.first,
-                            onClick = { onSelected(quality, null, null) }
+                            onClick = { onSelected(quality, null, null) },
                         )
                     }
                 }
-                MediaOptionKey.PLAYBACK_SPEED -> {
 
+                MediaOptionKey.PLAYBACK_SPEED -> {
                     speeds?.forEach { speed ->
 
                         OptionsButton(
                             currentSpeed,
                             speed = speed.speed,
-                            onClick = { onSelected(null,speed, null) }
+                            onClick = { onSelected(null, speed, null) },
                         )
                     }
                 }
@@ -130,14 +126,15 @@ private fun SpeedSelectPanel(
                             null,
                             currentScale,
                             scale = scale.scaleIndex,
-                            onClick = { onSelected(null,null, scale) }
+                            onClick = { onSelected(null, null, scale) },
                         )
                     }
                 }
 
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
-
         }
     }
 }
@@ -150,58 +147,58 @@ private fun OptionsButton(
     scale: Int? = null,
     currentQuality: MediaOptionValue.VideoQuality? = null,
     quality: Quality? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-
-    val backgroundColor = when {
-        (speed != null && speed == currentSpeed?.value?.speed) ||
+    val backgroundColor =
+        when {
+            (speed != null && speed == currentSpeed?.value?.speed) ||
                 (scale != null && scale == currentScale?.value?.scaleIndex) ||
                 (quality != null && quality == currentQuality?.quality?.first) -> MaterialTheme.colorScheme.primary
 
-        else -> MaterialTheme.colorScheme.background
+            else -> MaterialTheme.colorScheme.background
+        }
+    val text =
+        when {
+            speed != null -> "${speed}x"
+            scale != null -> LocalContext.current.resources.getString(ContentScale.entries[scale].label)
+            quality != null -> "${Quality.valueOf(quality.name)}${quality.screenSize}"
+            else -> ""
+        }
 
-    }
-    val text = when {
-        speed != null-> "${speed}x"
-        scale != null -> LocalContext.current.resources.getString(ContentScale.entries[scale].label)
-        quality != null -> "${Quality.valueOf(quality.name)}${quality.screenSize}"
-        else -> ""
-
-    }
-
-    val textColor = when {
-        (speed != null && speed == currentSpeed?.value?.speed) ||
+    val textColor =
+        when {
+            (speed != null && speed == currentSpeed?.value?.speed) ||
                 (scale != null && scale == currentScale?.value?.scaleIndex) ||
                 (quality != null && quality == currentQuality?.quality?.first) -> Color.Black
 
-        else -> MaterialTheme.colorScheme.onPrimary
+            else -> MaterialTheme.colorScheme.onPrimary
+        }
 
-    }
+    val fontWeight =
+        when {
+            (speed != null && speed == currentSpeed?.value?.speed) ||
+                (scale != null && scale == currentScale?.value?.scaleIndex) ||
+                (quality != null && quality == currentQuality?.quality?.first) -> FontWeight.Bold
 
-    val fontWeight = when {
-        (speed != null && speed == currentSpeed?.value?.speed) ||
-        (scale != null && scale == currentScale?.value?.scaleIndex) ||
-        (quality!=null &&      quality == currentQuality?.quality?.first) -> FontWeight.Bold
-        else -> FontWeight.Normal
-
-    }
+            else -> FontWeight.Normal
+        }
     Box(
-
-        modifier = Modifier.widthIn(75.dp,120.dp)
-            .height(40.dp)
-            .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .widthIn(75.dp, 120.dp)
+                .height(40.dp)
+                .background(
+                    color = backgroundColor,
+                    shape = RoundedCornerShape(20.dp),
+                ).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
-            modifier = Modifier.wrapContentSize().padding(start = 7.dp,end=7.dp),
+            modifier = Modifier.wrapContentSize().padding(start = 7.dp, end = 7.dp),
             color = textColor,
             fontSize = 11.sp,
-            fontWeight = fontWeight
+            fontWeight = fontWeight,
         )
     }
 }

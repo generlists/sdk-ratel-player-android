@@ -22,7 +22,7 @@ android {
     }
 
     buildTypes {
-        debug{
+        debug {
             manifestPlaceholders["IS_DEBUG"] = true
             manifestPlaceholders["IS_DEBUG_UDP"] = false
             manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = false
@@ -54,7 +54,7 @@ android {
 dependencies {
     api(project(":android-youtube-player"))
     implementation(project(":player-utils"))
-    implementation(libs.so.smartlab.sdk.common.utils.android )
+    implementation(libs.so.smartlab.sdk.common.utils.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

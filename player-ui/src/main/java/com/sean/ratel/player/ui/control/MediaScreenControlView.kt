@@ -37,6 +37,7 @@ import com.sean.ratel.player.ui.control.component.NextButton
 import com.sean.ratel.player.ui.control.component.PlayPauseButton
 import com.sean.ratel.player.ui.control.component.PreviousButton
 import com.sean.ratel.player.ui.control.component.SeekBackButton
+import com.sean.ratel.player.ui.control.component.options.OptionButton
 import com.sean.ratel.player.utils.PlayerUtils.formatTimeFromFloat
 
 @OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -45,13 +46,14 @@ import com.sean.ratel.player.utils.PlayerUtils.formatTimeFromFloat
 fun MediaScreenControlView(
     modifier: Modifier,
     viewModel: PlayerViewModel,
+    optionClick: () -> Unit = {},
 ) {
     Box(
         modifier
             .fillMaxSize()
             .background(Color.Transparent),
     ) {
-        BottomSeekBarArea(modifier, viewModel)
+        BottomSeekBarArea(modifier, viewModel, optionClick)
     }
 }
 
@@ -60,6 +62,7 @@ fun MediaScreenControlView(
 fun BottomSeekBarArea(
     modifier: Modifier,
     viewModel: PlayerViewModel,
+    optionClick: () -> Unit,
 ) {
     val currentTime by viewModel.currentTimeMs.collectAsState()
     val duration by viewModel.durationMs.collectAsStateWithLifecycle()
@@ -77,7 +80,8 @@ fun BottomSeekBarArea(
             .fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
     ) {
-        TimeArea(duration, currentTime)
+
+        TimePlayOptionArea(duration, currentTime, optionClick)
         CustomSeekBar(
             progress = progress,
             onSeekPreview = { newProgress ->
@@ -128,21 +132,23 @@ fun BottomSeekBarArea(
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun TimeArea(
+fun TimePlayOptionArea(
     duration: Long,
     currentTime: Long,
+    optionClick:()->Unit
 ) {
     Row(
         Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(bottom = 10.dp),
+            .wrapContentHeight(),
+            //.padding(bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = if (currentTime > 0.0f) formatTimeFromFloat(currentTime.toFloat()) else "",
             Modifier
                 .wrapContentSize()
-                .padding(start = 15.dp, top = 5.dp),
+                .padding(start = 15.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
@@ -153,7 +159,7 @@ fun TimeArea(
             text = if (currentTime > 0.0f) "/" else "",
             Modifier
                 .wrapContentSize()
-                .padding(start = 5.dp, top = 5.dp),
+                .padding(start = 5.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
@@ -164,12 +170,15 @@ fun TimeArea(
             text = if (currentTime > 0.0f) formatTimeFromFloat(duration.toFloat()) else "00:00",
             Modifier
                 .wrapContentSize()
-                .padding(start = 5.dp, top = 5.dp),
+                .padding(start = 5.dp),
             fontFamily = FontFamily.SansSerif,
             fontStyle = FontStyle.Normal,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp,
             color = if (LocalInspectionMode.current) Color.Black else Color.White,
         )
+        OptionButton(onClick = {
+            optionClick()
+        })
     }
 }

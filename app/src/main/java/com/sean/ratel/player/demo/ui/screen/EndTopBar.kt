@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import com.sean.ratel.player.demo.ui.view.BackButton
 import com.sean.ratel.player.demo.ui.view.BookMarkButton
 import com.sean.ratel.player.demo.ui.view.InfoButton
-import com.sean.ratel.player.demo.ui.view.OptionButton
 import com.sean.ratel.player.demo.ui.view.ShareButton
 
 @Suppress("ktlint:standard:function-naming")
@@ -31,9 +34,8 @@ import com.sean.ratel.player.demo.ui.view.ShareButton
 fun EndTopBar(
     modifier: Modifier,
     historyBack: () -> Unit,
-    infoClick: () -> Unit,
+    infoClick: ((Boolean) -> Unit) -> Unit,
     shareButtonClick: () -> Unit,
-    optionClick: () -> Unit = {},
     bookMarkClick: () -> Unit = {},
 ) {
     Box(
@@ -46,6 +48,7 @@ fun EndTopBar(
         contentAlignment = Alignment.CenterStart,
     ) {
         val density = LocalDensity.current
+        var showInfoDialog by remember { mutableStateOf(false) }
 
         Row(
             modifier =
@@ -74,16 +77,15 @@ fun EndTopBar(
 
             Row(Modifier.wrapContentSize()) {
                 InfoButton(onClick = {
-                    infoClick()
+                    infoClick({
+                        showInfoDialog = it
+                    })
                 })
                 BookMarkButton(onClick = {
                     bookMarkClick()
                 })
                 ShareButton(onClick = {
                     shareButtonClick()
-                })
-                OptionButton(onClick = {
-                    optionClick()
                 })
             }
         }

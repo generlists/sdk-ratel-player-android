@@ -7,14 +7,14 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.FragmentActivity
-import com.sean.ratel.player.core.data.player.pip.PIPViewModel
+import com.sean.ratel.player.core.data.player.pip.PIPManager
+import com.sean.ratel.player.core.data.player.pip.PIPTarget
 import com.sean.ratel.player.core.data.player.pip.PipAction
 import com.sean.ratel.player.core.util.launch
 import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
@@ -22,56 +22,45 @@ import com.sean.ratel.player.demo.ui.view.BasicPlayerFragment
 import com.sean.ratel.player.utils.PlayerUtils.hasPipPermission
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableSharedFlow
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     val mainViewModel by viewModels<MainViewModel>()
-    val pipViewModel: PIPViewModel by viewModels()
     private val pipButtonState = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     private var pipBroadcastReceiver: BroadcastReceiver? = null
     private var currentFragment: androidx.fragment.app.Fragment? = null
 
+    @Inject
+    lateinit var pipManager: PIPManager
+    private var pipTarget: PIPTarget? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        pipManager.bind(this)
         setContent {
             DemoPlayApp(
                 mainViewModel = mainViewModel,
+                pipManager = pipManager,
                 finish = { finish() },
             )
         }
 
         launch {
             pipButtonState.collect {
-                val fragment = currentFragment as BasicPlayerFragment
+                val fragment = currentFragment as? BasicPlayerFragment
                 when (it) {
                     PipAction.PAUSE.intentExtraValue -> {
-                        fragment.pause()
-                        fragment.pipButtonState()
+                        fragment?.pause()
+                        fragment?.pipButtonState()
                         pipButtonState.tryEmit(0)
                     }
 
                     PipAction.PLAY.intentExtraValue -> {
-                        fragment.play()
-                        fragment.pipButtonState()
+                        fragment?.play()
+                        fragment?.pipButtonState()
                         pipButtonState.tryEmit(0)
-                    }
-
-                    PipAction.SKIP_PREVIOUS.intentExtraValue -> {
-                        Toast
-                            .makeText(
-                                baseContext,
-                                "첫번째 비디오입니다.",
-                                Toast.LENGTH_LONG,
-                            ).show()
-                    }
-
-                    PipAction.SKIP_NEXT.intentExtraValue -> {
-                        Toast
-                            .makeText(
-                                baseContext,
-                                "마지막 비디오입니다.",
-                                Toast.LENGTH_LONG,
-                            ).show()
                     }
                 }
             }
@@ -91,6 +80,7 @@ class MainActivity : FragmentActivity() {
                 RECEIVER_NOT_EXPORTED,
             )
             this@MainActivity.pipBroadcastReceiver = pipBroadcastReceiver
+            pipManager.refreshActions()
         } else {
             pipBroadcastReceiver?.let {
                 unregisterReceiver(it)
@@ -98,7 +88,11 @@ class MainActivity : FragmentActivity() {
         }
         launch {
             val pageId = R.id.fragment_basic_container
-            pipViewModel.setPIPClick(pageId.toString(), isInPictureInPictureMode)
+            pipTarget?.let {
+                pipManager.setPIPClick(it.pageId, isInPictureInPictureMode)
+            } ?: run {
+                pipManager.setPIPClick(pageId.toString(), isInPictureInPictureMode)
+            }
         }
     }
 
@@ -119,9 +113,8 @@ class MainActivity : FragmentActivity() {
 
     private fun pipClickProcess(context: Context) {
         launch {
-            pipViewModel.pipClick.collect { target ->
-                Log.d("hbungshin", "target : $target")
-                val currentIndex = target.pageId
+            pipManager.pipClick.collect { target ->
+                pipTarget = PIPTarget(target.pageId, target.isPipClick)
                 val isPipClick = target.isPipClick
                 val fragmentManager = (this@MainActivity as FragmentActivity).supportFragmentManager
                 currentFragment = fragmentManager.findFragmentById(R.id.fragment_basic_container)
@@ -175,6 +168,5 @@ class MainActivity : FragmentActivity() {
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun GreetingPreview() {
-    DemoplayerTheme {
-    }
+    DemoplayerTheme {}
 }

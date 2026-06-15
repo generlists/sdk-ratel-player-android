@@ -17,5 +17,6 @@ data class MediaOptions(
     val shuffle: Toggle = Toggle(enabled = false),
     val contentScale: ContentScale = ContentScale.FillHeight,
     val screenBrightness: FloatValue = FloatValue(value = 0.5f),
-    val volume: FloatValue = FloatValue(value = 0.5f)
+    val volume: FloatValue = FloatValue(value = 0.5f),
+    val pip: Toggle = Toggle(enabled = true),
 )

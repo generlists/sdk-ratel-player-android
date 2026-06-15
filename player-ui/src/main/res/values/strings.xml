@@ -54,6 +54,7 @@
 
     <string name="player_control_screen_shot">스크린샷</string>
     <string name="player_control_screen_size">화면 크기\n(%1$s)</string>
+    <string name="player_control_pip">PIP 재생</string>
 
     <string name="player_control_options">플레이 옵션</string>
     <string name="player_control_screen_options">화면 설정</string>
@@ -85,12 +86,16 @@
     <string name="x">X</string>
     <string name="x_package_name">com.twitter.android</string>
     <string name="alert_confirm">확인</string>
+    <string name="memo_save">저장</string>
     <string name="player_error">⛔ 재생 에러(%s)</string>
     <string name="player_unkwnown_error">알수 없는 에러</string>
     <string name="player_error_protocal">적절한 재생 프로토콜이 아니에요.</string>
     <string name="player_error_file_not_founded">재생 파일이 존재하지 않아요.</string>
     <string name="player_error_connect_error">재생 중 접속 오류가 발생했어요.\n 휴대폰에 저장된 파일 경로로 다시 재생합니다.</string>
     <string name="player_error_unknown_error">알수 없는 에러에요.</string>
+
+    <string name="recently_scrap_memo_input_title">\uD83D\uDCDD 메모 입력</string>
+    <string name="recently_scrap_memo_input_hint">스크랩 영상 메모를 입력하세요!</string>
 
 
 </resources>

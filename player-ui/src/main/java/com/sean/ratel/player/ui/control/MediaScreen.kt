@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -51,6 +52,7 @@ import com.sean.ratel.player.core.data.domain.model.PlayMediaItem
 import com.sean.ratel.player.core.data.domain.model.PlaybackState
 import com.sean.ratel.player.core.data.domain.model.PreviewInfoData
 import com.sean.ratel.player.core.data.domain.model.Quality
+import com.sean.ratel.player.core.data.player.pip.PIPTarget
 import com.sean.ratel.player.core.data.player.viewmodel.PlayerViewModel
 import com.sean.ratel.player.ui.MediaOptions
 import com.sean.ratel.player.ui.R
@@ -62,10 +64,12 @@ import com.sean.ratel.player.ui.control.component.options.PrevViewInfoDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import so.smartlab.common.utils.log.RLog
 
 @OptIn(UnstableApi::class)
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun MediaScreen(
     modifier: Modifier = Modifier,
@@ -75,8 +79,9 @@ fun MediaScreen(
     startIndex: Int,
     listStartIndex: Int = 0,
     qualityStartIndex: Int,
-    topBar: @Composable (onInfoClick: (PreviewInfoData) -> Unit, onOptionClick: () -> Unit) -> Unit,
+    topBar: @Composable (onInfoClick: (data: PreviewInfoData, result: (Boolean) -> Unit) -> Unit) -> Unit,
     onOptionChanged: (MediaOptionKey, MediaOptionValue) -> Unit,
+    updateMemo: (Boolean, String, String) -> Unit,
     viewModel: PlayerViewModel = hiltViewModel(),
 ) {
     viewModel.setMediaList(mediaList)
@@ -112,6 +117,10 @@ fun MediaScreen(
 
     var errorState by remember { mutableStateOf(Pair(false, Pair<Int, String?>(200, null))) }
 
+    var infoResultCallback by remember {
+        mutableStateOf<((Boolean) -> Unit)?>(null)
+    }
+    val isPip by viewModel.pipManager.pipClick.collectAsState(initial = null)
     // 콘트롤러가 바뀌면 리컴파일 됨  필요
     LaunchedEffect(Unit) {
         RLog.d("TAG", "$playList ,$qualityStartIndex , $startIndex")
@@ -167,7 +176,7 @@ fun MediaScreen(
             RLog.d("MediaScreen", "현재 퀄리티   : ${it.second}")
             RLog.d(
                 "MediaScreen",
-                "현재 퀄리티  : ${it.second?.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}",
+                "현재 퀄리티  : ${it.second.first} , currentIndex : ${currentIndex.value} startIndex : $startIndex : ${it.third.value[startIndex]}",
             )
             RLog.d(
                 "MediaScreen",
@@ -226,35 +235,41 @@ fun MediaScreen(
             )
         }
 
-        Box(
-            Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                ) {
-                    hideControls = !hideControls
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            AnimatedVisibility(
-                visible = if (isEndVideo.value) true else !hideControls,
-                enter = fadeIn(),
-                exit = fadeOut(),
+        if (isPip == null || isPip?.isPipClick == false) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) {
+                        hideControls = !hideControls
+                    },
+                contentAlignment = Alignment.Center,
             ) {
-                MediaScreenControlView(
-                    Modifier.background(Color.Transparent),
-                    viewModel,
-                )
+                AnimatedVisibility(
+                    visible = if (isEndVideo.value) true else !hideControls,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    MediaScreenControlView(
+                        Modifier.background(Color.Transparent),
+                        viewModel,
+                        optionClick = {
+                            showOption = true
+                        },
+                    )
+                }
             }
         }
 
         // 외부 뷰 넘기기
-        topBar({ infoData ->
-            showInfoDialog.value = Pair(true, infoData)
-        }, {
-            showOption = true
-        })
+        topBar(
+            { infoData, result ->
+                infoResultCallback = result
+                showInfoDialog.value = Pair(true, infoData)
+            },
+        )
 
         if (showOption) {
             Box(
@@ -303,6 +318,10 @@ fun MediaScreen(
                 PrevViewInfoDialog(
                     data = previewInfoData,
                     themeMode = themeMode,
+                    onMemoChange = { type, id, memo ->
+                        RLog.d("MemoText", "type = $type id = $id , memo =$memo")
+                        updateMemo(type, id, memo)
+                    },
                     onConfirm = { infoType ->
                         scope.launch {
                             previewInfoData.bitmap?.let { bitmap ->
@@ -326,10 +345,11 @@ fun MediaScreen(
                                 }
                             }
                         }
-
+                        infoResultCallback?.invoke(true)
                         showInfoDialog.value = Pair(false, null)
                     },
                     onDismiss = {
+                        infoResultCallback?.invoke(true)
                         showInfoDialog.value = Pair(false, null)
                     },
                 )

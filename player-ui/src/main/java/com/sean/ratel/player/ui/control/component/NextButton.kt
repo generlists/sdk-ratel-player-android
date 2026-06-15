@@ -20,17 +20,18 @@ import com.sean.ratel.player.ui.R
 @OptIn(UnstableApi::class)
 @Composable
 fun NextButton(viewModel: PlayerViewModel) {
-
     val enabled = viewModel.isNextButtonEnabled.collectAsState()
 
     Icon(
         Icons.Default.SkipNext,
         contentDescription = stringResource(R.string.next_button),
-        modifier = Modifier
-            .width(48.dp)
-            .height(48.dp)
-            .clickable(enabled = enabled.value) {
-                viewModel.nextPlay()
-            },
-        tint = if(enabled.value) Color.White else Color.LightGray)
+        modifier =
+            Modifier
+                .width(48.dp)
+                .height(48.dp)
+                .clickable(enabled = enabled.value) {
+                    viewModel.nextPlay()
+                },
+        tint = if (enabled.value) Color.White else Color.LightGray,
+    )
 }

@@ -41,14 +41,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
+import com.sean.ratel.player.core.data.player.pip.PIPManager
 import com.sean.ratel.player.core.data.player.pip.PIPTarget
-import com.sean.ratel.player.core.data.player.pip.PIPViewModel
 import com.sean.ratel.player.core.data.player.pip.PipResult
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerAdapterImpl
 import com.sean.ratel.player.core.data.player.youtube.YouTubeStreamPlayerImpl
@@ -80,7 +79,9 @@ class BasicPlayerFragment : Fragment() {
             ActivityResultContracts.StartActivityForResult(),
         ) { _ ->
         }
-    private val pipViewModel: PIPViewModel by activityViewModels()
+
+    @Inject
+    lateinit var pipViewModel: PIPManager
 
     @NotControl
     @Inject
@@ -188,7 +189,7 @@ class BasicPlayerFragment : Fragment() {
 
     @Composable
     @Suppress("ktlint:standard:function-naming")
-    fun PIPButton(pipViewModel: PIPViewModel) {
+    fun PIPButton(pipViewModel: PIPManager) {
         val context = LocalContext.current
         val isPipMode by pipViewModel.pipClick.collectAsState(initial = PIPTarget("0", false))
 
@@ -273,10 +274,11 @@ class BasicPlayerFragment : Fragment() {
 
         val enterPipMode =
             pipViewModel.enterPipMode(
-                requireActivity(),
                 videoSize,
                 visibleRect,
                 isPlaying = isPlaying,
+                isFirst = true,
+                isLast = true,
             )
 
         when (enterPipMode) {
@@ -304,7 +306,6 @@ class BasicPlayerFragment : Fragment() {
                 binding.root.getGlobalVisibleRect(visibleRect)
 
                 pipViewModel.updatePipParams(
-                    requireActivity(),
                     youTubeStreamPlayer.isPlaying(),
                     youTubeStreamPlayer.getVideoSize(),
                     rect = visibleRect,

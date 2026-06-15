@@ -27,8 +27,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "VERSION_NAME", "\""+versionProps["VERSION_NAME"]+ "\"")
-        buildConfigField("String", "LIB_NAME",  "\""+versionProps["LIB_NAME"]+ "\"")
+        buildConfigField("String", "VERSION_NAME", "\"" + versionProps["VERSION_NAME"] + "\"")
+        buildConfigField("String", "LIB_NAME", "\"" + versionProps["LIB_NAME"] + "\"")
     }
 
     buildTypes {
@@ -36,7 +36,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -49,7 +49,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
-        compose =true
+        compose = true
     }
 }
 
@@ -57,7 +57,7 @@ dependencies {
 
     implementation(project(":player-core"))
     implementation(project(":player-utils"))
-    implementation(libs.so.smartlab.sdk.common.utils.android )
+    implementation(libs.so.smartlab.sdk.common.utils.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -71,7 +71,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.material3.icons.core)
-    implementation(libs.google.media3.ui )
+    implementation(libs.google.media3.ui)
     implementation(libs.google.media3.exoplayer)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.compose.foundation)
