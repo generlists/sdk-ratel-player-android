@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface MediaStreamPlayer {
-
     val playbackState: Flow<PlaybackState>
     val playbackErrorState: Flow<PlaybackState>
 
@@ -44,57 +43,57 @@ interface MediaStreamPlayer {
 
     val isShuffleOn: StateFlow<Boolean>
 
-
     val duration: StateFlow<Long?>
 
-    val currentPosition:StateFlow<Long?>
+    val currentPosition: StateFlow<Long?>
 
-    val repeatMode:StateFlow<RepeatMode>
+    val repeatMode: StateFlow<RepeatMode>
 
     val seekBackIncrement: StateFlow<Long>
 
     val seekForwardIncrement: StateFlow<Long>
 
-    val playSpeed:StateFlow<PlaySpeed>
+    val playSpeed: StateFlow<PlaySpeed>
 
     val mediaType: StateFlow<Set<Int>>
 
     val currentIndex: StateFlow<Int>
 
-
-    fun getPlayer():ExoPlayer?
-
+    fun getPlayer(): ExoPlayer?
 
     fun setPlayerConfig(configurations: Configurations)
-
 
     fun start(uri: Uri)
 
     fun start(
         uri: Uri,
-        cacheKey: String? = null)
+        cacheKey: String? = null,
+    )
 
     fun start(
         items: List<MediaItem>,
         startIndex: Int = 0,
-        cacheKey: String? = null
+        cacheKey: String? = null,
     )
 
-    fun replaceMediaItem(index:Int, newMediaItem: MediaItem)
+    fun replaceMediaItem(
+        index: Int,
+        newMediaItem: MediaItem,
+    )
 
-    fun isPrevItem():Boolean
+    fun isPrevItem(): Boolean
 
-    fun pervPlay(isReset:Boolean)
+    fun pervPlay(isReset: Boolean)
 
-    fun isNextItem():Boolean
+    fun isNextItem(): Boolean
 
-    fun nextPlay(isReset:Boolean)
+    fun nextPlay(isReset: Boolean)
 
     fun seekForward()
 
     fun seekBack()
 
-    fun rePlay(mediaIndex:Int)
+    fun rePlay(mediaIndex: Int)
 
     fun resume()
 
@@ -104,12 +103,14 @@ interface MediaStreamPlayer {
 
     fun seekTo(msec: Long)
 
-    fun seekTo(mediaIndex:Int,msec: Long)
+    fun seekTo(
+        mediaIndex: Int,
+        msec: Long,
+    )
 
     fun isPlaying(): Boolean
 
     fun isPlayComplete(): Boolean
-
 
     fun getBufferedPosition(): Long
 
@@ -123,11 +124,17 @@ interface MediaStreamPlayer {
 
     fun setMute(mute: Boolean)
 
-    fun setMute(playIndex: Int, mute: Boolean)
+    fun setMute(
+        playIndex: Int,
+        mute: Boolean,
+    )
 
-    fun setMaximumVideoQuality(quality: Int, isUserSelect: Boolean = true)
+    fun setMaximumVideoQuality(
+        quality: Int,
+        isUserSelect: Boolean = true,
+    )
 
-    fun setShuffleOn(isShuffle:Boolean)
+    fun setShuffleOn(isShuffle: Boolean)
 
     fun setRepeat(repeatMode: RepeatMode)
 
@@ -135,11 +142,13 @@ interface MediaStreamPlayer {
 
     fun setVolume(volume: Float)
 
-    fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int)
+    fun onMediaItemTransition(
+        mediaItem: MediaItem?,
+        reason: Int,
+    )
 
-    fun getVideoCapture(view: View, infoCallback: (Bitmap?) -> Unit)
-
-
-
-
+    fun getVideoCapture(
+        view: View,
+        infoCallback: (Bitmap?) -> Unit,
+    )
 }

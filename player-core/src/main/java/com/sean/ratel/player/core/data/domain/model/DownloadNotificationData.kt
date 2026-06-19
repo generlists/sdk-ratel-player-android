@@ -7,5 +7,5 @@ data class DownloadNotificationData(
     val message: String,
     val progress: Int? = null,
     val smallIcon: Int,
-    val contentIntent: PendingIntent? = null
+    val contentIntent: PendingIntent? = null,
 )

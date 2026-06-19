@@ -13,19 +13,16 @@ class DynamicHeaderDataSource(
     private val httpDataSource: HttpDataSource,
     private val headerStore: HeaderStore,
 ) : DataSource by httpDataSource {
-
-
     @Throws(IOException::class)
     override fun open(dataSpec: DataSpec): Long {
-
         val headers = headerStore.getHeaders(dataSpec.key ?: "")
-        RLog.d("DynamicHeaderDataSource","key : ${dataSpec.key} , headers : ${headers}")
+        RLog.d("DynamicHeaderDataSource", "key : ${dataSpec.key} , headers : $headers")
 
         val defaultHttpDataSource = httpDataSource as DefaultHttpDataSource
         headers?.forEach { (key, value) ->
             value?.let {
-               defaultHttpDataSource.setRequestProperty(key, it)
-                RLog.d("DynamicHeaderDataSource","key : $key ,,,,,  value:  $it")
+                defaultHttpDataSource.setRequestProperty(key, it)
+                RLog.d("DynamicHeaderDataSource", "key : $key ,,,,,  value:  $it")
             }
         }
 
@@ -34,5 +31,4 @@ class DynamicHeaderDataSource(
     }
 
     override fun getResponseHeaders(): Map<String, List<String>> = httpDataSource.responseHeaders
-
 }

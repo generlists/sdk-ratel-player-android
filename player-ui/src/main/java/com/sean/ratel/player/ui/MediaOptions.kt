@@ -13,7 +13,7 @@ import com.sean.ratel.player.ui.control.component.options.MediaOptionValue.Toggl
 data class MediaOptions(
     val currentQuality: Quality = Quality.AUDIO,
     val repeatMode: RepeatMode = RepeatMode.REPEAT_OFF,
-    val speed: PlaySpeed = PlaySpeed.PlaySpeed_1_0,
+    val speed: PlaySpeed = PlaySpeed.PlaySpeed1Dot0,
     val shuffle: Toggle = Toggle(enabled = false),
     val contentScale: ContentScale = ContentScale.FillHeight,
     val screenBrightness: FloatValue = FloatValue(value = 0.5f),

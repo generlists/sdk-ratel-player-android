@@ -11,6 +11,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
 import androidx.annotation.OptIn
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -124,6 +125,7 @@ class PlayerViewModel
         val isHWYAccelerated: StateFlow<Boolean> = _isHWYAccelerated
 
         private val _surfaceView = mutableStateOf<View?>(null)
+        val surfaceView: MutableState<View?> = _surfaceView
 
         private val _currentItemIndex = MutableStateFlow<Int>(0)
         val currentItemIndex: StateFlow<Int> = _currentItemIndex
@@ -143,7 +145,12 @@ class PlayerViewModel
                     if (data.pipTarget.isPipClick) {
                         RLog.d(
                             "PIP_CLICK",
-                            "isFirst : ${isFirst()} isLast : ${isLast()}, pipAction : ${data.pipAction} , ${data.pipTarget.isPipClick}, size=${data.screenSize} , isPIP=${data.pipTarget.isPipClick}",
+                            "isFirst : ${isFirst()} " +
+                                "isLast : ${isLast()}, " +
+                                "pipAction : ${data.pipAction} , " +
+                                "isPipClick : ${data.pipTarget.isPipClick}, " +
+                                "size=${data.screenSize} , " +
+                                "isPIP=${data.pipTarget.isPipClick}",
                         )
 
                         when (data.pipAction) {

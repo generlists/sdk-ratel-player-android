@@ -14,5 +14,5 @@ data class HttpHeaders(
     val Accept: String?,
     val `Accept-Language`: String?,
     val `Sec-Fetch-Mode`: String?,
-    val Referer: String?
-): Parcelable
+    val Referer: String?,
+) : Parcelable

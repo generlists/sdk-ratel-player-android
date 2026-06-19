@@ -97,17 +97,17 @@ class MediaExoStreamPlayer(
         DefaultBandwidthMeter
             .Builder(context)
             .setResetOnNetworkTypeChange(true)
-            /** Network changes invalidate existing data **/
-            // .setInitialBitrateEstimate(Integer.MAX_VALUE.toLong()) // later tuning
+            // Network changes invalidate existing data
+            // .setInitialBitrateEstimate(Integer.MAX_VALUE.toLong()) later tuning
             .build()
 
     private val _playbackState = MutableStateFlow<PlaybackState>(PlaybackState.Idle(playerIndex))
     override val playbackState: Flow<PlaybackState> = _playbackState
 
-    private val _playbackErrorState = MutableStateFlow<PlaybackState>(PlaybackState.Idle(playerIndex))
+    private val _playbackErrorState =
+        MutableStateFlow<PlaybackState>(PlaybackState.Idle(playerIndex))
 
-    override val playbackErrorState: Flow<PlaybackState> =
-        _playbackErrorState
+    override val playbackErrorState: Flow<PlaybackState> = _playbackErrorState
 
     private val _isMute = MutableStateFlow(PlayMuteInfo(0, false))
     override val isMute: StateFlow<PlayMuteInfo> = _isMute
@@ -115,6 +115,7 @@ class MediaExoStreamPlayer(
     private val _volume = MutableStateFlow(0f)
     override val volume: StateFlow<Float> = _volume
     private val _lastSystemVolume = MutableStateFlow<Float>(0f)
+    val lastSystemVolume: StateFlow<Float> = _lastSystemVolume
 
     private val _maximumVideoQuality = MutableStateFlow<Int>(Int.MAX_VALUE)
     override val maximumVideoQuality: StateFlow<Int> = _maximumVideoQuality
@@ -134,13 +135,14 @@ class MediaExoStreamPlayer(
     private val _seekBackIncrement = MutableStateFlow<Long>(SEEK_BACK_INCREMENTS_MS)
     override val seekBackIncrement: StateFlow<Long> = _seekBackIncrement
 
-    private val _seekForWardIncrement = MutableStateFlow<Long>(SEEK_FOWARD_INCREMENTS_MS)
-    override val seekForwardIncrement: StateFlow<Long> = _seekForWardIncrement
+    private val _seekForwardIncrement = MutableStateFlow<Long>(SEEK_FOWARD_INCREMENTS_MS)
+    override val seekForwardIncrement: StateFlow<Long> = _seekForwardIncrement
 
-    private val _playSpeed = MutableStateFlow<PlaySpeed>(PlaySpeed.PlaySpeed_1_0)
+    private val _playSpeed = MutableStateFlow<PlaySpeed>(PlaySpeed.PlaySpeed1Dot0)
     override val playSpeed: StateFlow<PlaySpeed> = _playSpeed
 
-    private val _mediaType = MutableStateFlow<Set<Int>>(setOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_VIDEO))
+    private val _mediaType =
+        MutableStateFlow<Set<Int>>(setOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_VIDEO))
     override val mediaType: StateFlow<Set<Int>> = _mediaType
 
     private val _duration = MutableStateFlow<Long?>(null)
@@ -189,7 +191,7 @@ class MediaExoStreamPlayer(
         this._seekBackIncrement.value =
             configurations.videoConfig.seekBackIncrementMs ?: SEEK_BACK_INCREMENTS_MS
 
-        this._seekForWardIncrement.value =
+        this._seekForwardIncrement.value =
             configurations.videoConfig.seekForwardIncrementMs ?: SEEK_FOWARD_INCREMENTS_MS
 
         this._maximumVideoQuality.update {
@@ -426,7 +428,7 @@ class MediaExoStreamPlayer(
                 minBufferMs = minBufferMs,
                 maximumVideoQuality = quality,
                 seekBackIncrementMs = _seekBackIncrement.value,
-                seekForwardIncrementMs = _seekForWardIncrement.value,
+                seekForwardIncrementMs = _seekForwardIncrement.value,
             )
         }
     }
@@ -506,15 +508,14 @@ class MediaExoStreamPlayer(
     }
 
     override fun isPlaying(): Boolean {
-        RLog.d("Player", "playbackState : ${player?.playbackState} , playWhenReady : ${player?.playWhenReady}")
-        return player != null &&
-            player?.playbackState == ExoPlayer.STATE_READY &&
-            player?.playWhenReady == true
+        RLog.d(
+            "Player",
+            "playbackState : ${player?.playbackState} , playWhenReady : ${player?.playWhenReady}",
+        )
+        return player != null && player?.playbackState == ExoPlayer.STATE_READY && player?.playWhenReady == true
     }
 
-    override fun isPlayComplete(): Boolean =
-        player != null &&
-            player?.playbackState == ExoPlayer.STATE_ENDED
+    override fun isPlayComplete(): Boolean = player != null && player?.playbackState == ExoPlayer.STATE_ENDED
 
     override fun getBufferedPosition(): Long = player?.bufferedPosition ?: 0
 
@@ -548,7 +549,10 @@ class MediaExoStreamPlayer(
         playWhenReady: Boolean,
         playbackState: Int,
     ) {
-        RLog.d("MediaScreen", "onPlayerStateChanged playbackState : $playbackState playWhenReady : $playWhenReady")
+        RLog.d(
+            "MediaScreen",
+            "onPlayerStateChanged playbackState : $playbackState playWhenReady : $playWhenReady",
+        )
         when (playbackState) {
             Player.STATE_IDLE -> {
                 _playbackState.update { PlaybackState.Idle(playerIndex) }
@@ -790,7 +794,7 @@ class MediaExoStreamPlayer(
                 .build()
         }
 
-//    fun getMediaItem(
+    //    fun getMediaItem(
 //        items: List<Uri>
 //    ): List<MediaItem> {
 //
@@ -848,7 +852,8 @@ class MediaExoStreamPlayer(
                     bufferForPlaybackAfterRebufferMs,
                 ).build()
 
-        val mediaDatsourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(getDefaultDatasource())
+        val mediaDatsourceFactory =
+            DefaultMediaSourceFactory(context).setDataSourceFactory(getDefaultDatasource())
         Log.d("MediaScreen", "datasourceFactory : $datasourceFactory")
         return ExoPlayer
             .Builder(context)
@@ -857,7 +862,7 @@ class MediaExoStreamPlayer(
             .setBandwidthMeter(getBandwidthMeter())
             .setLoadControl(loadControlBuilder)
             .setSeekBackIncrementMs(_seekBackIncrement.value ?: SEEK_BACK_INCREMENTS_MS)
-            .setSeekForwardIncrementMs(_seekForWardIncrement.value ?: SEEK_BACK_INCREMENTS_MS)
+            .setSeekForwardIncrementMs(_seekForwardIncrement.value ?: SEEK_BACK_INCREMENTS_MS)
             .setRenderersFactory(renderersFactory)
             .setDeviceVolumeControlEnabled(true) // 디바인스 볼륨 전달
             .build()
@@ -912,9 +917,7 @@ class MediaExoStreamPlayer(
         context: Context,
         mediaItem: MediaItem,
     ): MediaType {
-        val uri =
-            mediaItem.localConfiguration?.uri
-                ?: return MediaType.UNKNOWN
+        val uri = mediaItem.localConfiguration?.uri ?: return MediaType.UNKNOWN
 
         if (uri.scheme == ContentResolver.SCHEME_FILE) {
             return detectByMetadataRetriever(uri)
@@ -927,8 +930,7 @@ class MediaExoStreamPlayer(
         context: Context,
         uri: Uri,
     ): MediaType {
-        val dataSourceFactory =
-            DefaultDataSourceFactory(context)
+        val dataSourceFactory = DefaultDataSourceFactory(context)
 
         val trackTypes =
             detectMediaType(

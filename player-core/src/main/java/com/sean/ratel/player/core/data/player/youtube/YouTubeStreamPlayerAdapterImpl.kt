@@ -10,63 +10,55 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
 
-
-class YouTubeStreamPlayerAdapterImpl(private val youTubePlayerView: YouTubePlayerView) :
-    YouTubeStreamPlayerAdapter {
-
+class YouTubeStreamPlayerAdapterImpl(
+    private val youTubePlayerView: YouTubePlayerView,
+) : YouTubeStreamPlayerAdapter {
     override fun getYouTubePlayerView(): View = youTubePlayerView
 
     override fun initialize(
         youTubePlayerListener: YouTubePlayerListener,
         handleNetworkEvents: Boolean,
         playerOptions: IFramePlayerOptions,
-        videoId: String?
-    ) =
-        youTubePlayerView.initialize(
-            youTubePlayerListener,
-            handleNetworkEvents,
-            playerOptions,
-            videoId
-        )
+        videoId: String?,
+    ) = youTubePlayerView.initialize(
+        youTubePlayerListener,
+        handleNetworkEvents,
+        playerOptions,
+        videoId,
+    )
 
     override fun initialize(
         youTubePlayerListener: YouTubePlayerListener,
         handleNetworkEvents: Boolean,
-        playerOptions: IFramePlayerOptions
-    ) =
-        youTubePlayerView.initialize(youTubePlayerListener, handleNetworkEvents, playerOptions)
-
+        playerOptions: IFramePlayerOptions,
+    ) = youTubePlayerView.initialize(youTubePlayerListener, handleNetworkEvents, playerOptions)
 
     override fun initialize(
         youTubePlayerListener: YouTubePlayerListener,
-        handleNetworkEvents: Boolean
-    ) =
-        youTubePlayerView.initialize(youTubePlayerListener, handleNetworkEvents)
-
+        handleNetworkEvents: Boolean,
+    ) = youTubePlayerView.initialize(youTubePlayerListener, handleNetworkEvents)
 
     override fun initialize(
         youTubePlayerListener: YouTubePlayerListener,
-        playerOptions: IFramePlayerOptions
+        playerOptions: IFramePlayerOptions,
     ) = youTubePlayerView.initialize(youTubePlayerListener, playerOptions)
 
-
-    override fun initialize(youTubePlayerListener: YouTubePlayerListener) =
-        youTubePlayerView.initialize(youTubePlayerListener)
-
+    override fun initialize(youTubePlayerListener: YouTubePlayerListener) = youTubePlayerView.initialize(youTubePlayerListener)
 
     override fun getYouTubePlayerWhenReady(youTubePlayerCallback: YouTubePlayerCallback) {
         youTubePlayerView.getYouTubePlayerWhenReady(youTubePlayerCallback)
     }
 
-    override fun inflateCustomPlayerUi(layoutId: Int): View =
-        youTubePlayerView.inflateCustomPlayerUi(layoutId)
-
+    override fun inflateCustomPlayerUi(layoutId: Int): View = youTubePlayerView.inflateCustomPlayerUi(layoutId)
 
     override fun setCustomPlayerUi(view: View) {
         youTubePlayerView.setCustomPlayerUi(view)
     }
 
-    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+    override fun onStateChanged(
+        source: LifecycleOwner,
+        event: Lifecycle.Event,
+    ) {
         youTubePlayerView.onStateChanged(source, event)
     }
 
@@ -77,18 +69,14 @@ class YouTubeStreamPlayerAdapterImpl(private val youTubePlayerView: YouTubePlaye
     override fun addYouTubePlayerListener(youTubePlayerListener: YouTubePlayerListener): Boolean =
         youTubePlayerView.addYouTubePlayerListener(youTubePlayerListener)
 
-
     override fun removeYouTubePlayerListener(youTubePlayerListener: YouTubePlayerListener): Boolean =
         youTubePlayerView.removeYouTubePlayerListener(youTubePlayerListener)
-
 
     override fun addFullscreenListener(fullscreenListener: FullscreenListener): Boolean =
         youTubePlayerView.addFullscreenListener(fullscreenListener)
 
-
     override fun removeFullscreenListener(fullscreenListener: FullscreenListener): Boolean =
         youTubePlayerView.removeFullscreenListener(fullscreenListener)
-
 
     override fun matchParent() {
         youTubePlayerView.matchParent()

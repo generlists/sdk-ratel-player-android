@@ -28,32 +28,33 @@ fun ShareIconItem(
     item: ShareItem,
     uri: Uri,
     onDismiss: () -> Unit,
-    onClick:(String)->Unit
+    onClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(72.dp)
-            .clickable {
-                item.action(context, uri)
-                onDismiss()
-                onClick(item.label)
-            }
+        modifier =
+            Modifier
+                .width(72.dp)
+                .clickable {
+                    item.action(context, uri)
+                    onDismiss()
+                    onClick(item.label)
+                },
     ) {
-
         Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.outlineVariant),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.outlineVariant),
+            contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = item.icon,
                 contentDescription = item.label,
-                modifier = Modifier.size(item.size)
+                modifier = Modifier.size(item.size),
             )
         }
 
@@ -61,13 +62,10 @@ fun ShareIconItem(
 
         Text(
             item.label,
-            modifier = Modifier .wrapContentSize(),
+            modifier = Modifier.wrapContentSize(),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color=MaterialTheme.colorScheme.onPrimary,
-
-
-
+            color = MaterialTheme.colorScheme.onPrimary,
         )
     }
 }

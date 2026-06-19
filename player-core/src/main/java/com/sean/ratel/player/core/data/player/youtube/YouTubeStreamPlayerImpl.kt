@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import so.smartlab.common.utils.log.RLog
 
 class YouTubeStreamPlayerImpl(
     private val lifecycle: Lifecycle,
@@ -50,6 +51,7 @@ class YouTubeStreamPlayerImpl(
     override val playbackError: SharedFlow<YouTubeStreamPlayerError> = _playbackError.asSharedFlow()
 
     private val _isMute = MutableStateFlow(true)
+    val isMute: StateFlow<Boolean> = _isMute.asStateFlow()
 
     private val _duration = MutableStateFlow(0f)
     override val duration: StateFlow<Float> = _duration.asStateFlow()
@@ -149,6 +151,7 @@ class YouTubeStreamPlayerImpl(
     }
 
     override fun setPlaybackRate(playbackRate: YouTubeStreamPlaybackRate) {
+        Log.d("OKJSP", "$playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}")
         youTubeStreamPlayer?.setPlaybackRate(getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate))
     }
 
@@ -179,7 +182,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         state: PlayerState,
     ) {
-        Log.d("hbungshin", "state : $state")
+        RLog.d("onStateChange", "state : $state")
         _playbackState.update { (getConvertPlayerStateToYouTubeStreamPlaybackState(state)) }
     }
 
@@ -193,6 +196,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         playbackRate: PlaybackRate,
     ) {
+        Log.d("OKJSP", "youTubePlayer : $youTubePlayer , $playbackRate")
         _videoSpeedChange.update { getConvertPlaybackRateToYouTubePlaybackRate(playbackRate) }
     }
 
@@ -266,11 +270,25 @@ class YouTubeStreamPlayerImpl(
 
     private fun getConvertPlayerErrorToYouTubeStreamPlayerError(error: PlayerConstants.PlayerError): YouTubeStreamPlayerError =
         when (error) {
-            PlayerConstants.PlayerError.UNKNOWN -> YouTubeStreamPlayerError.UNKNOWN
-            PlayerConstants.PlayerError.INVALID_PARAMETER_IN_REQUEST -> YouTubeStreamPlayerError.INVALID_PARAMETER_IN_REQUEST
-            PlayerConstants.PlayerError.HTML_5_PLAYER -> YouTubeStreamPlayerError.HTML_5_PLAYER
-            PlayerConstants.PlayerError.VIDEO_NOT_FOUND -> YouTubeStreamPlayerError.VIDEO_NOT_FOUND
-            PlayerConstants.PlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER -> YouTubeStreamPlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER
+            PlayerConstants.PlayerError.UNKNOWN -> {
+                YouTubeStreamPlayerError.UNKNOWN
+            }
+
+            PlayerConstants.PlayerError.INVALID_PARAMETER_IN_REQUEST -> {
+                YouTubeStreamPlayerError.INVALID_PARAMETER_IN_REQUEST
+            }
+
+            PlayerConstants.PlayerError.HTML_5_PLAYER -> {
+                YouTubeStreamPlayerError.HTML_5_PLAYER
+            }
+
+            PlayerConstants.PlayerError.VIDEO_NOT_FOUND -> {
+                YouTubeStreamPlayerError.VIDEO_NOT_FOUND
+            }
+
+            PlayerConstants.PlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER -> {
+                YouTubeStreamPlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER
+            }
         }
 
     private fun getConvertPlaybackRateToYouTubePlaybackRate(rate: PlayerConstants.PlaybackRate): YouTubeStreamPlaybackRate =

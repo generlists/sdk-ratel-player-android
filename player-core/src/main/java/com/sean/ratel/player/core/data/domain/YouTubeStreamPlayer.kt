@@ -22,10 +22,12 @@ interface YouTubeStreamPlayer {
     val fullScreenView: StateFlow<View?>
     val exitFullScreen: StateFlow<Boolean>
 
-
     fun getYouTubePlayerView(): View
 
-    fun initPlayer(networkHandle: Boolean? = false,videoId: String? = null)
+    fun initPlayer(
+        networkHandle: Boolean? = false,
+        videoId: String? = null,
+    )
 
     fun loadOrCueVideo(
         videoId: String,
@@ -68,7 +70,7 @@ interface YouTubeStreamPlayer {
 
     fun setShuffle(shuffle: Boolean)
 
-    fun addFullscreenListener():Boolean
+    fun addFullscreenListener(): Boolean
 
     fun removeFullscreenListener(): Boolean
 }

@@ -247,7 +247,7 @@ fun onClickPipAction(
     val isLast = playerViewModel.isLast()
     val pageId = playerViewModel.currentItemIndex.value
 
-    Log.d("PIP_CLICK", "isPlaying : ${isPlaying.value} , resolution : ${resolution.value} visibleRect : $visibleRect")
+    Log.d("PIP_CLICK", "isPlaying : ${isPlaying.value} , resolution : ${resolution.value} visibleRect : $visibleRect $screenSize")
 
     val enterPipMode =
         pipManager.enterPipMode(

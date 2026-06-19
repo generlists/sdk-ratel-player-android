@@ -9,12 +9,10 @@ import androidx.media3.datasource.TransferListener
 @UnstableApi
 class UnifiedDataSourceFactory(
     private val httpFactory: DataSource.Factory,
-    private val localFactory: DataSource.Factory
+    private val localFactory: DataSource.Factory,
 ) : DataSource.Factory {
-
     override fun createDataSource(): DataSource {
         return object : DataSource {
-
             private lateinit var delegate: DataSource
             private val listeners = mutableListOf<TransferListener>()
 
@@ -28,11 +26,12 @@ class UnifiedDataSourceFactory(
             override fun open(dataSpec: DataSpec): Long {
                 val scheme = dataSpec.uri.scheme
 
-                delegate = when (scheme) {
-                    "http", "https",null -> httpFactory.createDataSource()
-                    "content", "file",  -> localFactory.createDataSource()
-                    else -> httpFactory.createDataSource()
-                }
+                delegate =
+                    when (scheme) {
+                        "http", "https", null -> httpFactory.createDataSource()
+                        "content", "file" -> localFactory.createDataSource()
+                        else -> httpFactory.createDataSource()
+                    }
 
                 // 🔥 여기 중요: 기존에 등록된 리스너 전부 주입
                 listeners.forEach { delegate.addTransferListener(it) }
@@ -40,13 +39,15 @@ class UnifiedDataSourceFactory(
                 return delegate.open(dataSpec)
             }
 
-            override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
-                delegate.read(buffer, offset, length)
+            override fun read(
+                buffer: ByteArray,
+                offset: Int,
+                length: Int,
+            ): Int = delegate.read(buffer, offset, length)
 
             override fun getUri(): Uri? = delegate.uri
 
-            override fun getResponseHeaders(): Map<String, List<String>> =
-                delegate.responseHeaders
+            override fun getResponseHeaders(): Map<String, List<String>> = delegate.responseHeaders
 
             override fun close() {
                 if (::delegate.isInitialized) {

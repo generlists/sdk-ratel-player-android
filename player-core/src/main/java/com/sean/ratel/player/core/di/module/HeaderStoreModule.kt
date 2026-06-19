@@ -10,7 +10,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object HeaderStoreModule {
-
     @Provides
     @Singleton
     fun provideHeaderStore(): HeaderStore = HeaderStore()

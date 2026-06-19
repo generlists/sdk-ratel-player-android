@@ -8,9 +8,8 @@ data class VideoTrack(
     val width: Int? = null,
     val height: Int? = null,
     val frameRate: Float? = null,
-    val language: String? = null
+    val language: String? = null,
 ) {
-
     /**
      * 높이가 존재하지 않는 경우 추정된 높이.
      */
@@ -24,11 +23,12 @@ data class VideoTrack(
         get() = estimatedHeightMap.floorEntry(bitrate)?.value ?: 0
 
     companion object {
-        private val estimatedHeightMap = TreeMap<Int, Int>().apply {
-            put(5_000_000, 1080)
-            put(1_500_000, 720)
-            put(1_000_000, 360)
-            put(200_000, 270)
-        }
+        private val estimatedHeightMap =
+            TreeMap<Int, Int>().apply {
+                put(5_000_000, 1080)
+                put(1_500_000, 720)
+                put(1_000_000, 360)
+                put(200_000, 270)
+            }
     }
 }

@@ -2,8 +2,10 @@
 agp = "8.12.3"
 kotlin = "2.0.21"
 coreKtx = "1.17.0"
+ksp = "2.0.21-1.0.25"
 junit = "4.13.2"
 junitVersion = "1.3.0"
+hilt ="2.52"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 fragmentktx ="1.6.1"
@@ -11,8 +13,8 @@ activityCompose = "1.12.1"
 composeBom = "2024.09.00"
 appcompat = "1.7.1"
 material = "1.13.0"
-hilt ="2.52"
-ksp = "2.0.21-1.0.25"
+
+
 retrofit2 = "2.9.0"
 okhttp3 = "4.9.3"
 navigation ="2.8.9"
@@ -26,6 +28,9 @@ hilt-compose="1.2.0"
 google-gson="2.10.1"
 accompanist-webview="0.36.0"
 
+shortform-play-core="0.0.6"
+
+
 google-ad ="23.5.0"
 foundationVersion = "1.10.2"
 lifecycle-process = "2.8.3"
@@ -35,6 +40,7 @@ ktlint = "12.1.1"
 utils="0.0.1"
 
 [libraries]
+ai-shortformplay-core ={ module = "ai.shortform-play.sdk.ratel.player.android:player-core", version.ref = "shortform-play-core" }
 so-smartlab-sdk-common-utils-android ={ module = "so.smartlab.sdk.common:utils-android", version.ref = "utils" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

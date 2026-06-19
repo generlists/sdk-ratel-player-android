@@ -1,9 +1,7 @@
 package com.sean.ratel.player.core
 
-
 import android.content.Context
 import so.smartlab.common.utils.log.RLog
-
 
 /**
  * Set the necessary data when initializing the player.
@@ -11,7 +9,7 @@ import so.smartlab.common.utils.log.RLog
  */
 data class Configurations(
     val loggingConfig: LoggingConfiguration,
-    val videoConfig: PlayConfiguration
+    val videoConfig: PlayConfiguration,
 )
 
 /**
@@ -19,12 +17,9 @@ data class Configurations(
  */
 data class LoggingConfiguration(
     val enableAllLogger: Boolean? = false,
-
     val enableShowLogWithLinkToSource: Boolean? = false,
-
     val enableUdpLogger: Boolean? = false,
-
-    val ipAddress: String? = null
+    val ipAddress: String? = null,
 )
 
 /**
@@ -36,8 +31,8 @@ data class PlayConfiguration(
     var maxBufferMs: Int? = 2_000,
     var minBufferMs: Int? = 2_000,
     var maximumVideoQuality: Int? = Int.MAX_VALUE,
-    var seekBackIncrementMs:Long? = 5_000,
-    var seekForwardIncrementMs:Long? = 5_000
+    var seekBackIncrementMs: Long? = 5_000,
+    var seekForwardIncrementMs: Long? = 5_000,
 )
 
 /**
@@ -51,90 +46,106 @@ private object PlayConfigurationBuilder {
     private var maxBufferMs: Int? = 2_000
     private var minBufferMs: Int? = 2_000
     private var maximumVideoQuality: Int? = Int.MAX_VALUE
-    private var seekBackIncrementMs:Long? = 5_000
-    private var seekForwardIncrementMs:Long? = 5_000
+    private var seekBackIncrementMs: Long? = 5_000
+    private var seekForwardIncrementMs: Long? = 5_000
 
-    fun bufferForPlaybackAfterRebufferMs(bufferForPlaybackAfterRebufferMs: Int?) = apply {
-        this.bufferForPlaybackAfterRebufferMs = bufferForPlaybackAfterRebufferMs
-    }
+    fun bufferForPlaybackAfterRebufferMs(bufferForPlaybackAfterRebufferMs: Int?) =
+        apply {
+            this.bufferForPlaybackAfterRebufferMs = bufferForPlaybackAfterRebufferMs
+        }
 
-    fun bufferForPlaybackMs(bufferForPlaybackMs: Int?) = apply {
-        this.bufferForPlaybackMs = bufferForPlaybackMs
-    }
+    fun bufferForPlaybackMs(bufferForPlaybackMs: Int?) =
+        apply {
+            this.bufferForPlaybackMs = bufferForPlaybackMs
+        }
 
-    fun maxBufferMs(maxBufferMs: Int?) = apply {
-        this.maxBufferMs = maxBufferMs
-    }
+    fun maxBufferMs(maxBufferMs: Int?) =
+        apply {
+            this.maxBufferMs = maxBufferMs
+        }
 
-    fun minBufferMs(minBufferMs: Int?) = apply {
-        this.minBufferMs = minBufferMs
-    }
+    fun minBufferMs(minBufferMs: Int?) =
+        apply {
+            this.minBufferMs = minBufferMs
+        }
 
-    fun maximumVideoQuality(maximumVideoQuality: Int?) = apply {
-        this.maximumVideoQuality = maximumVideoQuality
-    }
-    fun seekBackIncrementMs(seekBackIncrementMs: Long?) = apply {
-        this.seekBackIncrementMs = seekBackIncrementMs
-    }
-    fun seekForwardIncrementMs(seekForwardIncrementMs: Long?) = apply {
-        this.seekForwardIncrementMs = seekForwardIncrementMs
-    }
+    fun maximumVideoQuality(maximumVideoQuality: Int?) =
+        apply {
+            this.maximumVideoQuality = maximumVideoQuality
+        }
 
-    fun build() = PlayConfiguration(
-        bufferForPlaybackAfterRebufferMs,
-        bufferForPlaybackMs,
-        maxBufferMs,
-        minBufferMs,
-        maximumVideoQuality,
-        seekBackIncrementMs,
-        seekForwardIncrementMs
-    )
+    fun seekBackIncrementMs(seekBackIncrementMs: Long?) =
+        apply {
+            this.seekBackIncrementMs = seekBackIncrementMs
+        }
+
+    fun seekForwardIncrementMs(seekForwardIncrementMs: Long?) =
+        apply {
+            this.seekForwardIncrementMs = seekForwardIncrementMs
+        }
+
+    fun build() =
+        PlayConfiguration(
+            bufferForPlaybackAfterRebufferMs,
+            bufferForPlaybackMs,
+            maxBufferMs,
+            minBufferMs,
+            maximumVideoQuality,
+            seekBackIncrementMs,
+            seekForwardIncrementMs,
+        )
 }
 
 private object LoggingConfigurationBuilder {
-
     private var enableAllLogger: Boolean = true
     private var enableShowLogWithLinkToSource: Boolean = false
     private var enableUdpLogger: Boolean = false
     private var ipAddress: String? = null
 
-    fun enableAllLogger(enableAllLogger: Boolean) = apply {
-        this.enableAllLogger = enableAllLogger
-    }
+    fun enableAllLogger(enableAllLogger: Boolean) =
+        apply {
+            this.enableAllLogger = enableAllLogger
+        }
 
-    fun enableShowLogWithLinkToSource(enableShowLogWithLinkToSource: Boolean) = apply {
-        this.enableShowLogWithLinkToSource = enableShowLogWithLinkToSource
-    }
+    fun enableShowLogWithLinkToSource(enableShowLogWithLinkToSource: Boolean) =
+        apply {
+            this.enableShowLogWithLinkToSource = enableShowLogWithLinkToSource
+        }
 
-    fun enableUdpLogger(enableUdpLogger: Boolean) = apply {
-        this.enableUdpLogger = enableUdpLogger
-    }
+    fun enableUdpLogger(enableUdpLogger: Boolean) =
+        apply {
+            this.enableUdpLogger = enableUdpLogger
+        }
 
-    fun ipAddress(ipAddress: String?) = apply {
-        this.ipAddress = ipAddress
-    }
+    fun ipAddress(ipAddress: String?) =
+        apply {
+            this.ipAddress = ipAddress
+        }
 
-    fun build(context: Context) = RLog.init(
-        context = context,
-        enableAllLogger = enableAllLogger,
-        enableShowLogWithLinkToSource = enableShowLogWithLinkToSource,
-        enableUdpLogger = enableUdpLogger,
-        ipAddress = ipAddress
-    ).let {
-        LoggingConfiguration(
-            enableAllLogger = enableAllLogger,
-            enableShowLogWithLinkToSource = enableShowLogWithLinkToSource,
-            enableUdpLogger = enableUdpLogger,
-            ipAddress = ipAddress
-        )
-    }
+    fun build(context: Context) =
+        RLog
+            .init(
+                context = context,
+                enableAllLogger = enableAllLogger,
+                enableShowLogWithLinkToSource = enableShowLogWithLinkToSource,
+                enableUdpLogger = enableUdpLogger,
+                ipAddress = ipAddress,
+            ).let {
+                LoggingConfiguration(
+                    enableAllLogger = enableAllLogger,
+                    enableShowLogWithLinkToSource = enableShowLogWithLinkToSource,
+                    enableUdpLogger = enableUdpLogger,
+                    ipAddress = ipAddress,
+                )
+            }
 }
 
 /**
  * play configurations Builder
  */
-class ConfigurationBuilder(private val context: Context) {
-
+class ConfigurationBuilder(
+    private val context: Context,
+) {
     private var playConfiguration = PlayConfiguration()
     private var loggingConfiguration = LoggingConfiguration()
 
@@ -144,26 +155,27 @@ class ConfigurationBuilder(private val context: Context) {
         maxBufferMs: Int?,
         minBufferMs: Int?,
         maximumVideoQuality: Int? = null,
-        seekBackIncrementMs:Long?,
-        seekForwardIncrementMs:Long?
+        seekBackIncrementMs: Long?,
+        seekForwardIncrementMs: Long?,
     ) = apply {
-        playConfiguration = PlayConfigurationBuilder
-            .bufferForPlaybackAfterRebufferMs(bufferForPlaybackAfterRebufferMs)
-            .bufferForPlaybackMs(bufferForPlaybackMs)
-            .maxBufferMs(maxBufferMs)
-            .minBufferMs(minBufferMs)
-            .maximumVideoQuality(maximumVideoQuality)
-            .seekBackIncrementMs(seekBackIncrementMs)
-            .seekForwardIncrementMs(seekForwardIncrementMs)
-            .build()
+        playConfiguration =
+            PlayConfigurationBuilder
+                .bufferForPlaybackAfterRebufferMs(
+                    bufferForPlaybackAfterRebufferMs,
+                ).bufferForPlaybackMs(bufferForPlaybackMs)
+                .maxBufferMs(maxBufferMs)
+                .minBufferMs(minBufferMs)
+                .maximumVideoQuality(maximumVideoQuality)
+                .seekBackIncrementMs(seekBackIncrementMs)
+                .seekForwardIncrementMs(seekForwardIncrementMs)
+                .build()
     }
 
     fun loggingConfiguration(
         enableAllLogger: Boolean,
         enableShowLogWithLinkToSource: Boolean,
         enableUdpLogger: Boolean,
-        ipAddress: String? = null
-
+        ipAddress: String? = null,
     ) = apply {
         loggingConfiguration =
             LoggingConfigurationBuilder
@@ -177,6 +189,7 @@ class ConfigurationBuilder(private val context: Context) {
     fun build() = Configurations(loggingConfiguration, playConfiguration)
 }
 
-fun configurations(context: Context, lambda: ConfigurationBuilder.() -> Unit): Configurations {
-    return ConfigurationBuilder(context).apply(lambda).build()
-}
+fun configurations(
+    context: Context,
+    lambda: ConfigurationBuilder.() -> Unit,
+): Configurations = ConfigurationBuilder(context).apply(lambda).build()
