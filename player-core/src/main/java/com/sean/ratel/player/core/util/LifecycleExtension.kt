@@ -20,7 +20,5 @@ fun LifecycleOwner.repeatOnStart(block: suspend CoroutineScope.() -> Unit) {
 fun LifecycleOwner.launch(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
-    block: suspend CoroutineScope.() -> Unit
-): Job {
-    return lifecycleScope.launch(context, start, block)
-}
+    block: suspend CoroutineScope.() -> Unit,
+): Job = lifecycleScope.launch(context, start, block)

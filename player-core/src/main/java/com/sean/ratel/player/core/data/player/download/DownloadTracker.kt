@@ -165,7 +165,10 @@ class DownloadTracker(
                                         val stableFile = waitForStableFile(file.path)
                                         RLog.d(
                                             "TRANSFORM",
-                                            "${file.path} , exists=${stableFile?.exists()}, length=${stableFile?.length()}, path=${stableFile?.path}",
+                                            "${file.path} , " +
+                                                "exists=${stableFile?.exists()}, " +
+                                                "length=${stableFile?.length()}, " +
+                                                "path=${stableFile?.path}",
                                         )
                                     }
                                 }

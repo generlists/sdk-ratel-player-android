@@ -122,6 +122,7 @@ class MainActivity : FragmentActivity() {
                     currentFragment != null && currentFragment is BasicPlayerFragment &&
                     hasPipPermission()
                 ) {
+                    Log.d("onClickPipButton", "$isPipClick")
                     (currentFragment as BasicPlayerFragment).onClickPipAction(context)
                 }
             }

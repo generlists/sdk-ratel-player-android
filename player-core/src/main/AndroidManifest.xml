@@ -16,7 +16,7 @@
             android:name="log_enable_udp"
             android:value="${IS_DEBUG_UDP}" />
         <meta-data
-            android:name="log_enable_udp"
+            android:name="log_enable_link_source"
             android:value="${IS_DEBUG_LINK_SOURCE}" />
         <service
             android:name="com.sean.ratel.player.core.data.player.download.VideoDownloadService"

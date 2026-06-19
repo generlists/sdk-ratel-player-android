@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.DatabaseProvider
-
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -28,8 +27,6 @@ import com.sean.ratel.player.core.data.player.download.VideoDownloadManager
 import com.sean.ratel.player.core.data.player.download.VideoDownloadNotifierImpl
 import com.sean.ratel.player.core.data.player.download.VideoDownloadService.Companion.DOWNLOAD_CHANNEL_ID
 import com.sean.ratel.player.core.data.player.media.MediaExoStreamPlayer
-
-
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,22 +36,17 @@ import java.io.File
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Named
-
 import javax.inject.Singleton
-
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ExoDownloadModule {
-
-
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
     fun provideDatabaseProvider(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): DatabaseProvider = StandaloneDatabaseProvider(context)
-
 
     @OptIn(UnstableApi::class)
     @Provides
@@ -78,16 +70,13 @@ object ExoDownloadModule {
     fun provideDefaultHttpDataSourceFactory(): DefaultHttpDataSource.Factory =
         DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
 
-
     @Provides
     @Singleton
     @Named("local")
     @UnstableApi
     fun provideLocalDataSourceFactory(
-        @ApplicationContext context: Context
-    ): DataSource.Factory {
-        return DefaultDataSource.Factory(context)
-    }
+        @ApplicationContext context: Context,
+    ): DataSource.Factory = DefaultDataSource.Factory(context)
 
     @Provides
     @Singleton
@@ -96,7 +85,7 @@ object ExoDownloadModule {
         @Named("http") httpFactory: DefaultHttpDataSource.Factory,
         @Named("local") localFactory: DataSource.Factory,
         cache: Cache,
-        headerStore: HeaderStore
+        headerStore: HeaderStore,
     ): DataSource.Factory {
 //    val cacheDataSourceFactory = CacheDataSource.Factory()
 //        .setCache(simpleCache)
@@ -106,25 +95,25 @@ object ExoDownloadModule {
         val dynamicHeaderFactory =
             DynamicHeaderDataSourceFactory(httpFactory, headerStore)
 
-        val cachedHttpFactory= CacheDataSource.Factory()
-            .setCache(cache)
-            .setUpstreamDataSourceFactory(dynamicHeaderFactory)
-            .setCacheReadDataSourceFactory(FileDataSource.Factory())
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-            .setCacheWriteDataSinkFactory(null)
+        val cachedHttpFactory =
+            CacheDataSource
+                .Factory()
+                .setCache(cache)
+                .setUpstreamDataSourceFactory(dynamicHeaderFactory)
+                .setCacheReadDataSourceFactory(FileDataSource.Factory())
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                .setCacheWriteDataSinkFactory(null)
 
         return UnifiedDataSourceFactory(
             httpFactory = cachedHttpFactory,
-            localFactory = localFactory
+            localFactory = localFactory,
         )
     }
 
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    fun provideDownloadIndex(databaseProvider: DatabaseProvider): DownloadIndex =
-        DefaultDownloadIndex(databaseProvider)
-
+    fun provideDownloadIndex(databaseProvider: DatabaseProvider): DownloadIndex = DefaultDownloadIndex(databaseProvider)
 
     @OptIn(UnstableApi::class)
     @Provides
@@ -134,37 +123,32 @@ object ExoDownloadModule {
         databaseProvider: DatabaseProvider,
         cache: Cache,
         executor: Executor,
-        dataSourceFactory: DataSource.Factory
-    ): DownloadManager {
-
-        return DownloadManager(
+        dataSourceFactory: DataSource.Factory,
+    ): DownloadManager =
+        DownloadManager(
             context,
             databaseProvider,
             cache,
             dataSourceFactory,
-            executor
+            executor,
         ).apply {
-            maxParallelDownloads = 3   // 병렬 다운로드 개수
+            maxParallelDownloads = 3 // 병렬 다운로드 개수
         }
-    }
+
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    fun provideNotificationHelper( @ApplicationContext context: Context):DownloadNotificationHelper{
-
-        return DownloadNotificationHelper(context,DOWNLOAD_CHANNEL_ID )
-
-    }
+    fun provideNotificationHelper(
+        @ApplicationContext context: Context,
+    ): DownloadNotificationHelper = DownloadNotificationHelper(context, DOWNLOAD_CHANNEL_ID)
 
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
     fun provideMyDownloadNotifier(
         @ApplicationContext context: Context,
-        helper: DownloadNotificationHelper
-    ): VideoDownloadNotifier {
-        return VideoDownloadNotifierImpl(context, helper)
-    }
+        helper: DownloadNotificationHelper,
+    ): VideoDownloadNotifier = VideoDownloadNotifierImpl(context, helper)
 
     @OptIn(UnstableApi::class)
     @Provides
@@ -174,7 +158,7 @@ object ExoDownloadModule {
         downloadManager: DownloadManager,
         cache: Cache,
     ): DownloadTracker {
-        val tracker = DownloadTracker(context, downloadManager,cache)
+        val tracker = DownloadTracker(context, downloadManager, cache)
         downloadManager.addListener(tracker)
         return tracker
     }
@@ -186,19 +170,14 @@ object ExoDownloadModule {
         @ApplicationContext context: Context,
         downloadManager: DownloadManager,
         downloadTracker: DownloadTracker,
-        headerStore: HeaderStore
-    ): VideoDownloadManager =
-        VideoDownloadManager(context, downloadManager, downloadTracker, headerStore)
+        headerStore: HeaderStore,
+    ): VideoDownloadManager = VideoDownloadManager(context, downloadManager, downloadTracker, headerStore)
 
     @OptIn(UnstableApi::class)
     @Provides
     fun provideTExoPlayer(
         @ApplicationContext context: Context,
-        //userAgentProvider: UserAgentProvider,
-        datasourceFactory:DataSource.Factory
-    ): MediaStreamPlayer {
-        return MediaExoStreamPlayer(context,datasourceFactory)
-    }
-
-
+        // userAgentProvider: UserAgentProvider,
+        datasourceFactory: DataSource.Factory,
+    ): MediaStreamPlayer = MediaExoStreamPlayer(context, datasourceFactory)
 }

@@ -13,9 +13,8 @@ import com.sean.ratel.player.core.data.player.download.VideoDownloadService.Comp
 @OptIn(UnstableApi::class)
 class VideoDownloadNotifierImpl(
     private val context: Context,
-    private val notificationHelper: DownloadNotificationHelper
+    private val notificationHelper: DownloadNotificationHelper,
 ) : VideoDownloadNotifier {
-
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -23,33 +22,37 @@ class VideoDownloadNotifierImpl(
     }
 
     override fun showCompleted(data: DownloadNotificationData) {
-        val notification = notificationHelper.buildDownloadCompletedNotification(
-            context,
-            data.smallIcon,
-            data.contentIntent,
-            data.message
-        )
-        val channel = NotificationChannel(
-            DOWNLOAD_CHANNEL_ID,
-            "Downloads",
-            NotificationManager.IMPORTANCE_HIGH
-        )
+        val notification =
+            notificationHelper.buildDownloadCompletedNotification(
+                context,
+                data.smallIcon,
+                data.contentIntent,
+                data.message,
+            )
+        val channel =
+            NotificationChannel(
+                DOWNLOAD_CHANNEL_ID,
+                "Downloads",
+                NotificationManager.IMPORTANCE_HIGH,
+            )
         notificationManager.createNotificationChannel(channel)
         notificationManager.notify(NOTIFY_ID, notification)
     }
 
     override fun showFailed(data: DownloadNotificationData) {
-        val notification = notificationHelper.buildDownloadFailedNotification(
-            context,
-            data.smallIcon,
-            data.contentIntent,
-            data.message
-        )
-        val channel = NotificationChannel(
-            DOWNLOAD_CHANNEL_ID,
-            "Downloads",
-            NotificationManager.IMPORTANCE_HIGH
-        )
+        val notification =
+            notificationHelper.buildDownloadFailedNotification(
+                context,
+                data.smallIcon,
+                data.contentIntent,
+                data.message,
+            )
+        val channel =
+            NotificationChannel(
+                DOWNLOAD_CHANNEL_ID,
+                "Downloads",
+                NotificationManager.IMPORTANCE_HIGH,
+            )
         notificationManager.createNotificationChannel(channel)
         notificationManager.notify(NOTIFY_ID, notification)
     }

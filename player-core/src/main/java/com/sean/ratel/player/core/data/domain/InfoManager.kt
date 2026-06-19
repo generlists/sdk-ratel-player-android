@@ -23,7 +23,7 @@ class InfoManager
             bitmap: Bitmap,
             currentPos: Long,
             playbackSpeed: Float,
-            videoFileName: String, // 원본 영상 이름
+            videoFileName: String,
             memo: String = "",
         ): PreviewInfoData {
             val mainInfoList = mutableListOf<Pair<String, String>>()

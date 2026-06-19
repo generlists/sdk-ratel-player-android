@@ -8,6 +8,16 @@ plugins {
     alias(libs.plugins.signing)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ktlint)
+}
+ktlint {
+    android.set(true)
+    outputToConsole.set(true)
+    enableExperimentalRules.set(true)
+}
+
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    debug.set(true)
 }
 
 android {

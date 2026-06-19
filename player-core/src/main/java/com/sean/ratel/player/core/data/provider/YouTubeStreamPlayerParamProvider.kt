@@ -5,9 +5,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTube
 import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlayerAdapter
 
 interface YouTubeStreamPlayerParamProvider {
-
     val youtubeStreamPlayerAdapter: YouTubeStreamPlayerAdapter
     val iFramePlayerOptions: IFramePlayerOptions
     val youtubeStreamPlayerTracker: YouTubePlayerTracker
-
 }

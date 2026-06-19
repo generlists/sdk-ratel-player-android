@@ -23,9 +23,7 @@ import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.BurstMode
 import androidx.compose.material.icons.filled.CropFree
-import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.PictureInPicture
-import androidx.compose.material.icons.filled.PictureInPictureAlt
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOn
 import androidx.compose.material.icons.filled.RepeatOneOn
@@ -33,9 +31,7 @@ import androidx.compose.material.icons.filled.RunCircle
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.ShuffleOn
 import androidx.compose.material.icons.outlined.BurstMode
-import androidx.compose.material.icons.outlined.FullscreenExit
 import androidx.compose.material.icons.outlined.PictureInPicture
-import androidx.compose.material.icons.outlined.PictureInPictureAlt
 import androidx.compose.material.icons.outlined.RunCircle
 import androidx.compose.material.icons.outlined.SwitchVideo
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -152,7 +148,7 @@ fun MediaOptionSheet(
             OptionItem(
                 key = MediaOptionKey.PLAYBACK_SPEED,
                 value = MediaOptionValue.Speed(mediaOptions.speed),
-                icon = if (mediaOptions.speed == PlaySpeed.PlaySpeed_1_0) Icons.Outlined.RunCircle else Icons.Filled.RunCircle,
+                icon = if (mediaOptions.speed == PlaySpeed.PlaySpeed1Dot0) Icons.Outlined.RunCircle else Icons.Filled.RunCircle,
                 label = String.format(stringResource(R.string.player_control_speed), mediaOptions.speed.speed),
                 enabled = true,
                 locked = false,
@@ -328,7 +324,7 @@ fun MediaOptionSheet(
                 enabled = true,
                 locked = false,
             ) {
-                //playerViewModel.setIsPIP(!mediaOptions.pip.enabled)
+                // playerViewModel.setIsPIP(!mediaOptions.pip.enabled)
 
                 openLayer =
                     openLayer.mapValues { (key, value) ->

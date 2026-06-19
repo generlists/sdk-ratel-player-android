@@ -25,6 +25,7 @@
     <string name="download_tab_facebook">FaceBook</string>
     <string name="download_tab_tiktok">TikTok</string>
     <string name="browser">Browser</string>
+    <string name="play_speed">재생속도</string>
 
 
 </resources>

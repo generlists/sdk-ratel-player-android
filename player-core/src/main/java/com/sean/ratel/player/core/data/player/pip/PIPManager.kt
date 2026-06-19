@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import so.smartlab.common.utils.log.RLog
 import java.lang.ref.WeakReference
-import java.util.UUID
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -54,10 +53,10 @@ class PIPManager
         private val _videoSize = MutableStateFlow<Size>(Size(0, 0))
         val videoSize = _videoSize.asStateFlow()
 
-        private val _isFirst = MutableStateFlow<Boolean>(false)
+        private val _isFirst = MutableStateFlow<Boolean?>(null)
         val isFirst = _isFirst.asStateFlow()
 
-        private val _isLast = MutableStateFlow<Boolean>(false)
+        private val _isLast = MutableStateFlow<Boolean?>(null)
         val isLast = _isLast.asStateFlow()
 
         private val pipActionReceiver =
@@ -112,8 +111,8 @@ class PIPManager
             videoSize: Size?,
             rect: Rect,
             isPlaying: Boolean,
-            isFirst: Boolean,
-            isLast: Boolean,
+            isFirst: Boolean? = null,
+            isLast: Boolean? = null,
         ): PipResult {
             val pipContext = activityRef?.get() ?: return PipResult.UnKnownReason
             if (videoSize == null) return PipResult.UnKnownReason
@@ -140,8 +139,8 @@ class PIPManager
             isPlaying: Boolean,
             videoSize: Size?,
             rect: Rect,
-            isFirst: Boolean,
-            isLast: Boolean,
+            isFirst: Boolean? = null,
+            isLast: Boolean? = null,
         ) = updatePipParams(
             isPlaying = isPlaying,
             videoSize = videoSize,
@@ -157,8 +156,8 @@ class PIPManager
             rect: Rect,
             enter: Boolean = false,
             endPlay: Boolean = false,
-            isFirst: Boolean = false,
-            isLast: Boolean = false,
+            isFirst: Boolean? = false,
+            isLast: Boolean? = false,
         ) {
             _isPlaying.value = isPlaying
             _videoSize.value = videoSize ?: Size(0, 0)
@@ -169,8 +168,24 @@ class PIPManager
             val pipContext = activityRef?.get() ?: return
             val aspectRatio = getPipAspectRatio(videoSize) ?: return
             val playAction = PipAction.getRemoteActionPlayPause(pipContext, isPlaying, endPlay)
-            val playPrevAction = PipAction.getRemoteActionSkipPrevious(pipContext, isFirst)
-            val playNextAction = PipAction.getRemoteActionSkipNext(pipContext, isLast)
+            val playPrevAction =
+                if (isFirst != null) {
+                    PipAction.getRemoteActionSkipPrevious(
+                        pipContext,
+                        isFirst,
+                    )
+                } else {
+                    PipAction.getRemoteAction(pipContext, PipAction.SKIP_PREVIOUS)
+                }
+            val playNextAction =
+                if (isLast != null) {
+                    PipAction.getRemoteActionSkipNext(
+                        pipContext,
+                        isLast,
+                    )
+                } else {
+                    PipAction.getRemoteAction(pipContext, PipAction.SKIP_NEXT)
+                }
 
             RLog.d(
                 "PIP_CLICK",
