@@ -2,6 +2,7 @@ package com.sean.ratel.player.core.data.domain
 
 import android.util.Size
 import android.view.View
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
@@ -18,6 +19,12 @@ interface YouTubeStreamPlayer {
     val currentTime: StateFlow<Float>
 
     val videoSpeedChange: StateFlow<YouTubeStreamPlaybackRate?>
+
+    val videoQualityLevel: StateFlow<List<YouTubeStreamPlayQuality>>
+
+    val videoQualityChange: StateFlow<YouTubeStreamPlayQuality>
+
+    val captionAvailable: StateFlow<Boolean>
 
     val fullScreenView: StateFlow<View?>
     val exitFullScreen: StateFlow<Boolean>
@@ -73,4 +80,10 @@ interface YouTubeStreamPlayer {
     fun addFullscreenListener(): Boolean
 
     fun removeFullscreenListener(): Boolean
+
+    fun setQuality(quality: YouTubeStreamPlayQuality)
+
+    fun enableCaptions(languageCode: String)
+
+    fun disableCaptions()
 }
