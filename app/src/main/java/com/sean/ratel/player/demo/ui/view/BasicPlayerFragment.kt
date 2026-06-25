@@ -22,14 +22,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloseFullscreen
+import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,9 +57,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackCaptionState
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
@@ -68,12 +75,14 @@ import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeStreamPlaye
 import com.sean.ratel.player.core.util.launch
 import com.sean.ratel.player.core.util.repeatOnStart
 import com.sean.ratel.player.demo.R
+import com.sean.ratel.player.demo.data.youtube.domain.YouTubePlayerOptions
 import com.sean.ratel.player.demo.databinding.FragmentBasicPlayerBinding
 import com.sean.ratel.player.demo.di.qualifier.NotControl
 import com.sean.ratel.player.utils.PlayerUtils.hasPipPermission
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -93,6 +102,9 @@ class BasicPlayerFragment : Fragment() {
     @NotControl
     @Inject
     lateinit var iFramePlayerOptions: IFramePlayerOptions
+
+    @Inject
+    lateinit var playOptions: YouTubePlayerOptions
 
     @Inject
     lateinit var youtubeStreamPlayerTracker: YouTubePlayerTracker
@@ -137,6 +149,11 @@ class BasicPlayerFragment : Fragment() {
                 Log.d("BasicPlayerFragment", "$it")
             }
         }
+        repeatOnStart {
+            youTubeStreamPlayer.videoQualityChange.collect {
+                Log.d("OKJSPKK", "change : ${it.displayName()}")
+            }
+        }
     }
 
     override fun onResume() {
@@ -177,7 +194,7 @@ class BasicPlayerFragment : Fragment() {
                 lifecycle = lifecycle,
                 autoPlay = true,
                 youtubeStreamPlayerAdapter = youtubeStreamPlayerAdapter,
-                iFramePlayerOptions = IFramePlayerOptions.default,
+                iFramePlayerOptions = iFramePlayerOptions,
             )
 
         lifecycle.addObserver(youTubePlayerView)
@@ -195,7 +212,11 @@ class BasicPlayerFragment : Fragment() {
         val composeView =
             youTubePlayerView.rootView?.findViewById<ComposeView>(com.sean.ratel.player.demo.R.id.player_controller)
         composeView?.setContent {
-            Control(pipViewModel)
+            Column(Modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Control(pipViewModel)
+                Quality()
+                Caption()
+            }
         }
     }
 
@@ -210,7 +231,7 @@ class BasicPlayerFragment : Fragment() {
         if (!isPipMode.isPipClick) {
             Box(
                 Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .background(Color.Transparent),
                 contentAlignment = Alignment.Center,
             ) {
@@ -324,6 +345,176 @@ class BasicPlayerFragment : Fragment() {
         }
     }
 
+    @Composable
+    @Suppress("ktlint:standard:function-naming")
+    fun Quality() {
+        var clickQuality by remember { mutableStateOf(false) }
+        var currentQuality by remember { mutableStateOf<YouTubeStreamPlayQuality>(YouTubeStreamPlayQuality.Auto) }
+        val availableQualities by youTubeStreamPlayer.videoQualityLevel.collectAsStateWithLifecycle()
+        val captionAvailable by youTubeStreamPlayer.captionAvailable.collectAsStateWithLifecycle()
+        val state =
+            when {
+                !captionAvailable -> YouTubeStreamPlaybackCaptionState.UNSUPPORTED
+                captionAvailable -> YouTubeStreamPlaybackCaptionState.ENABLED
+                else -> YouTubeStreamPlaybackCaptionState.DISABLED
+            }
+        Log.d("QualityQuality", "captionAvailable : $state")
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(Color.Transparent),
+            contentAlignment = Alignment.Center,
+        ) {
+            Card(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .padding(16.dp),
+                shape = RoundedCornerShape(12.dp),
+                border =
+                    BorderStroke(
+                        1.5.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                    ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.outlineVariant),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            ) {
+                Column(Modifier.fillMaxSize()) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color.LightGray)
+                            .padding(10.dp),
+                    ) {
+                        Text(
+                            "Play Quality",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = null,
+                            Modifier
+                                .size(48.dp)
+                                .clickable {
+                                    clickQuality = true
+                                },
+                            tint = Color.White,
+                        )
+                    }
+
+                    if (clickQuality) {
+                        QualityBottomSheet(
+                            currentQuality = currentQuality,
+                            availableQualities = availableQualities,
+                            onQualitySelected = {
+                                Log.d("OKJSP", "onRateSelected : $it")
+                                youTubeStreamPlayer.setQuality(it)
+                                currentQuality = it
+                            },
+                            onDismiss = {
+                                clickQuality = false
+                            },
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("ktlint:standard:function-naming")
+    fun Caption() {
+        val captionAvailable =
+            remember {
+                youTubeStreamPlayer.captionAvailable.value
+            }
+        var initCaptionState by remember { mutableStateOf(if (playOptions.ccLoadPolicy == 1) true else false) }
+        val state =
+            when {
+                !captionAvailable -> YouTubeStreamPlaybackCaptionState.UNSUPPORTED
+                captionAvailable -> YouTubeStreamPlaybackCaptionState.ENABLED
+                else -> YouTubeStreamPlaybackCaptionState.UNSUPPORTED
+            }
+        Log.d("CAPTION_TRACKLIST", "state : $state , captionAvailable$captionAvailable")
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(Color.Transparent),
+            contentAlignment = Alignment.Center,
+        ) {
+            Card(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .padding(16.dp),
+                shape = RoundedCornerShape(12.dp),
+                border =
+                    BorderStroke(
+                        1.5.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                    ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.outlineVariant),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            ) {
+                Column(Modifier.fillMaxSize()) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color.LightGray)
+                            .padding(10.dp),
+                    ) {
+                        Text(
+                            "Caption",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ClosedCaption,
+                            contentDescription = null,
+                            Modifier
+                                .size(48.dp)
+                                .clickable {
+                                    Log.d(
+                                        "CAPTION_AVAILABLE",
+                                        "captionAvailable : $captionAvailable",
+                                    )
+
+                                    if (initCaptionState) {
+                                        youTubeStreamPlayer.disableCaptions()
+
+                                        initCaptionState = false
+                                    } else {
+//
+                                        initCaptionState = true
+                                        youTubeStreamPlayer.enableCaptions(Locale.getDefault().language)
+                                    }
+                                },
+                            tint = Color.White,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     @Suppress("ktlint:standard:function-naming")
@@ -371,6 +562,69 @@ class BasicPlayerFragment : Fragment() {
             }
         }
     }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    @Suppress("ktlint:standard:function-naming")
+    fun QualityBottomSheet(
+        currentQuality: YouTubeStreamPlayQuality,
+        availableQualities: List<YouTubeStreamPlayQuality>,
+        onQualitySelected: (YouTubeStreamPlayQuality) -> Unit,
+        onDismiss: () -> Unit,
+    ) {
+        var clickSpeed by remember { mutableStateOf(false) }
+        ModalBottomSheet(onDismissRequest = onDismiss) {
+            Column(modifier = Modifier.padding(bottom = 32.dp)) {
+                Text(
+                    text = "Video Quality",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                )
+
+                availableQualities.forEach { quality ->
+                    val isSelected = quality == currentQuality
+
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onQualitySelected(quality)
+                                    onDismiss()
+                                }.padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = quality.displayName(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color =
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            modifier = Modifier.weight(1f),
+                        )
+
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun YouTubeStreamPlayQuality.displayName(): String =
+        when (this) {
+            YouTubeStreamPlayQuality.Auto -> "Auto"
+            YouTubeStreamPlayQuality.P1080 -> "1080P"
+            YouTubeStreamPlayQuality.P720 -> "720P"
+        }
 
     fun onClickPipAction(context: Context) {
         val v = binding.root

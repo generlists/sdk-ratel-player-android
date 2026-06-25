@@ -9,53 +9,69 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
  * eg: player is playing -> network goes out -> player stops -> network comes back -> player resumes playback automatically.
  */
 internal class PlaybackResumer : AbstractYouTubePlayerListener() {
+    private var canLoad = false
+    private var isPlaying = false
+    private var error: PlayerConstants.PlayerError? = null
 
-  private var canLoad = false
-  private var isPlaying = false
-  private var error: PlayerConstants.PlayerError? = null
+    private var currentVideoId: String? = null
+    private var currentSecond: Float = 0f
 
-  private var currentVideoId: String? = null
-  private var currentSecond: Float = 0f
+    fun resume(youTubePlayer: YouTubePlayer) {
+        val videoId = currentVideoId ?: return
+        if (isPlaying && error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
+            youTubePlayer.loadOrCueVideo(canLoad, videoId, currentSecond)
+        } else if (!isPlaying && error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
+            youTubePlayer.cueVideo(videoId, currentSecond)
+        }
 
-  fun resume(youTubePlayer: YouTubePlayer) {
-    val videoId = currentVideoId ?: return
-    if (isPlaying && error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
-      youTubePlayer.loadOrCueVideo(canLoad, videoId, currentSecond)
+        error = null
     }
-    else if (!isPlaying && error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
-      youTubePlayer.cueVideo(videoId, currentSecond)
+
+    override fun onStateChange(
+        youTubePlayer: YouTubePlayer,
+        state: PlayerConstants.PlayerState,
+    ) {
+        when (state) {
+            PlayerConstants.PlayerState.ENDED, PlayerConstants.PlayerState.PAUSED -> {
+                isPlaying = false
+            }
+
+            PlayerConstants.PlayerState.PLAYING -> {
+                isPlaying = true
+            }
+
+            else -> { }
+        }
     }
 
-    error = null
-  }
-
-  override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
-    when (state) {
-      PlayerConstants.PlayerState.ENDED, PlayerConstants.PlayerState.PAUSED -> isPlaying = false
-      PlayerConstants.PlayerState.PLAYING -> isPlaying = true
-      else -> { }
+    override fun onError(
+        youTubePlayer: YouTubePlayer,
+        error: PlayerConstants.PlayerError,
+    ) {
+        if (error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
+            this.error = error
+        }
     }
-  }
 
-  override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
-    if (error == PlayerConstants.PlayerError.HTML_5_PLAYER) {
-      this.error = error
+    override fun onCurrentSecond(
+        youTubePlayer: YouTubePlayer,
+        second: Float,
+    ) {
+        currentSecond = second
     }
-  }
 
-  override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-    currentSecond = second
-  }
+    override fun onVideoId(
+        youTubePlayer: YouTubePlayer,
+        videoId: String,
+    ) {
+        currentVideoId = videoId
+    }
 
-  override fun onVideoId(youTubePlayer: YouTubePlayer, videoId: String) {
-    currentVideoId = videoId
-  }
+    fun onLifecycleResume() {
+        canLoad = true
+    }
 
-  fun onLifecycleResume() {
-    canLoad = true
-  }
-
-  fun onLifecycleStop() {
-    canLoad = false
-  }
+    fun onLifecycleStop() {
+        canLoad = false
+    }
 }

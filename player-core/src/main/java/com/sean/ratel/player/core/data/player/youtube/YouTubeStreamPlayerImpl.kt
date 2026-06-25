@@ -14,6 +14,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.You
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.loadOrCueVideo
+import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
@@ -62,13 +63,27 @@ class YouTubeStreamPlayerImpl(
     override fun getYouTubePlayerView(): View = youtubeStreamPlayerAdapter.getYouTubePlayerView()
 
     private val _videoSpeedChange = MutableStateFlow<YouTubeStreamPlaybackRate?>(null)
-    override val videoSpeedChange: StateFlow<YouTubeStreamPlaybackRate?> = _videoSpeedChange.asStateFlow()
+    override val videoSpeedChange: StateFlow<YouTubeStreamPlaybackRate?> =
+        _videoSpeedChange.asStateFlow()
+
+    private val _videoQualityLevel = MutableStateFlow<List<YouTubeStreamPlayQuality>>(emptyList())
+    override val videoQualityLevel: StateFlow<List<YouTubeStreamPlayQuality>> =
+        _videoQualityLevel.asStateFlow()
+
+    private val _videoQualityChange =
+        MutableStateFlow<YouTubeStreamPlayQuality>(YouTubeStreamPlayQuality.Auto)
+    override val videoQualityChange: StateFlow<YouTubeStreamPlayQuality> =
+        _videoQualityChange.asStateFlow()
 
     private val _fullScreenView = MutableStateFlow<View?>(null)
     override val fullScreenView: StateFlow<View?> = _fullScreenView.asStateFlow()
 
     private val _exitFullScreen = MutableStateFlow<Boolean>(false)
     override val exitFullScreen: StateFlow<Boolean> = _exitFullScreen.asStateFlow()
+
+    private val _captionAvailable = MutableStateFlow<Boolean>(true)
+    override val captionAvailable: StateFlow<Boolean> =
+        _captionAvailable.asStateFlow()
 
     override fun initPlayer(
         networkHandle: Boolean?,
@@ -151,7 +166,10 @@ class YouTubeStreamPlayerImpl(
     }
 
     override fun setPlaybackRate(playbackRate: YouTubeStreamPlaybackRate) {
-        Log.d("OKJSP", "$playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}")
+        Log.d(
+            "OKJSP",
+            "$playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}",
+        )
         youTubeStreamPlayer?.setPlaybackRate(getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate))
     }
 
@@ -190,6 +208,75 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         playbackQuality: PlayerConstants.PlaybackQuality,
     ) {
+        RLog.d("OKJSPKK", "playbackQuality : $playbackQuality")
+
+        when (playbackQuality) {
+            PlayerConstants.PlaybackQuality.SMALL, PlayerConstants.PlaybackQuality.MEDIUM, PlayerConstants.PlaybackQuality.LARGE,
+            -> {
+                _videoQualityChange.update { YouTubeStreamPlayQuality.Auto }
+            }
+
+            PlayerConstants.PlaybackQuality.HD720 -> {
+                _videoQualityChange.update { YouTubeStreamPlayQuality.P720 }
+            }
+
+            PlayerConstants.PlaybackQuality.HD1080 -> {
+                _videoQualityChange.update { YouTubeStreamPlayQuality.P1080 }
+            }
+
+            else -> {
+                _videoQualityChange.update { YouTubeStreamPlayQuality.Auto }
+            }
+        }
+    }
+
+    override fun onAvailableQualityLevels(
+        youTubePlayer: YouTubePlayer,
+        qualityLevels: List<PlayerConstants.PlaybackQuality>,
+    ) {
+        RLog.d("OKJSPKK", "qualityLevels : $qualityLevels")
+
+        val result = mutableListOf<YouTubeStreamPlayQuality>()
+
+        if (qualityLevels.any {
+                it == PlayerConstants.PlaybackQuality.DEFAULT ||
+                    it == PlayerConstants.PlaybackQuality.SMALL ||
+                    it == PlayerConstants.PlaybackQuality.MEDIUM ||
+                    it == PlayerConstants.PlaybackQuality.LARGE ||
+                    it == PlayerConstants.PlaybackQuality.UNKNOWN
+            }
+
+        ) {
+            result.add(YouTubeStreamPlayQuality.Auto)
+        }
+
+        // 720 존재 여부
+
+        if (qualityLevels.contains(PlayerConstants.PlaybackQuality.HD720)) {
+            result.add(YouTubeStreamPlayQuality.P720)
+        }
+
+        // 1080 존재 여부
+
+        if (qualityLevels.contains(PlayerConstants.PlaybackQuality.HD1080)) {
+            result.add(YouTubeStreamPlayQuality.P1080)
+        }
+        _videoQualityLevel.update { result }
+    }
+
+    override fun onCaptionAvailable(
+        youTubePlayer: YouTubePlayer,
+        available: Boolean,
+    ) {
+        _captionAvailable.update { available }
+    }
+
+    override fun enableCaptions(languageCode: String) {
+        youTubeStreamPlayer?.enableCaptions(languageCode)
+    }
+
+    override fun disableCaptions() {
+        youTubeStreamPlayer?.disableCaptions()
     }
 
     override fun onPlaybackRateChange(
@@ -233,7 +320,8 @@ class YouTubeStreamPlayerImpl(
     override fun onVideoId(
         youTubePlayer: YouTubePlayer,
         videoId: String,
-    ) {}
+    ) {
+    }
 
     private fun getConvertPlayerStateToYouTubeStreamPlaybackState(state: PlayerState): YouTubeStreamPlaybackState =
         when (state) {
@@ -327,6 +415,16 @@ class YouTubeStreamPlayerImpl(
 
     override fun setShuffle(shuffle: Boolean) {
         youTubeStreamPlayer?.setShuffle(shuffle)
+    }
+
+    override fun setQuality(quality: YouTubeStreamPlayQuality) {
+        if (quality == YouTubeStreamPlayQuality.Auto) {
+            youTubeStreamPlayer?.setQuality(PlayerConstants.PlaybackQuality.DEFAULT)
+        } else if (quality == YouTubeStreamPlayQuality.P720) {
+            youTubeStreamPlayer?.setQuality(PlayerConstants.PlaybackQuality.HD720)
+        } else if (quality == YouTubeStreamPlayQuality.P1080) {
+            youTubeStreamPlayer?.setQuality(PlayerConstants.PlaybackQuality.HD1080)
+        }
     }
 
     override fun addFullscreenListener(): Boolean = youtubeStreamPlayerAdapter.addFullscreenListener(this)
