@@ -358,7 +358,7 @@ class BasicPlayerFragment : Fragment() {
                 captionAvailable -> YouTubeStreamPlaybackCaptionState.ENABLED
                 else -> YouTubeStreamPlaybackCaptionState.DISABLED
             }
-        Log.d("QualityQuality", "captionAvailable : $captionAvailable")
+        Log.d("QualityQuality", "captionAvailable : $state")
         Box(
             Modifier
                 .fillMaxWidth()
@@ -433,7 +433,10 @@ class BasicPlayerFragment : Fragment() {
     @Composable
     @Suppress("ktlint:standard:function-naming")
     fun Caption() {
-        val captionAvailable by youTubeStreamPlayer.captionAvailable.collectAsStateWithLifecycle()
+        val captionAvailable =
+            remember {
+                youTubeStreamPlayer.captionAvailable.value
+            }
         var initCaptionState by remember { mutableStateOf(if (playOptions.ccLoadPolicy == 1) true else false) }
         val state =
             when {
@@ -441,7 +444,7 @@ class BasicPlayerFragment : Fragment() {
                 captionAvailable -> YouTubeStreamPlaybackCaptionState.ENABLED
                 else -> YouTubeStreamPlaybackCaptionState.UNSUPPORTED
             }
-        Log.d("CAPTION_AVAILABLE", "state : $state")
+        Log.d("CAPTION_TRACKLIST", "state : $state , captionAvailable$captionAvailable")
 
         Box(
             Modifier

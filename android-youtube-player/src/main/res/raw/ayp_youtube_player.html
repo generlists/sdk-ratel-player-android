@@ -67,17 +67,16 @@
             onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
             onError: function(error) { YouTubePlayerBridge.sendError(error.data) },
             onApiChange: function(event) {
-
-<!--              try {-->
+<!--                try {-->
 <!--                  console.log(-->
 <!--                      "CAPTION_AVAILABLE:",-->
 <!--                      JSON.stringify(-->
 <!--                          player.getOption("captions", "track")-->
 <!--                      )-->
 <!--                  );-->
-<!--                  checkCaptionAvailable();-->
+
 <!--              } catch (e) {-->
-<!--                  console.log("CAPTION_TRACK_ERROR:", e);-->
+<!--                  console.log("CAPTION_AVAILABLE:", e);-->
 <!--              }-->
 
               YouTubePlayerBridge.sendApiChange();
@@ -262,25 +261,79 @@
     function checkCaptionAvailable() {
        const available = isCaptionAvailable(player);
         YouTubePlayerBridge.sendCaptionAvailable(available);
-    <!--    console.log(-->
-    <!--        "CAPTION_AVAILABLE:",-->
-    <!--        available);-->
+<!--          try {-->
+<!--                  console.log(-->
+<!--                      "CAPTION_AVAILABLE:",-->
+<!--                      JSON.stringify(-->
+<!--                          player.getOption("captions", "track")-->
+<!--                      )-->
+<!--                  );-->
+
+<!--              } catch (e) {-->
+<!--                  console.log("CAPTION_AVAILABLE:", e);-->
+<!--              }-->
+
+       const tracklist = player.getOption('captions', 'tracklist');
+
+                     try {
+                  console.log(
+                      "CAPTION_AVAILABLE:",
+                      JSON.stringify(
+                          player.getOption("captions", "track")
+                      )
+
+                  );
+                    console.log("CAPTION_AVAILABLE",available);
+
+              } catch (e) {
+                  console.log("CAPTION_TRACK_ERROR:", e);
+              }
 
     }
 
-    function isCaptionAvailable(player) {
+   function isCaptionAvailable(player) {
 
-        try {
+    try {
 
-            const options = player.getOptions();
-            const isNotEmpty =
-            options && Object.keys(options).length > 0;
-            return isNotEmpty;
+        const track = player.getOption('captions', 'track');
 
-        } catch (e) {
-            return false;
+        // 현재 선택된 자막이 있으면
+
+        if (track && track.languageCode) {
+
+            return true;
+
         }
+
+        const tracklist =
+
+            player.getOption('captions', 'tracklist');
+
+        // 선택된 건 없어도 사용 가능한 자막 목록이 있으면
+
+        if (Array.isArray(tracklist) && tracklist.length > 0) {
+
+            return true;
+
+        }
+
+        return false;
+
+    } catch (e) {
+
+        console.log(
+
+            'CAPTION_AVAILABLE_ERROR:',
+
+            e.message
+
+        );
+
+        return false;
+
     }
+
+}
 
 let captionsEnabled = true;
 
@@ -300,8 +353,6 @@ let captionsEnabled = true;
              YouTubePlayerBridge.sendCaptionAvailable(
             captionsEnabled);
 
-    <!--        console.log("CAPTIONS_ENABLED:", languageCode);-->
-
 
         } catch (e) {
             console.log("CAPTIONS_ERROR:", e);
@@ -314,8 +365,6 @@ let captionsEnabled = true;
             player.unloadModule("captions");
              YouTubePlayerBridge.sendCaptionAvailable(
             captionsEnabled);
-
-    <!--        console.log("CAPTIONS_DISABLED");-->
         } catch (e) {
             console.log("CAPTIONS_ERROR:", e);
         }
