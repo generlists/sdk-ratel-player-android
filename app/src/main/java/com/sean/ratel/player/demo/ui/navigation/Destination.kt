@@ -14,6 +14,8 @@ object Destination {
 
     data object EndPlayer : DynamicScreen("endPlayer", "contentId", "startIndex")
 
+    data object CastPlayer : DynamicScreen("castPlayer", "contentId", "startIndex")
+
     data object BasicPlayer : DynamicScreen("basic_player", "contentId", "startIndex")
 
     data object AdvancePlayer : DynamicScreen("advance_player", "contentId", "startIndex")

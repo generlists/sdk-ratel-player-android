@@ -26,6 +26,8 @@ google-media3 = "1.8.0"
 icons-core="1.6.0"
 hilt-compose="1.2.0"
 google-gson="2.10.1"
+google-cast="22.1.0"
+media-router ="1.7.0"
 accompanist-webview="0.36.0"
 
 shortform-play-core="0.0.6"
@@ -37,7 +39,7 @@ lifecycle-process = "2.8.3"
 multidex = "2.0.1"
 media3Transformer = "1.10.0"
 ktlint = "12.1.1"
-utils="0.0.1"
+utils="0.0.5"
 
 [libraries]
 ai-shortformplay-core ={ module = "ai.shortform-play.sdk.ratel.player.android:player-core", version.ref = "shortform-play-core" }
@@ -77,7 +79,15 @@ google-media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls",
 google-media3-datasource-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "google-media3"}
 google-media3-database = { module = "androidx.media3:media3-database", version.ref = "google-media3"}
 google-code-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson"}
+google-android-gms-play-service-cast-framework =  {group = "com.google.android.gms",name="play-services-cast-framework", version.ref = "google-cast"}
+androidx-mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.ref = "media-router" }
+
+
+
+
 com-google-accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist-webview"}
+
+
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"}
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt"}

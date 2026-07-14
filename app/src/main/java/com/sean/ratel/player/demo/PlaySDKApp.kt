@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sean.ratel.player.core.data.player.pip.PIPManager
+import com.sean.ratel.player.demo.ui.cast.YouTubePlayersManager
 import com.sean.ratel.player.demo.ui.home.HomeTopBar
 import com.sean.ratel.player.demo.ui.home.MainTab
 import com.sean.ratel.player.demo.ui.navigation.Destination
@@ -47,6 +48,7 @@ import com.sean.ratel.player.ui.ThemeMode
 fun DemoPlayApp(
     mainViewModel: MainViewModel,
     pipManager: PIPManager,
+    youTubePlayersManager: YouTubePlayersManager,
     finish: () -> Unit,
 ) {
     BackHandler {
@@ -96,6 +98,7 @@ fun DemoPlayApp(
                     navigator = mainViewModel.navigator,
                     themeMode = ThemeMode.SYSTEM,
                     pipManager = pipManager,
+                    youTubePlayersManager = youTubePlayersManager,
                     finish = finish,
                 )
 

@@ -2,6 +2,7 @@ package com.sean.ratel.player.core.data.domain
 
 import android.util.Size
 import android.view.View
+import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
@@ -29,7 +30,7 @@ interface YouTubeStreamPlayer {
     val fullScreenView: StateFlow<View?>
     val exitFullScreen: StateFlow<Boolean>
 
-    fun getYouTubePlayerView(): View
+    fun getYouTubePlayerView(): View?
 
     fun initPlayer(
         networkHandle: Boolean? = false,
@@ -86,4 +87,12 @@ interface YouTubeStreamPlayer {
     fun enableCaptions(languageCode: String)
 
     fun disableCaptions()
+
+    fun getChromeCastContext(): ChromecastYouTubePlayerContext?
+
+    fun chromeCastRelease()
+
+    fun endCurrentSession()
+
+    fun onCaptionAvailable()
 }

@@ -78,6 +78,8 @@ private class YouTubePlayerImpl(
     override fun disableCaptions() = webView.invoke("disableCaptions")
 
     override fun enableCaptions(languageCode: String) = webView.invoke("enableCaptions", languageCode)
+    override fun checkCaptionAvailable() {
+    }
 
     fun release() {
         listeners.clear()

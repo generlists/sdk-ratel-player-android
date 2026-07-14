@@ -1,9 +1,9 @@
-package com.sean.ratel.player.demo.ui.view
+package com.sean.ratel.player.demo.ui.view.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,16 +13,16 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Suppress("ktlint:standard:function-naming")
-fun OptionButton(onClick: () -> Unit) {
+fun BookMarkButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {
         IconButton(onClick = onClick) {
             Icon(
-                imageVector = Icons.AutoMirrored.Default.List,
+                imageVector = Icons.Filled.Favorite,
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.primaryContainer,
+                tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }

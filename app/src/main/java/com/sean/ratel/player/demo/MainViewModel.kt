@@ -27,6 +27,9 @@ class MainViewModel
         private val _youtubeModelList = MutableStateFlow<YouTubeModelList?>(null)
         val youtubeModelList: StateFlow<YouTubeModelList?> = _youtubeModelList
 
+        private val _youtubeGoogleCastModelList = MutableStateFlow<YouTubeModelList?>(null)
+        val youtubeGoogleCastModelList: StateFlow<YouTubeModelList?> = _youtubeGoogleCastModelList
+
         private val _playState = MutableStateFlow<String>("UnKnown")
         val playState: StateFlow<String> = _playState
 
@@ -46,6 +49,7 @@ class MainViewModel
             viewModelScope.launch {
                 loadBasicJsonData()
                 loadAdvanceJsonData()
+                loadGoogleCastJsonData()
             }
         }
 
@@ -60,6 +64,13 @@ class MainViewModel
             val model = youTubeRepository.getLocalContentList(R.raw.youtube_advance_sample)
             model.collect {
                 _youtubeModelList.value = it
+            }
+        }
+
+        suspend fun loadGoogleCastJsonData() {
+            val model = youTubeRepository.getLocalContentList(R.raw.youtube_google_cast_sample)
+            model.collect {
+                _youtubeGoogleCastModelList.value = it
             }
         }
 

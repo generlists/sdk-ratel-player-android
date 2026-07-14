@@ -1,9 +1,9 @@
-package com.sean.ratel.player.demo.ui.view
+package com.sean.ratel.player.demo.ui.view.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,13 +13,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Suppress("ktlint:standard:function-naming")
-fun InfoButton(onClick: () -> Unit) {
+fun BackButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier,
     ) {
         IconButton(onClick = onClick) {
             Icon(
-                imageVector = Icons.Default.Info,
+                imageVector = Icons.AutoMirrored.Default.ArrowBack,
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
                 tint = MaterialTheme.colorScheme.onPrimary,

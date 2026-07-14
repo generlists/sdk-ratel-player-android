@@ -43,6 +43,7 @@ object FragmentModule {
             .Builder()
             .controls(playerOptions.control)
             .fullscreen(playerOptions.fs) // enable full screen button
+            .ccLoadPolicy(playerOptions.ccLoadPolicy)
             .langPref(playerOptions.ccLangPref)
             .build()
 
@@ -88,7 +89,7 @@ object FragmentModule {
     @Provides
     @CCLoadPolicy
     @FragmentScoped
-    fun provideCCLoadPolicy(): Int = 3
+    fun provideCCLoadPolicy(): Int = 1
 
     @Provides
     @CCLangPref

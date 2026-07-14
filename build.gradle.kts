@@ -42,6 +42,9 @@ subprojects {
             "android-youtube-player" -> {
                 versionProps["YOUTUBE_PLAYER_VERSION"].toString()
             }
+            "android-youtube-chromecast-sender" -> {
+                versionProps["YOUTUBE_CHROMECAST_SENDER_VERSION"].toString()
+            }
 
             else -> {
                 "1.0.0"
@@ -64,6 +67,7 @@ tasks.register("publishAll") {
     val modules =
         mapOf(
             ":android-youtube-player" to "YOUTUBE_PLAYER",
+            ":android-youtube-chromecast-sender" to "YOUTUBE_CHROMECAST_SENDER",
             ":player-utils" to "UTIL",
             ":player-core" to "CORE",
             ":player-ui" to "UI",

@@ -35,7 +35,7 @@ android {
         debug {
             manifestPlaceholders["IS_DEBUG"] = true
             manifestPlaceholders["IS_DEBUG_UDP"] = false
-            manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = false
+            manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = true
         }
         release {
             isMinifyEnabled = false
@@ -63,6 +63,7 @@ android {
 
 dependencies {
     api(project(":android-youtube-player"))
+    api(project(":android-youtube-chromecast-sender"))
     implementation(project(":player-utils"))
     implementation(libs.so.smartlab.sdk.common.utils.android)
 

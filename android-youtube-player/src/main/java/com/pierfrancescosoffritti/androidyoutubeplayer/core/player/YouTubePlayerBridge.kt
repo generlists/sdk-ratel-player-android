@@ -3,6 +3,7 @@ package com.pierfrancescosoffritti.androidyoutubeplayer.core.player
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.annotation.RestrictTo
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
@@ -59,7 +60,9 @@ class YouTubePlayerBridge(
     }
 
     @JavascriptInterface
-    fun sendYouTubeIFrameAPIReady() = mainThreadHandler.post { youTubePlayerOwner.onYouTubeIFrameAPIReady() }
+    fun sendYouTubeIFrameAPIReady() = mainThreadHandler.post {
+        youTubePlayerOwner.onYouTubeIFrameAPIReady()
+    }
 
     @JavascriptInterface
     fun sendReady() =
@@ -109,6 +112,8 @@ class YouTubePlayerBridge(
 
         mainThreadHandler.post {
             youTubePlayerOwner.listeners.forEach {
+
+               // Log.d("CCAAPP","JavascriptInterface sendCaptionAvailable $available ,  it : $it")
                 it.onCaptionAvailable(
                     youTubePlayerOwner.getInstance(),
                     available,
@@ -122,7 +127,11 @@ class YouTubePlayerBridge(
         val playbackRate = parsePlaybackRate(rate)
 
         mainThreadHandler.post {
-            youTubePlayerOwner.listeners.forEach { it.onPlaybackRateChange(youTubePlayerOwner.getInstance(), playbackRate) }
+
+            youTubePlayerOwner.listeners.forEach {
+                //Log.d("CCAAPP","222 sendCaptionAvailable $rate , $it")
+                it.onPlaybackRateChange(youTubePlayerOwner.getInstance(), playbackRate)
+            }
         }
     }
 

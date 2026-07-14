@@ -3,12 +3,16 @@ package com.sean.ratel.player.core.data.domain.model.youtube
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 
 sealed class YouTubeStreamPlaybackState {
+    data object IFrameReady : YouTubeStreamPlaybackState()
+
+    data object Ready : YouTubeStreamPlaybackState()
+
     data object UnKnown : YouTubeStreamPlaybackState()
 
     data object UnStarted : YouTubeStreamPlaybackState()
 
     data class Prepared(
-        val youTubeStreamPlayer: YouTubeStreamPlayer,
+        val youTubePlayer: YouTubeStreamPlayer,
     ) : YouTubeStreamPlaybackState()
 
     data object Playing : YouTubeStreamPlaybackState()

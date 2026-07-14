@@ -17,6 +17,8 @@ import com.sean.ratel.player.core.data.player.pip.PIPManager
 import com.sean.ratel.player.core.data.player.pip.PIPTarget
 import com.sean.ratel.player.core.data.player.pip.PipAction
 import com.sean.ratel.player.core.util.launch
+import com.sean.ratel.player.demo.ui.cast.YouTubePlayersManager
+import com.sean.ratel.player.demo.ui.cast.notifications.CastNotificationAction
 import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 import com.sean.ratel.player.demo.ui.view.BasicPlayerFragment
 import com.sean.ratel.player.utils.PlayerUtils.hasPipPermission
@@ -33,16 +35,22 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var pipManager: PIPManager
+
+    @Inject
+    lateinit var youTubePlayersManager: YouTubePlayersManager
     private var pipTarget: PIPTarget? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         pipManager.bind(this)
+
+        youTubePlayersManager.bind(this)
         setContent {
             DemoPlayApp(
                 mainViewModel = mainViewModel,
                 pipManager = pipManager,
+                youTubePlayersManager = youTubePlayersManager,
                 finish = { finish() },
             )
         }
@@ -63,6 +71,18 @@ class MainActivity : FragmentActivity() {
                         pipButtonState.tryEmit(0)
                     }
                 }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        when (intent.action) {
+            CastNotificationAction.ACTION_OPEN_CAST_SCREEN -> {
+                Log.d("hbungshin", "CastAction")
+
+                // 여기서 처리
             }
         }
     }

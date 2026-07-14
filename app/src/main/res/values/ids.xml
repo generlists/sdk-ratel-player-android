@@ -2,4 +2,5 @@
 <resources>
     <item name="fragment_basic_container" type="id" />
     <item name="fragmen_advance_container" type="id" />
+    <item name="fragment_cast_container" type="id" />
 </resources>

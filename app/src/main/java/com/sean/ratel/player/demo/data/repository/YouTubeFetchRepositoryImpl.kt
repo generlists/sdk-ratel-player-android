@@ -16,4 +16,6 @@ class YouTubeFetchRepositoryImpl
         override suspend fun getLocalContent(rawId: Int): Flow<YouTubeModel> = localJsonService.fetchContentFromJson(rawId)
 
         override suspend fun getLocalContentList(rawId: Int): Flow<YouTubeModelList> = localJsonService.fetchContentListFromJson(rawId)
+
+        override suspend fun getGoogleCastContentList(rawId: Int): Flow<YouTubeModelList> = localJsonService.fetchContentListFromJson(rawId)
     }

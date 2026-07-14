@@ -6,4 +6,5 @@ import androidx.annotation.Keep
 data class VideoModel(
     val videoId: String,
     val title: String,
+    val thumbNail: String,
 )

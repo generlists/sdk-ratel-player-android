@@ -37,14 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sean.ratel.player.demo.MainViewModel
 import com.sean.ratel.player.demo.R
+import com.sean.ratel.player.demo.ui.cast.YouTubePlayersManager
 import com.sean.ratel.player.demo.ui.navigation.Destination
 import com.sean.ratel.player.demo.ui.theme.DemoplayerTheme
 
 @Composable
 @Suppress("ktlint:standard:function-naming")
-fun YouTubeScreen(viewModel: MainViewModel) {
+fun YouTubeScreen(
+    viewModel: MainViewModel,
+    youTubePlayersManager: YouTubePlayersManager,
+) {
     val basicDataModel = viewModel.youtubeModel.collectAsState()
     val advanceDataModel = viewModel.youtubeModelList.collectAsState()
+    val googleCastDataModel = viewModel.youtubeGoogleCastModelList.collectAsState()
 
     Column(Modifier.fillMaxWidth()) {
         TitleArea(basicDataModel.value?.exampleTitle ?: "")
@@ -63,6 +68,15 @@ fun YouTubeScreen(viewModel: MainViewModel) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AdvancePlayer(viewModel)
+        }
+        Spacer(Modifier.height(10.dp))
+        TitleArea(googleCastDataModel.value?.exampleTitle ?: "")
+        Spacer(Modifier.height(10.dp))
+        Row(
+            Modifier.fillMaxWidth().wrapContentSize().background(Color.White),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MainCastScreen(viewModel, youTubePlayersManager)
         }
     }
 }
