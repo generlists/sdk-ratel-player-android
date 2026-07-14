@@ -41,6 +41,9 @@ android {
 
     buildTypes {
         debug {
+            manifestPlaceholders["IS_DEBUG"] = true
+            manifestPlaceholders["IS_DEBUG_UDP"] = false
+            manifestPlaceholders["IS_DEBUG_LINK_SOURCE"] = true
             buildConfigField(
                 "String",
                 "TEST_DEVICE_HASHED_ID",
@@ -153,4 +156,6 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation("com.google.android.gms:play-services-cast-framework:22.1.0")
+    implementation("androidx.mediarouter:mediarouter:1.7.0")
 }

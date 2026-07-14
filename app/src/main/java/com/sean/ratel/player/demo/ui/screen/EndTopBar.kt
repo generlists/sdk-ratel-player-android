@@ -24,10 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sean.ratel.player.demo.ui.view.BackButton
-import com.sean.ratel.player.demo.ui.view.BookMarkButton
-import com.sean.ratel.player.demo.ui.view.InfoButton
-import com.sean.ratel.player.demo.ui.view.ShareButton
+import com.sean.ratel.player.demo.ui.view.component.BackButton
+import com.sean.ratel.player.demo.ui.view.component.BookMarkButton
+import com.sean.ratel.player.demo.ui.view.component.InfoButton
+import com.sean.ratel.player.demo.ui.view.component.ShareButton
 
 @Suppress("ktlint:standard:function-naming")
 @Composable

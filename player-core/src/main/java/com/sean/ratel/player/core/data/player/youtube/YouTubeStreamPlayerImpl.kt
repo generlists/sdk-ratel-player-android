@@ -1,10 +1,10 @@
 package com.sean.ratel.player.core.data.player.youtube
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.lifecycle.Lifecycle
+import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants.PlaybackRate
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants.PlayerState
@@ -15,6 +15,9 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.loadOrCueVideo
 import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
+import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertPlaybackRateToYouTubePlaybackRate
+import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertPlayerErrorToYouTubeStreamPlayerError
+import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertYouTubePlaybackRatYoPlaybackRate
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
@@ -89,7 +92,7 @@ class YouTubeStreamPlayerImpl(
         networkHandle: Boolean?,
         videoId: String?,
     ) {
-        Log.d("TAG", "videoId : $videoId")
+        RLog.d(TAG, "videoId : $videoId")
 
         if (initialPlayer) return
 
@@ -101,7 +104,7 @@ class YouTubeStreamPlayerImpl(
         )
         this.initialPlayer = true
         this.videoId = videoId
-        Log.d("TAG", "initialPlayer : $initialPlayer")
+        RLog.d(TAG, "[LIB] initialPlayer : $initialPlayer")
     }
 
     @SuppressLint("RestrictedApi")
@@ -166,9 +169,7 @@ class YouTubeStreamPlayerImpl(
     }
 
     override fun setPlaybackRate(playbackRate: YouTubeStreamPlaybackRate) {
-        Log.d(
-            "OKJSP",
-            "$playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}",
+        RLog.d(TAG, "[LIB] $playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}",
         )
         youTubeStreamPlayer?.setPlaybackRate(getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate))
     }
@@ -187,7 +188,7 @@ class YouTubeStreamPlayerImpl(
         }
 
     override fun onReady(youTubePlayer: YouTubePlayer) {
-        Log.d("hbungshin", "$videoId , youTubePlayer : $youTubePlayer $autoPlay")
+        //Log.d("CHROME", "[onReady] videoId : $videoId , youTubePlayer : $youTubePlayer , autoPlay : $autoPlay")
         youTubeStreamPlayer = youTubePlayer
         youTubeStreamPlayer?.addListener(this)
 
@@ -200,7 +201,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         state: PlayerState,
     ) {
-        RLog.d("onStateChange", "state : $state")
+        RLog.d(TAG, "[LIB], state : $state")
         _playbackState.update { (getConvertPlayerStateToYouTubeStreamPlaybackState(state)) }
     }
 
@@ -208,7 +209,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         playbackQuality: PlayerConstants.PlaybackQuality,
     ) {
-        RLog.d("OKJSPKK", "playbackQuality : $playbackQuality")
+        RLog.d(TAG, "[LIB] playbackQuality : $playbackQuality")
 
         when (playbackQuality) {
             PlayerConstants.PlaybackQuality.SMALL, PlayerConstants.PlaybackQuality.MEDIUM, PlayerConstants.PlaybackQuality.LARGE,
@@ -234,7 +235,7 @@ class YouTubeStreamPlayerImpl(
         youTubePlayer: YouTubePlayer,
         qualityLevels: List<PlayerConstants.PlaybackQuality>,
     ) {
-        RLog.d("OKJSPKK", "qualityLevels : $qualityLevels")
+        RLog.d(TAG, "[LIB] qualityLevels : $qualityLevels")
 
         val result = mutableListOf<YouTubeStreamPlayQuality>()
 
@@ -279,11 +280,20 @@ class YouTubeStreamPlayerImpl(
         youTubeStreamPlayer?.disableCaptions()
     }
 
+    override fun getChromeCastContext(): ChromecastYouTubePlayerContext? {
+        return null
+    }
+
+    override fun chromeCastRelease() {}
+
+    override fun endCurrentSession() {}
+    override fun onCaptionAvailable() {}
+
     override fun onPlaybackRateChange(
         youTubePlayer: YouTubePlayer,
         playbackRate: PlaybackRate,
     ) {
-        Log.d("OKJSP", "youTubePlayer : $youTubePlayer , $playbackRate")
+        RLog.d(TAG, "[LIB] youTubePlayer : $youTubePlayer , $playbackRate")
         _videoSpeedChange.update { getConvertPlaybackRateToYouTubePlaybackRate(playbackRate) }
     }
 
@@ -356,54 +366,6 @@ class YouTubeStreamPlayerImpl(
             }
         }
 
-    private fun getConvertPlayerErrorToYouTubeStreamPlayerError(error: PlayerConstants.PlayerError): YouTubeStreamPlayerError =
-        when (error) {
-            PlayerConstants.PlayerError.UNKNOWN -> {
-                YouTubeStreamPlayerError.UNKNOWN
-            }
-
-            PlayerConstants.PlayerError.INVALID_PARAMETER_IN_REQUEST -> {
-                YouTubeStreamPlayerError.INVALID_PARAMETER_IN_REQUEST
-            }
-
-            PlayerConstants.PlayerError.HTML_5_PLAYER -> {
-                YouTubeStreamPlayerError.HTML_5_PLAYER
-            }
-
-            PlayerConstants.PlayerError.VIDEO_NOT_FOUND -> {
-                YouTubeStreamPlayerError.VIDEO_NOT_FOUND
-            }
-
-            PlayerConstants.PlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER -> {
-                YouTubeStreamPlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER
-            }
-        }
-
-    private fun getConvertPlaybackRateToYouTubePlaybackRate(rate: PlayerConstants.PlaybackRate): YouTubeStreamPlaybackRate =
-        when (rate) {
-            PlaybackRate.UNKNOWN -> YouTubeStreamPlaybackRate.UNKNOWN
-            PlaybackRate.RATE_0_25 -> YouTubeStreamPlaybackRate.RATE_0_25
-            PlaybackRate.RATE_0_5 -> YouTubeStreamPlaybackRate.RATE_0_5
-            PlaybackRate.RATE_0_75 -> YouTubeStreamPlaybackRate.RATE_0_75
-            PlaybackRate.RATE_1 -> YouTubeStreamPlaybackRate.RATE_1
-            PlaybackRate.RATE_1_25 -> YouTubeStreamPlaybackRate.RATE_1_25
-            PlaybackRate.RATE_1_5 -> YouTubeStreamPlaybackRate.RATE_1_5
-            PlaybackRate.RATE_1_75 -> YouTubeStreamPlaybackRate.RATE_1_75
-            PlaybackRate.RATE_2 -> YouTubeStreamPlaybackRate.RATE_2
-        }
-
-    private fun getConvertYouTubePlaybackRatYoPlaybackRate(rate: YouTubeStreamPlaybackRate): PlaybackRate =
-        when (rate) {
-            YouTubeStreamPlaybackRate.UNKNOWN -> PlaybackRate.UNKNOWN
-            YouTubeStreamPlaybackRate.RATE_0_25 -> PlaybackRate.RATE_0_25
-            YouTubeStreamPlaybackRate.RATE_0_5 -> PlaybackRate.RATE_0_5
-            YouTubeStreamPlaybackRate.RATE_0_75 -> PlaybackRate.RATE_0_75
-            YouTubeStreamPlaybackRate.RATE_1 -> PlaybackRate.RATE_1
-            YouTubeStreamPlaybackRate.RATE_1_25 -> PlaybackRate.RATE_1_25
-            YouTubeStreamPlaybackRate.RATE_1_5 -> PlaybackRate.RATE_1_5
-            YouTubeStreamPlaybackRate.RATE_1_75 -> PlaybackRate.RATE_1_75
-            YouTubeStreamPlaybackRate.RATE_2 -> PlaybackRate.RATE_2
-        }
 
     override fun toggleFullscreen() {
         youTubeStreamPlayer?.toggleFullscreen()
@@ -442,4 +404,9 @@ class YouTubeStreamPlayerImpl(
     override fun onExitFullscreen() {
         _exitFullScreen.update { true }
     }
+    companion object{
+
+        private val TAG ="YouTubeStreamPlayerImpl"
+    }
+
 }

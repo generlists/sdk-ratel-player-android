@@ -1,0 +1,37 @@
+{
+  "exampleTitle":"Google Cast 예제",
+  "videoList": [
+    {
+  "channelModel": {
+    "title": "SMTOWN",
+    "channelId": "UCEf_Bc-KVd7onSeifS3py9g"
+  },
+  "videoModel": {
+    "title": "RIIZE 라이즈 'Do your dance' MV Teaser",
+    "videoId": "CG8FiJ5p8p4",
+    "thumbNail": "https://i.ytimg.com/vi/CG8FiJ5p8p4/hqdefault.jpg"
+  }},
+    {
+      "channelModel": {
+        "title": "침착맨 플러스",
+        "channelId": "UCC1LvVTX2ySKYjeIXkAtvsQ"
+      },
+      "videoModel": {
+        "title": "자꾸만 난 목말라",
+        "videoId": "xwsOr5W6Ve0",
+        "thumbNail": "https://i.ytimg.com/vi/xwsOr5W6Ve0/hqdefault.jpg"
+      }
+    },
+    {
+      "channelModel": {
+        "title": "잉여맨 유튜브",
+        "channelId": "UCeG0ONJtjwE20ThR5iSYdsA"
+      },
+      "videoModel": {
+        "title": "공포의 구덩이",
+        "videoId": "Bm3Lkdops-k",
+        "thumbNail": "https://i.ytimg.com/vi/Bm3Lkdops-k/hqdefault.jpg"
+      }
+    }
+  ]
+}

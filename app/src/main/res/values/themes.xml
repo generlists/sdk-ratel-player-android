@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Demoplayer" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Demoplayer" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:colorBackground">#FFFFFF</item>
+    </style>
 </resources>

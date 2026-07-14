@@ -1,4 +1,4 @@
-package com.sean.ratel.player.demo.ui.view
+package com.sean.ratel.player.demo.ui.view.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

@@ -78,4 +78,6 @@ interface YouTubePlayer {
     fun disableCaptions()
 
     fun enableCaptions(languageCode: String)
+
+    fun checkCaptionAvailable()
 }

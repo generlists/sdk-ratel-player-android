@@ -31,3 +31,8 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Local Netlify folder
+.netlify
+#receiver code
+/ratel-cast-receiver

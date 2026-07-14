@@ -11,10 +11,12 @@ import androidx.navigation.compose.composable
 import com.sean.ratel.player.core.data.player.pip.PIPManager
 import com.sean.ratel.player.demo.MainActivity
 import com.sean.ratel.player.demo.MainViewModel
+import com.sean.ratel.player.demo.ui.cast.YouTubePlayersManager
 import com.sean.ratel.player.demo.ui.download.AccompanistBrowserScreen
 import com.sean.ratel.player.demo.ui.download.VideoDownloadViewModel
 import com.sean.ratel.player.demo.ui.screen.AdvancePlayer
 import com.sean.ratel.player.demo.ui.screen.BasicPlayer
+import com.sean.ratel.player.demo.ui.screen.CastEndScreen
 import com.sean.ratel.player.demo.ui.screen.DownLoadSample
 import com.sean.ratel.player.demo.ui.screen.EndPlayerScreen
 import com.sean.ratel.player.demo.ui.screen.SplashScreen
@@ -29,12 +31,14 @@ fun NavGraph(
     themeMode: ThemeMode,
     startDestination: String = Destination.Home.route,
     pipManager: PIPManager,
+    youTubePlayersManager: YouTubePlayersManager,
     navigator: Navigator,
     finish: () -> Unit = {},
 ) {
     val activity = LocalContext.current as MainActivity
     val mainViewModel: MainViewModel = ViewModelProvider(activity)[MainViewModel::class.java]
     val videoDownloadViewModel: VideoDownloadViewModel = ViewModelProvider(activity)[VideoDownloadViewModel::class.java]
+    // val castViewModel: CastViewModel = ViewModelProvider(activity)[CastViewModel::class.java]
 
     NavHandler(
         navController = navController,
@@ -49,7 +53,7 @@ fun NavGraph(
             SplashScreen(activity, mainViewModel)
         }
         composable(Destination.Home.route) {
-            YouTubeScreen(mainViewModel)
+            YouTubeScreen(mainViewModel, youTubePlayersManager)
         }
         composable(Destination.Download.route) {
             DownLoadSample(mainViewModel, videoDownloadViewModel)
@@ -73,6 +77,16 @@ fun NavGraph(
             val videoIdList = backStackEntry.arguments?.getString("contentId")
             val videoList = videoIdList?.split(",")
             AdvancePlayer(mainViewModel, videoList)
+        }
+
+        composable(
+            route = Destination.CastPlayer.route,
+            arguments = Destination.CastPlayer.navArguments,
+        ) { backStackEntry ->
+            val videoIdList = backStackEntry.arguments?.getString("contentId")
+            val startIndex = backStackEntry.arguments?.getInt("startIndex") ?: -1
+            val videoList = videoIdList?.split(",")
+            CastEndScreen(mainViewModel, videoList, startIndex)
         }
 
         composable(
