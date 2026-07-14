@@ -1,6 +1,5 @@
 package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.adaptor
 
-import android.view.View
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayerBridge
@@ -9,7 +8,10 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.You
 interface YouTubeCastPlayerAdapter {
     fun getChromeCastContext(): ChromecastYouTubePlayerContext
 
-    fun initialize(youTubePlayerListener: YouTubePlayerListener,bridgeCallback: YouTubePlayerBridge.YouTubePlayerBridgeCallbacks)
+    fun initialize(
+        youTubePlayerListener: YouTubePlayerListener,
+        bridgeCallback: YouTubePlayerBridge.YouTubePlayerBridgeCallbacks,
+    )
 
     fun release()
 
@@ -17,7 +19,10 @@ interface YouTubeCastPlayerAdapter {
 
     fun onChromecastConnecting()
 
-    fun onChromecastConnected(castDevice:String?,chromecastYouTubePlayerContext: ChromecastYouTubePlayerContext)
+    fun onChromecastConnected(
+        castDevice: String?,
+        chromecastYouTubePlayerContext: ChromecastYouTubePlayerContext,
+    )
 
     fun addChromecastConnectionListener(chromecastConnectionListener: ChromecastConnectionListener)
 

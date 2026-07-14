@@ -4,9 +4,7 @@ import android.content.Context
 import android.media.AudioManager
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants.PlaybackRate
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants.PlayerState
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
-import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
 
 object PlayerUtil {
@@ -63,5 +61,4 @@ object PlayerUtil {
                 YouTubeStreamPlayerError.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER
             }
         }
-
 }

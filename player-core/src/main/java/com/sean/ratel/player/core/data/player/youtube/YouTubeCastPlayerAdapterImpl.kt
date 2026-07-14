@@ -11,8 +11,11 @@ class YouTubeCastPlayerAdapterImpl(
 ) : YouTubeCastPlayerAdapter {
     override fun getChromeCastContext(): ChromecastYouTubePlayerContext = chromecastYouTubePlayerContext
 
-    override fun initialize(youTubePlayerListener: YouTubePlayerListener,bridgeCallback: YouTubePlayerBridge.YouTubePlayerBridgeCallbacks) {
-        chromecastYouTubePlayerContext.initialize(youTubePlayerListener,bridgeCallback)
+    override fun initialize(
+        youTubePlayerListener: YouTubePlayerListener,
+        bridgeCallback: YouTubePlayerBridge.YouTubePlayerBridgeCallbacks,
+    ) {
+        chromecastYouTubePlayerContext.initialize(youTubePlayerListener, bridgeCallback)
     }
 
     override fun release() {
@@ -27,8 +30,14 @@ class YouTubeCastPlayerAdapterImpl(
         chromecastYouTubePlayerContext.onChromecastConnecting()
     }
 
-    override fun onChromecastConnected(castDevice: String?,chromecastYouTubePlayerContext: ChromecastYouTubePlayerContext) {
-        chromecastYouTubePlayerContext.onChromecastConnected(castDevice,chromecastYouTubePlayerContext)
+    override fun onChromecastConnected(
+        castDevice: String?,
+        chromecastYouTubePlayerContext: ChromecastYouTubePlayerContext,
+    ) {
+        chromecastYouTubePlayerContext.onChromecastConnected(
+            castDevice,
+            chromecastYouTubePlayerContext,
+        )
     }
 
     override fun addChromecastConnectionListener(chromecastConnectionListener: ChromecastConnectionListener) {
@@ -36,6 +45,8 @@ class YouTubeCastPlayerAdapterImpl(
     }
 
     override fun removeChromecastConnectionListener(chromecastConnectionListener: ChromecastConnectionListener) {
-        chromecastYouTubePlayerContext.removeChromecastConnectionListener(chromecastConnectionListener)
+        chromecastYouTubePlayerContext.removeChromecastConnectionListener(
+            chromecastConnectionListener,
+        )
     }
 }

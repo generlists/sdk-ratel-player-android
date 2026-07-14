@@ -169,7 +169,10 @@ class YouTubeStreamPlayerImpl(
     }
 
     override fun setPlaybackRate(playbackRate: YouTubeStreamPlaybackRate) {
-        RLog.d(TAG, "[LIB] $playbackRate , speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}",
+        RLog.d(
+            TAG,
+            "[LIB] $playbackRate , " +
+                "speed : ${getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate)}",
         )
         youTubeStreamPlayer?.setPlaybackRate(getConvertYouTubePlaybackRatYoPlaybackRate(playbackRate))
     }
@@ -188,7 +191,7 @@ class YouTubeStreamPlayerImpl(
         }
 
     override fun onReady(youTubePlayer: YouTubePlayer) {
-        //Log.d("CHROME", "[onReady] videoId : $videoId , youTubePlayer : $youTubePlayer , autoPlay : $autoPlay")
+        // Log.d("CHROME", "[onReady] videoId : $videoId , youTubePlayer : $youTubePlayer , autoPlay : $autoPlay")
         youTubeStreamPlayer = youTubePlayer
         youTubeStreamPlayer?.addListener(this)
 
@@ -280,13 +283,12 @@ class YouTubeStreamPlayerImpl(
         youTubeStreamPlayer?.disableCaptions()
     }
 
-    override fun getChromeCastContext(): ChromecastYouTubePlayerContext? {
-        return null
-    }
+    override fun getChromeCastContext(): ChromecastYouTubePlayerContext? = null
 
     override fun chromeCastRelease() {}
 
     override fun endCurrentSession() {}
+
     override fun onCaptionAvailable() {}
 
     override fun onPlaybackRateChange(
@@ -366,7 +368,6 @@ class YouTubeStreamPlayerImpl(
             }
         }
 
-
     override fun toggleFullscreen() {
         youTubeStreamPlayer?.toggleFullscreen()
     }
@@ -404,9 +405,8 @@ class YouTubeStreamPlayerImpl(
     override fun onExitFullscreen() {
         _exitFullScreen.update { true }
     }
-    companion object{
 
-        private val TAG ="YouTubeStreamPlayerImpl"
+    companion object {
+        private val TAG = "YouTubeStreamPlayerImpl"
     }
-
 }

@@ -3,7 +3,6 @@ package com.sean.ratel.player.core.data.domain.model.youtube
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 
 sealed class YouTubeStreamPlaybackState {
-
     data object IFrameReady : YouTubeStreamPlaybackState()
 
     data object Ready : YouTubeStreamPlaybackState()
