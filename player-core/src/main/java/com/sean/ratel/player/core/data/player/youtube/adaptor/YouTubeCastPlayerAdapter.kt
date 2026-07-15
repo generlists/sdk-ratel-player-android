@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.adaptor
+package com.sean.ratel.player.core.data.player.youtube.adaptor
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener

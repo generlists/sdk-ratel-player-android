@@ -1,10 +1,10 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube
+package com.sean.ratel.player.core.data.player.youtube
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayerBridge
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeCastPlayerAdapter
+import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeCastPlayerAdapter
 
 class YouTubeCastPlayerAdapterImpl(
     private val chromecastYouTubePlayerContext: ChromecastYouTubePlayerContext,

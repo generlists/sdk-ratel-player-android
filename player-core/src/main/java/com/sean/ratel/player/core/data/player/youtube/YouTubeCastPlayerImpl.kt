@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube
+package com.sean.ratel.player.core.data.player.youtube
 
 import android.util.Size
 import android.view.View
@@ -12,7 +12,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.loadOrCueVideo
 import com.sean.ratel.player.core.com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayQuality
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeCastPlayerAdapter
 import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertPlaybackRateToYouTubePlaybackRate
 import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertPlayerErrorToYouTubeStreamPlayerError
 import com.sean.ratel.player.core.com.sean.ratel.player.core.util.PlayerUtil.getConvertYouTubePlaybackRatYoPlaybackRate
@@ -20,6 +19,7 @@ import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
+import com.sean.ratel.player.core.data.player.youtube.adaptor.YouTubeCastPlayerAdapter
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
