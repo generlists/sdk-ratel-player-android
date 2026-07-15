@@ -1,4 +1,4 @@
-package com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.media
+package com.sean.ratel.player.core.data.player.media
 
 import android.net.Uri
 import androidx.media3.common.util.UnstableApi

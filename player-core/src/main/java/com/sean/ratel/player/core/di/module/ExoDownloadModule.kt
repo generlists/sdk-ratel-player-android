@@ -17,7 +17,6 @@ import androidx.media3.exoplayer.offline.DefaultDownloadIndex
 import androidx.media3.exoplayer.offline.DownloadIndex
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.media.UnifiedDataSourceFactory
 import com.sean.ratel.player.core.data.domain.MediaStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.VideoDownloadNotifier
 import com.sean.ratel.player.core.data.player.download.DownloadTracker
@@ -27,6 +26,7 @@ import com.sean.ratel.player.core.data.player.download.VideoDownloadManager
 import com.sean.ratel.player.core.data.player.download.VideoDownloadNotifierImpl
 import com.sean.ratel.player.core.data.player.download.VideoDownloadService.Companion.DOWNLOAD_CHANNEL_ID
 import com.sean.ratel.player.core.data.player.media.MediaExoStreamPlayer
+import com.sean.ratel.player.core.data.player.media.UnifiedDataSourceFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

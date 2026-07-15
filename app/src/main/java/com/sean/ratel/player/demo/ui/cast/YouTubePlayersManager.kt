@@ -13,12 +13,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.cast.framework.CastContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.YouTubeCastPlayerAdapterImpl
-import com.sean.ratel.player.core.com.sean.ratel.player.core.data.player.youtube.YouTubeCastPlayerImpl
 import com.sean.ratel.player.core.data.domain.YouTubeStreamPlayer
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackRate
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlaybackState
 import com.sean.ratel.player.core.data.domain.model.youtube.YouTubeStreamPlayerError
+import com.sean.ratel.player.core.data.player.youtube.YouTubeCastPlayerAdapterImpl
+import com.sean.ratel.player.core.data.player.youtube.YouTubeCastPlayerImpl
 import com.sean.ratel.player.demo.data.youtube.domain.YouTubeModel
 import com.sean.ratel.player.demo.data.youtube.domain.YouTubeModelList
 import com.sean.ratel.player.demo.ui.cast.notifications.CastForegroundService
